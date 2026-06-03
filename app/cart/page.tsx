@@ -38,7 +38,6 @@ function getToken(): string | null {
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart } = useCart();
-  const { user } = useAuth();
   const router = useRouter();
 
   // Coupon states
@@ -47,22 +46,10 @@ export default function CartPage() {
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
 
-  // Checkout flow
-  const [checkoutStep, setCheckoutStep] = useState<"cart" | "address" | "success">("cart");
-  const [isPlacing, setIsPlacing] = useState(false);
-  const [placeError, setPlaceError] = useState<string | null>(null);
-  const [placedOrderNumber, setPlacedOrderNumber] = useState("");
-
-  // Shipping address form
-  const [address, setAddress] = useState<ShippingAddress>({
-    name: user?.name ?? "",
-    phone: "",
-    street: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
-  const [addressErrors, setAddressErrors] = useState<Partial<ShippingAddress>>({});
+  // Checkout overlay states
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutStep] = useState<"cart">("cart");
+  const [generatedOrderNumber] = useState("");
 
   // Apply Coupon logic
   const handleApplyCoupon = (e: React.FormEvent) => {
@@ -101,82 +88,18 @@ export default function CartPage() {
     return { subtotal, deliveryFee, tax, discount, total, isFreeDelivery };
   }, [items, activeCoupon]);
 
-  // Step 1: "Proceed To Checkout" clicked
-  const handleProceedToCheckout = () => {
-    if (!user) {
-      router.push("/login?redirect=/cart");
-      return;
-    }
-    setAddress((prev) => ({ ...prev, name: user.name }));
-    setCheckoutStep("address");
-  };
-
-  // Step 2: Validate address form
-  const validateAddress = (): boolean => {
-    const errs: Partial<ShippingAddress> = {};
-    if (!address.name.trim()) errs.name = "Name is required";
-    if (!address.phone.trim() || !/^\d{10}$/.test(address.phone.trim())) errs.phone = "Valid 10-digit phone required";
-    if (!address.street.trim()) errs.street = "Street address is required";
-    if (!address.city.trim()) errs.city = "City is required";
-    if (!address.state.trim()) errs.state = "State is required";
-    if (!address.pincode.trim() || !/^\d{6}$/.test(address.pincode.trim())) errs.pincode = "Valid 6-digit pincode required";
-    setAddressErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  // Step 3: Place order via API
-  const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAddress()) return;
-
-    setIsPlacing(true);
-    setPlaceError(null);
-
-    try {
-      const token = getToken();
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            productId: item.id,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          shippingAddress: address,
-          couponCode: activeCoupon ?? undefined,
-          subtotal: calculations.subtotal,
-          discount: calculations.discount,
-          deliveryFee: calculations.deliveryFee,
-          total: calculations.total,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPlaceError(data.message || "Failed to place order. Please try again.");
-        return;
-      }
-
-      setPlacedOrderNumber(data.order?.orderNumber ?? data.orderNumber ?? "");
-      clearCart();
-      setActiveCoupon(null);
-      setCouponCode("");
-      setCheckoutStep("success");
-    } catch {
-      setPlaceError("Network error. Please check your connection and try again.");
-    } finally {
-      setIsPlacing(false);
-    }
+  // Navigate to checkout with active coupon
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    const params = new URLSearchParams();
+    if (activeCoupon) params.set("coupon", activeCoupon);
+    router.push(`/checkout?${params.toString()}`);
   };
 
   const resetCart = () => {
-    setCheckoutStep("cart");
-    setPlaceError(null);
+    clearCart();
+    setActiveCoupon(null);
+    setCouponCode("");
   };
 
   // ── ADDRESS STEP ──
