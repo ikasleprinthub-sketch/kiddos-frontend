@@ -1,10 +1,10 @@
-import { LucideIcon } from "lucide-react";
+import type React from "react";
 
 interface Props {
   title: string;
   value: string | number;
   sub?: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   color?: "green" | "blue" | "orange" | "red" | "purple";
   trend?: number;
 }

@@ -30,7 +30,7 @@ const EMPTY_FORM: FormState = {
   title: "", subtitle: "", image: "", link: "", isActive: true, sortOrder: 0, position: "HOME",
 };
 
-const POSITIONS = ["HOME", "CATEGORY", "PRODUCT", "CHECKOUT"];
+const POSITIONS = ["HOME", "PROMO", "CATEGORY", "PRODUCT", "CHECKOUT"];
 
 export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
