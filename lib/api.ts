@@ -43,6 +43,8 @@ export interface ApiProduct {
   stock: number;
   sku: string | null;
   isFeatured: boolean;
+  isPopularBatter?: boolean;
+  isSpiceOil?: boolean;
   isActive: boolean;
   weight: string | number | null;
   unit: string | null;

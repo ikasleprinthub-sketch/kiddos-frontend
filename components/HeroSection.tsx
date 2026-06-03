@@ -274,8 +274,15 @@ export default function HeroSection() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    api.get<ApiBanner[]>("/banners?position=HOME")
-      .then((data) => setBanners(data || []))
+    fetch("/api/banners?position=HOME")
+      .then((r) => r.json())
+      .then((data: ApiBanner[] | { banners: ApiBanner[] }) => {
+        // Public route returns array directly; handle both shapes defensively
+        const list: ApiBanner[] = Array.isArray(data)
+          ? data
+          : (data as { banners: ApiBanner[] }).banners ?? [];
+        setBanners(list.filter((b) => b.isActive));
+      })
       .catch((err) => console.error("Failed to load banners:", err))
       .finally(() => setLoading(false));
   }, []);

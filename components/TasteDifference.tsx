@@ -45,8 +45,8 @@ export default function TasteDifference() {
   return (
     <section className="bg-white py-14 px-4">
       {/* Heading */}
-      <h2 className="text-center text-zinc-800 font-bold text-sm sm:text-[15px] tracking-[0.1em] uppercase mb-10">
-        Taste The Difference
+      <h2 className="text-center text-zinc-800 font-black text-2xl tracking-tight mb-10 max-w-6xl mx-auto pb-4 border-b border-zinc-100">
+        Explore Categories
       </h2>
 
       {/* Loading skeleton */}

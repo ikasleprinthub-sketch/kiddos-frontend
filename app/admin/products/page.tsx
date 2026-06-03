@@ -18,6 +18,8 @@ interface Product {
   sku: string | null;
   isActive: boolean;
   isFeatured: boolean;
+  isPopularBatter: boolean;
+  isSpiceOil: boolean;
   unit: string | null;
   category: { id: string; name: string };
   images: ProductImage[];
@@ -33,6 +35,8 @@ interface FormState {
   categoryId: string;
   isActive: boolean;
   isFeatured: boolean;
+  isPopularBatter: boolean;
+  isSpiceOil: boolean;
   weight: string;
   unit: string;
   tags: string;
@@ -41,7 +45,8 @@ interface FormState {
 
 const EMPTY_FORM: FormState = {
   name: "", description: "", price: "", salePrice: "", stock: 0, sku: "",
-  categoryId: "", isActive: true, isFeatured: false, weight: "", unit: "", tags: "", images: [],
+  categoryId: "", isActive: true, isFeatured: false, isPopularBatter: false, isSpiceOil: false,
+  weight: "", unit: "", tags: "", images: [],
 };
 
 export default function ProductsPage() {
@@ -86,6 +91,8 @@ export default function ProductsPage() {
     setForm({
       name: p.name, description: "", price: p.price, salePrice: p.salePrice || "", stock: p.stock,
       sku: p.sku || "", categoryId: p.category.id, isActive: p.isActive, isFeatured: p.isFeatured,
+      isPopularBatter: p.isPopularBatter || false,
+      isSpiceOil: p.isSpiceOil || false,
       weight: "", unit: p.unit || "", tags: "", images: p.images.map((i) => i.url),
     });
     setEditing(p);
@@ -175,9 +182,26 @@ export default function ProductsPage() {
       <span className={row.stock <= 10 ? "text-orange-600 font-semibold" : ""}>{row.stock}</span>
     )},
     { key: "isActive", label: "Status", render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-        {row.isActive ? "Active" : "Inactive"}
-      </span>
+      <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+          {row.isActive ? "Active" : "Inactive"}
+        </span>
+        {row.isFeatured && (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+            Best Seller
+          </span>
+        )}
+        {row.isPopularBatter && (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">
+            Popular Batter
+          </span>
+        )}
+        {row.isSpiceOil && (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800">
+            Spice & Oil
+          </span>
+        )}
+      </div>
     )},
     {
       key: "actions",
@@ -298,7 +322,7 @@ export default function ProductsPage() {
                   className="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-emerald-50 file:text-emerald-700 file:text-sm file:font-medium hover:file:bg-emerald-100" />
                 {uploading && <p className="text-xs text-gray-400 mt-1">Uploading…</p>}
               </div>
-              <div className="flex items-center gap-4">
+              <div className="col-span-2 flex flex-wrap gap-4 pt-1">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
                     className="w-4 h-4 accent-emerald-600" />
@@ -307,7 +331,17 @@ export default function ProductsPage() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm((f) => ({ ...f, isFeatured: e.target.checked }))}
                     className="w-4 h-4 accent-emerald-600" />
-                  <span className="text-sm text-gray-700">Featured</span>
+                  <span className="text-sm text-gray-700">Best Seller</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isPopularBatter} onChange={(e) => setForm((f) => ({ ...f, isPopularBatter: e.target.checked }))}
+                    className="w-4 h-4 accent-emerald-600" />
+                  <span className="text-sm text-gray-700">Popular Batter</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isSpiceOil} onChange={(e) => setForm((f) => ({ ...f, isSpiceOil: e.target.checked }))}
+                    className="w-4 h-4 accent-emerald-600" />
+                  <span className="text-sm text-gray-700">Spice & Oil</span>
                 </label>
               </div>
             </div>
