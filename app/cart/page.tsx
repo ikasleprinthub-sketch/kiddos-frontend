@@ -72,9 +72,9 @@ export default function CartPage() {
     fetch("/api/products?limit=200")
       .then((r) => r.json())
       .then((data) => {
-        const list: { id: string; stock: number }[] = Array.isArray(data) ? data : (data.products ?? []);
+        const list: { id: string; stock: number | null }[] = Array.isArray(data) ? data : (data.products ?? []);
         const map: Record<string, number> = {};
-        list.forEach((p) => { map[p.id] = p.stock; });
+        list.forEach((p) => { if (p.stock != null) map[p.id] = p.stock; });
         setStockMap(map);
       })
       .catch(() => {/* keep stockMap empty — don't block UI */});

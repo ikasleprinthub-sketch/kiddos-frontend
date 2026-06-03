@@ -575,7 +575,7 @@ function ProductsPageContent() {
                 {filteredProducts.map((product) => {
                   const isAdding = addingToCartId === product.id;
                   const hasHoverImg = !!product.image2;
-                  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+                  const isOutOfStock = (product.stock ?? 1) <= 0;
                   
                   return (
                     <article
@@ -857,20 +857,20 @@ function ProductsPageContent() {
                 <div className="flex flex-col gap-3 mt-auto">
                   <button
                     onClick={() => {
-                      if (!(quickViewProduct.stock !== undefined && quickViewProduct.stock <= 0)) {
+                      if (!((quickViewProduct.stock ?? 1) <= 0)) {
                         handleAddToCart(quickViewProduct);
                         setQuickViewProduct(null);
                       }
                     }}
-                    disabled={quickViewProduct.stock !== undefined && quickViewProduct.stock <= 0}
+                    disabled={(quickViewProduct.stock ?? 1) <= 0}
                     className={`w-full py-4 rounded-2xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                      quickViewProduct.stock !== undefined && quickViewProduct.stock <= 0
+                      (quickViewProduct.stock ?? 1) <= 0
                         ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
                         : "bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green"
                     }`}
                   >
                     <ShoppingBag className="w-5 h-5" />
-                    {quickViewProduct.stock !== undefined && quickViewProduct.stock <= 0 ? "Out of Stock" : "Add to Cart"}
+                    {(quickViewProduct.stock ?? 1) <= 0 ? "Out of Stock" : "Add to Cart"}
                   </button>
                   <button
                     onClick={() => toggleWishlist(quickViewProduct)}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 import ContactLocation from "@/components/ContactLocation";
+import FAQSection from "@/components/FAQSection";
 
 export const metadata: Metadata = {
   title: "Contact Us | Kiddos Foods",
@@ -51,6 +52,11 @@ export default function ContactPage() {
             <ContactLocation />
           </div>
         </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="bg-[#fafafa] dark:bg-zinc-950 py-16 md:py-24 border-t border-zinc-200 dark:border-zinc-800">
+        <FAQSection />
       </section>
     </main>
   );

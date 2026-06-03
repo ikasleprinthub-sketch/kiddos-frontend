@@ -1,11 +1,9 @@
-import Image from "next/image";
+"use client";
 
-const stats = [
-  { value: "20+", label: "Products" },
-  { value: "100+", label: "Partners" },
-  { value: "35%+", label: "Avg. ROI" },
-  { value: "5★", label: "Brand Trust" },
-];
+import Image from "next/image";
+import { Rocket } from "lucide-react";
+
+
 
 export default function FranchiseHero() {
   return (
@@ -18,13 +16,13 @@ export default function FranchiseHero() {
       <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-white/5 blur-2xl" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 pb-0 lg:pt-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-end">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:items-stretch">
 
           {/* Left — Text */}
-          <div className="pb-16 space-y-7">
+          <div className="pb-16 lg:pb-0 flex flex-col justify-center space-y-7">
             {/* Badge */}
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f97316]/15 border border-[#f97316]/30 text-[#f97316] text-xs font-bold tracking-wide">
-              🌿 India&apos;s Growing Healthy Food Franchise
+            <span className="w-fit inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f97316]/15 border border-[#f97316]/30 text-[#f97316] text-xs font-bold tracking-wide">
+              <Rocket className="w-4 h-4" /> India&apos;s Growing Healthy Food Franchise
             </span>
 
             <h1 className="text-4xl md:text-5xl xl:text-6xl font-black text-white leading-[1.08] tracking-tight">
@@ -47,35 +45,15 @@ export default function FranchiseHero() {
               >
                 Apply Now →
               </a>
-              <a
-                href="#downloads"
-                className="px-8 py-3.5 border border-white/30 hover:border-white/60 hover:bg-white/10 text-white font-bold rounded-xl transition-all text-sm"
-              >
-                Download Brochure
-              </a>
             </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-white/10">
-              {stats.map((s) => (
-                <div key={s.label}>
-                  <p className="text-2xl font-black text-white">{s.value}</p>
-                  <p className="text-white/50 text-xs mt-0.5">{s.label}</p>
-                </div>
-              ))}
-            </div>
+          
           </div>
 
           {/* Right — Image, flush to bottom */}
-          <div className="relative flex justify-center lg:justify-end">
-            {/* Floating badge */}
-            <div className="absolute top-6 -left-4 z-10 bg-white rounded-2xl px-4 py-3 shadow-xl">
-              <p className="text-[10px] text-gray-400 font-medium">Monthly Revenue</p>
-              <p className="text-[#1e4620] font-black text-lg leading-none mt-0.5">₹1.5 L+</p>
-              <p className="text-emerald-500 text-[10px] font-bold mt-1">↑ 32% avg growth</p>
-            </div>
-
-            <div className="relative w-full max-w-[480px] rounded-t-3xl overflow-hidden shadow-2xl border border-white/10">
+          <div className="relative flex justify-center lg:justify-end self-end mt-auto">
+           
+         <div className="relative w-full max-w-[480px] rounded-t-3xl overflow-hidden shadow-2xl border border-white/10">
               <Image
                 src="/images/franchisis/franchisis_hero.svg"
                 alt="Kiddos Foods Franchise Outlet"
