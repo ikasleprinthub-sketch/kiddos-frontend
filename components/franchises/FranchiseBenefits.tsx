@@ -41,11 +41,7 @@ export default function FranchiseBenefits() {
                 className="w-full h-auto object-cover"
               />
             </div>
-            {/* Floating stat card */}
-            <div className="absolute -bottom-6 -right-4 bg-[#1e4620] text-white rounded-2xl px-6 py-4 shadow-xl">
-              <p className="text-3xl font-black">35%+</p>
-              <p className="text-white/70 text-xs mt-0.5">Average Profit Margin</p>
-            </div>
+          
           </div>
 
           {/* Right — Content */}
@@ -65,14 +61,12 @@ export default function FranchiseBenefits() {
                 <div key={b.num} className="flex gap-5 group">
                   {/* Number + icon pill */}
                   <div className="shrink-0 flex flex-col items-center gap-1">
-                    <span className="text-[#1e4620]/20 dark:text-white/10 font-black text-xl leading-none">
-                      {b.num}
-                    </span>
+                    
                     <div className="w-11 h-11 rounded-2xl bg-[#f97316]/10 border border-[#f97316]/20 flex items-center justify-center group-hover:bg-[#f97316]/20 transition-colors">
                       {b.icon}
                     </div>
                   </div>
-                  <div className="pt-6 space-y-1.5">
+                  <div className="space-y-1.5">
                     <h3 className="text-base font-extrabold text-gray-800 dark:text-zinc-100">
                       {b.title}
                     </h3>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PublicShell from "@/components/common/PublicShell";
+import FloatingWhatsApp from "@/components/common/FloatingWhatsApp";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
@@ -35,7 +36,10 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
-              <PublicShell>{children}</PublicShell>
+              <PublicShell>
+                {children}
+                <FloatingWhatsApp />
+              </PublicShell>
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>
