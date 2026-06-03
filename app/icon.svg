@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  {/* A rounded-circle backdrop with the green leaf logo design */}
+  <rect width="32" height="32" rx="8" fill="#1e4620" />
+  <path d="M22 12C14 12 10 18 10 24h2c0-3 3-5 7-5s7 2 7 5h2c0-6-4-12-10-12z" fill="#f97316" />
+  <circle cx="16" cy="16" r="8" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="2 2" />
+</svg>
