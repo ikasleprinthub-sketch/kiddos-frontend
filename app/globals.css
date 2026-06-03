@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #111827;
@@ -26,12 +28,6 @@
   --color-brand-cream-dark: var(--brand-cream-dark);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #061410;
-    --foreground: #f3f4f6;
-  }
-}
 
 body {
   background: var(--background);

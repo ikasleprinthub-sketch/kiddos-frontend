@@ -652,14 +652,24 @@ function ProductsPageContent() {
                             )}
                           </Link>
 
-                          {/* Top Left Badge - Discount */}
-                          {product.originalPrice && product.originalPrice > product.price && (
-                            <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                          {/* Top Left Badges */}
+                          <div className="absolute top-3 left-3 flex flex-col gap-2 z-20 pointer-events-none">
+                            {product.originalPrice && product.originalPrice > product.price && (
                               <span className="bg-[#2C4A3B] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm">
                                 {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
                               </span>
-                            </div>
-                          )}
+                            )}
+                            {product.isBestSeller && (
+                              <span className="bg-brand-gold text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm w-fit">
+                                Best Seller
+                              </span>
+                            )}
+                            {product.isNew && (
+                              <span className="bg-blue-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm w-fit">
+                                New
+                              </span>
+                            )}
+                          </div>
 
                           {/* Top Right Buttons (Wishlist & Quick View) */}
                           <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
