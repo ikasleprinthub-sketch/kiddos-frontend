@@ -35,6 +35,7 @@ interface Product {
   isFeatured: boolean;
   isPopularBatter: boolean;
   isSpiceOil: boolean;
+  weight: string | number | null;
   unit: string | null;
   tags: string[];
   category: { id: string; name: string };
@@ -75,7 +76,8 @@ const EMPTY_FORM: FormState = {
   name: "", description: "", price: "", salePrice: "", stock: 0, sku: "",
   categoryId: "", isActive: true, isFeatured: false, isPopularBatter: false, isSpiceOil: false,
   weight: "", unit: "", tags: "", images: [],
-  ingredients: "", healthBenefits: "", usageInstructions: "", nutrientFacts: "", shelfLife: "", storageInstructions: "",
+  ingredients: "", healthBenefits: "", usageInstructions: "", nutrientFacts: "",
+  shelfLife: "", storageInstructions: "",
 };
 
 export default function ProductsPage() {
@@ -171,11 +173,21 @@ export default function ProductsPage() {
   };
   const openEdit = (p: Product) => {
     setForm({
-      name: p.name, description: "", price: p.price, salePrice: p.salePrice || "", stock: p.stock,
-      sku: p.sku || "", categoryId: p.category.id, isActive: p.isActive, isFeatured: p.isFeatured,
+      name: p.name,
+      description: p.description || "",
+      price: p.price,
+      salePrice: p.salePrice || "",
+      stock: p.stock,
+      sku: p.sku || "",
+      categoryId: p.category.id,
+      isActive: p.isActive,
+      isFeatured: p.isFeatured,
       isPopularBatter: p.isPopularBatter || false,
       isSpiceOil: p.isSpiceOil || false,
-      weight: "", unit: p.unit || "", tags: "", images: p.images.map((i) => i.url),
+      weight: p.weight !== null && p.weight !== undefined ? String(p.weight) : "",
+      unit: p.unit || "",
+      tags: p.tags ? p.tags.join(", ") : "",
+      images: p.images.map((i) => i.url),
       ingredients: p.ingredients || "",
       healthBenefits: p.healthBenefits || "",
       usageInstructions: p.usageInstructions || "",
@@ -253,33 +265,37 @@ export default function ProductsPage() {
     { key: "name", label: "Name" },
     { key: "category", label: "Category", render: (row) => row.category.name },
     { key: "price", label: "Price", render: (row) => `₹${row.price}` },
-    { key: "stock", label: "Stock", render: (row) => (
-      row.stock <= 0 
-        ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Out of Stock</span>
-        : <span className={row.stock <= 10 ? "text-orange-600 font-semibold" : ""}>{row.stock}</span>
-    )},
-    { key: "isActive", label: "Status", render: (row) => (
-      <div className="flex flex-wrap gap-1.5 max-w-[200px]">
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-          {row.isActive ? "Active" : "Inactive"}
-        </span>
-        {row.isFeatured && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
-            Best Seller
+    {
+      key: "stock", label: "Stock", render: (row) => (
+        row.stock <= 0
+          ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Out of Stock</span>
+          : <span className={row.stock <= 10 ? "text-orange-600 font-semibold" : ""}>{row.stock}</span>
+      )
+    },
+    {
+      key: "isActive", label: "Status", render: (row) => (
+        <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+            {row.isActive ? "Active" : "Inactive"}
           </span>
-        )}
-        {row.isPopularBatter && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">
-            Popular Batter
-          </span>
-        )}
-        {row.isSpiceOil && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800">
-            Spice & Oil
-          </span>
-        )}
-      </div>
-    )},
+          {row.isFeatured && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+              Best Seller
+            </span>
+          )}
+          {row.isPopularBatter && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">
+              Popular Batter
+            </span>
+          )}
+          {row.isSpiceOil && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800">
+              Spice & Oil
+            </span>
+          )}
+        </div>
+      )
+    },
     {
       key: "actions",
       label: "Actions",
