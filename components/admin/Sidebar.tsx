@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Tag, Package, ShoppingCart, Users,
-  Ticket, Image, BarChart2, Settings, LogOut, ChevronLeft,
+  Ticket, Image, BarChart2, Settings, LogOut, ChevronLeft, Upload,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -18,13 +18,27 @@ const NAV = [
   { href: "/admin/coupons", label: "Coupons", icon: Ticket },
   { href: "/admin/banners", label: "Banners", icon: Image },
   { href: "/admin/reports", label: "Reports", icon: BarChart2 },
+  { href: "/admin/import", label: "Import", icon: Upload },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch { /* ignore network errors */ } finally {
+      localStorage.removeItem("token");
+      router.replace("/admin/login");
+    }
+  };
 
   return (
     <aside
@@ -70,7 +84,7 @@ export default function Sidebar() {
       </nav>
 
       <button
-        onClick={logout}
+        onClick={handleLogout}
         title="Logout"
         className="flex items-center gap-3 px-4 py-4 text-sm text-emerald-200 hover:bg-emerald-800 border-t border-emerald-700 transition-colors"
       >

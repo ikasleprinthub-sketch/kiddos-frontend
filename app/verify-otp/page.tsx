@@ -37,10 +37,10 @@ function VerifyOtpForm() {
     const result = await verifyOtp(email, otp);
 
     if (result.success) {
-      setSuccess("Account verified successfully! Redirecting you to login...");
+      setSuccess("Account verified! Your email has been confirmed. Redirecting to login...");
       setTimeout(() => {
-        router.push("/login");
-      }, 3000);
+        router.push(`/login?email=${encodeURIComponent(email)}`);
+      }, 2000);
     } else {
       setError(result.message || "Invalid OTP code. Please try again.");
       setLoading(false);

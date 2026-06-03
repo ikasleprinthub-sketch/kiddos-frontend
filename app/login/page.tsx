@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const searchParams = useSearchParams();
+  const prefillEmail = searchParams.get("email") || "";
+
+  const [form, setForm] = useState({ email: prefillEmail, password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +29,12 @@ export default function LoginPage() {
     const result = await login(form.email, form.password);
 
     if (result.success) {
+      if (result.user?.role === "ADMIN") {
+        localStorage.removeItem("token");
+        setError("Admin accounts must sign in through the Admin Panel, not here.");
+        setLoading(false);
+        return;
+      }
       router.push("/");
     } else {
       setError(result.message || "Invalid email or password");
@@ -119,6 +128,14 @@ export default function LoginPage() {
                   className="text-brand-green font-semibold hover:underline mt-1"
                 >
                   Verify your account now &rarr;
+                </Link>
+              )}
+              {error.toLowerCase().includes("admin") && (
+                <Link
+                  href="/admin/login"
+                  className="text-[#1e4620] font-semibold hover:underline mt-1"
+                >
+                  Go to Admin Panel &rarr;
                 </Link>
               )}
             </div>
@@ -259,5 +276,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

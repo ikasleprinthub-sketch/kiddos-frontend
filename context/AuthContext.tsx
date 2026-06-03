@@ -13,7 +13,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
   verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (meRes.ok) {
         const meData = await meRes.json();
         setUser(meData.user);
-        return { success: true };
+        return { success: true, user: meData.user as User };
       } else {
         return { success: false, message: "Failed to load user profile." };
       }
