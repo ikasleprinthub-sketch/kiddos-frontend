@@ -9,12 +9,76 @@ import {
   Star, 
   Check, 
   X, 
-  ChevronRight, 
   AlertCircle, 
   Sparkles,
   ShoppingBag
 } from "lucide-react";
-import { PRODUCTS, CATEGORIES, Product } from "@/components/productsData";
+import { PRODUCTS, Product } from "@/components/productsData";
+import type { ApiCategory, ApiProduct } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
+import Link from "next/link";
+
+// Map API product → local Product UI shape
+const CATEGORY_EMOJIS: Record<string, string> = {
+  batters: "🫙", batter: "🫙",
+  "spice-blends": "🌶️", "organic-spices": "🌶️", spices: "🌶️",
+  "raw-spices": "🌿",
+  oils: "🫒",
+  pickles: "🥒",
+  "chutney-book": "📖",
+  millets: "🌾",
+  rice: "🍚",
+  ghee: "🧈",
+  honey: "🍯",
+  "healthy-snacks": "🥜", snacks: "🥜",
+  masala: "✨",
+};
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  batters: "from-amber-100 to-orange-200", batter: "from-amber-100 to-orange-200",
+  "spice-blends": "from-red-100 to-rose-200", "organic-spices": "from-red-100 to-rose-200", spices: "from-red-100 to-rose-200",
+  "raw-spices": "from-green-100 to-emerald-200",
+  oils: "from-yellow-100 to-lime-200",
+  pickles: "from-teal-100 to-green-200",
+  "chutney-book": "from-orange-100 to-amber-200",
+  millets: "from-yellow-50 to-yellow-200",
+  rice: "from-sky-100 to-blue-200",
+  ghee: "from-amber-50 to-yellow-200",
+  honey: "from-orange-100 to-yellow-300",
+  "healthy-snacks": "from-stone-100 to-amber-200", snacks: "from-stone-100 to-amber-200",
+  masala: "from-purple-100 to-pink-200",
+};
+const FALLBACK_GRADIENTS = ["from-amber-100 to-orange-200","from-red-100 to-rose-200","from-green-100 to-emerald-200","from-yellow-100 to-lime-200"];
+const FALLBACK_EMOJIS = ["🫙","🌶️","🌿","🫒","🥒","📖","🌾","🍚","🧈","🍯","🥜","✨"];
+
+function apiProductToProduct(p: ApiProduct, idx: number): Product {
+  const slug = p.category?.slug ?? "";
+  const price = Number(p.salePrice ?? p.price);
+  const originalPrice = p.salePrice ? Number(p.price) : undefined;
+  const weight = p.weight ? `${Number(p.weight)} ${p.unit ?? "kg"}` : (p.unit ?? "");
+  return {
+    id: p.id,
+    name: p.name,
+    category: slug,
+    categoryLabel: p.category?.name ?? "",
+    description: p.description ?? "",
+    price,
+    originalPrice,
+    rating: 4.5,
+    reviewsCount: 0,
+    emoji: CATEGORY_EMOJIS[slug] ?? FALLBACK_EMOJIS[idx % FALLBACK_EMOJIS.length],
+    image: p.images?.[0]?.url,
+    gradient: CATEGORY_GRADIENTS[slug] ?? FALLBACK_GRADIENTS[idx % FALLBACK_GRADIENTS.length],
+    isBestSeller: p.isFeatured,
+    isNew: false,
+    isVeg: true,
+    weightOrQty: weight,
+    tags: p.tags ?? [],
+    slug: p.slug,
+  };
+}
+
+
+
 
 function ProductsPageContent() {
   const router = useRouter();
@@ -33,6 +97,38 @@ function ProductsPageContent() {
   const [maxPrice, setMaxPrice] = useState<number>(initialMaxPrice);
   const [sortBy, setSortBy] = useState<string>("featured");
   
+  // Live categories from backend
+  const [apiCategories, setApiCategories] = useState<ApiCategory[]>([]);
+  const [catsLoading, setCatsLoading] = useState(true);
+
+  // Live products from backend
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [prodsLoading, setProdsLoading] = useState(true);
+
+  const { addItem } = useCart();
+
+  useEffect(() => {
+    fetch("/api/categories?limit=100")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiCategory[] = Array.isArray(data) ? data : (data.categories ?? []);
+        setApiCategories(list.filter((c) => c.isActive));
+      })
+      .catch(() => setApiCategories([]))
+      .finally(() => setCatsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/products?limit=200")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
+        setApiProducts(list.map((p, i) => apiProductToProduct(p, i)));
+      })
+      .catch(() => setApiProducts([]))
+      .finally(() => setProdsLoading(false));
+  }, []);
+
   // Cart feedback state (per product id)
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
   
@@ -55,17 +151,21 @@ function ProductsPageContent() {
     setMaxPrice(searchParams.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!) : 700);
   }, [searchParams]);
 
+  // Use API products when available, otherwise fall back to static
+  const allProducts = useMemo(
+    () => (apiProducts.length > 0 ? apiProducts : prodsLoading ? [] : PRODUCTS),
+    [apiProducts, prodsLoading]
+  );
+
   // Helper to count products per category in real-time based on current filters (excluding category filter itself)
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: PRODUCTS.length };
-    
-    // Initialize other categories
-    CATEGORIES.forEach(cat => {
+    const counts: Record<string, number> = { all: allProducts.length };
+
+    apiCategories.forEach(cat => {
       counts[cat.slug] = 0;
     });
 
-    PRODUCTS.forEach(product => {
-      // Check search query and price limits
+    allProducts.forEach(product => {
       const matchesSearch = searchQuery
         ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,11 +180,11 @@ function ProductsPageContent() {
     });
 
     return counts;
-  }, [searchQuery, maxPrice]);
+  }, [searchQuery, maxPrice, apiCategories, allProducts]);
 
   // Filtered and Sorted Products
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(product => {
+    return allProducts.filter(product => {
       // Category Filter
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
       
@@ -117,8 +217,19 @@ function ProductsPageContent() {
   }, [selectedCategory, searchQuery, maxPrice, sortBy]);
 
   // Handle Add to Cart animation triggers
-  const handleAddToCart = (id: string) => {
-    setAddingToCartId(id);
+  const handleAddToCart = (product: Product) => {
+    setAddingToCartId(product.id);
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: product.image,
+      emoji: product.emoji,
+      gradient: product.gradient,
+      weightOrQty: product.weightOrQty,
+      slug: product.slug || product.id,
+    });
     // Simulate API request / cart update delay
     setTimeout(() => {
       setAddingToCartId(null);
@@ -228,34 +339,45 @@ function ProductsPageContent() {
                   </span>
                 </button>
 
-                {/* Categories */}
-                {CATEGORIES.map((cat) => {
-                  const isActive = selectedCategory === cat.slug;
-                  const count = categoryCounts[cat.slug] || 0;
-                  return (
-                    <button
-                      key={cat.slug}
-                      onClick={() => setSelectedCategory(cat.slug)}
-                      className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all shrink-0 snap-start ${
-                        isActive
-                          ? "bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green shadow-sm"
-                          : "bg-zinc-50 hover:bg-zinc-100 text-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>{cat.emoji}</span>
-                        <span>{cat.label}</span>
-                      </div>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                        isActive
-                          ? "bg-white/20 text-white dark:bg-brand-green/20 dark:text-brand-green"
-                          : "bg-zinc-200/60 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-                      }`}>
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
+                {/* Categories from backend */}
+                {catsLoading
+                  ? Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-800 animate-pulse shrink-0" />
+                    ))
+                  : apiCategories.map((cat, idx) => {
+                      const isActive = selectedCategory === cat.slug;
+                      const count = categoryCounts[cat.slug] || 0;
+                      const emoji = CATEGORY_EMOJIS[cat.slug] ?? FALLBACK_EMOJIS[idx % FALLBACK_EMOJIS.length];
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.slug)}
+                          className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all shrink-0 snap-start ${
+                            isActive
+                              ? "bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green shadow-sm"
+                              : "bg-zinc-50 hover:bg-zinc-100 text-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-300"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {cat.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={cat.image} alt={cat.name} className="w-5 h-5 rounded-full object-cover" />
+                            ) : (
+                              <span>{emoji}</span>
+                            )}
+                            <span>{cat.name}</span>
+                          </div>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                            isActive
+                              ? "bg-white/20 text-white dark:bg-brand-green/20 dark:text-brand-green"
+                              : "bg-zinc-200/60 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                          }`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })
+                }
               </div>
             </div>
 
@@ -353,11 +475,13 @@ function ProductsPageContent() {
                   <span>
                     {selectedCategory === "all" 
                       ? "All Products" 
-                      : CATEGORIES.find(c => c.slug === selectedCategory)?.label}
+                      : apiCategories.find(c => c.slug === selectedCategory)?.name}
                   </span>
                 </h2>
                 <p className="text-xs text-zinc-450 dark:text-zinc-550">
-                  Showing {filteredProducts.length} of {PRODUCTS.length} traditional goods
+                  {prodsLoading
+                    ? "Loading products…"
+                    : `Showing ${filteredProducts.length} of ${allProducts.length} traditional goods`}
                 </p>
               </div>
 
@@ -365,7 +489,7 @@ function ProductsPageContent() {
               <div className="flex flex-wrap gap-1.5 my-1">
                 {selectedCategory !== "all" && (
                   <span className="inline-flex items-center gap-1 bg-brand-green/10 text-brand-green dark:bg-brand-gold/15 dark:text-brand-gold text-[10px] font-bold py-1 px-2.5 rounded-full border border-brand-green/20 dark:border-brand-gold/20">
-                    Category: {CATEGORIES.find(c => c.slug === selectedCategory)?.label}
+                    Category: {apiCategories.find(c => c.slug === selectedCategory)?.name}
                     <button onClick={() => setSelectedCategory("all")}><X className="w-2.5 h-2.5" /></button>
                   </span>
                 )}
@@ -413,45 +537,52 @@ function ProductsPageContent() {
                       className="group bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-200/50 dark:border-zinc-850 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
                     >
                       {/* Product Visual Top */}
-                      <div className={`relative h-44 w-full bg-gradient-to-br ${product.gradient} flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0`}>
-                        {/* Shimmer Effect */}
-                        <div className="absolute inset-0 plastic-sheen opacity-60" />
-                        
-                        {/* Float background circle decoration */}
-                        <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/10 dark:bg-black/10 blur-md group-hover:scale-125 transition-transform duration-300" />
-                        
-                        {/* Food Emoji Icon */}
-                        <span className="text-6xl relative z-10 select-none transform transition-all duration-500 group-hover:scale-115 group-hover:rotate-6 drop-shadow-md">
-                          {product.emoji}
-                        </span>
-
-                        {/* Top Badges */}
-                        <div className="absolute top-3 left-3 flex flex-col gap-1 z-20">
-                          {product.isBestSeller && (
-                            <span className="bg-brand-gold text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
-                              Best Seller
-                            </span>
-                          )}
-                          {product.isNew && (
-                            <span className="bg-brand-green text-white dark:bg-brand-gold-light dark:text-brand-green text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
-                              New
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Veg / Non-Veg Indicator */}
-                        <div className="absolute top-3 right-3 z-20 shadow-sm rounded-xs overflow-hidden">
-                          {product.isVeg ? (
-                            <div className="veg-mark" title="Vegetarian">
-                              <div className="veg-mark-dot" />
-                            </div>
+                      <Link href={`/products/${product.slug || product.id}`} className="block relative shrink-0">
+                        <div className={`relative h-44 w-full bg-gradient-to-br ${product.gradient} flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0`}>
+                          {/* Shimmer Effect */}
+                          <div className="absolute inset-0 plastic-sheen opacity-60" />
+                          
+                          {/* Float background circle decoration */}
+                          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/10 dark:bg-black/10 blur-md group-hover:scale-125 transition-transform duration-300" />
+                          
+                          {/* Food Visual */}
+                          {product.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
-                            <div className="w-3.5 h-3.5 border border-red-650 bg-white flex items-center justify-center p-0.5" title="Non-Vegetarian">
-                              <div className="w-1.5 h-1.5 rounded-full bg-red-650" />
-                            </div>
+                            <span className="text-6xl font-bold text-white/40 select-none transform transition-all duration-500 group-hover:scale-110">
+                              {product.name.charAt(0).toUpperCase()}
+                            </span>
                           )}
+
+                          {/* Top Badges */}
+                          <div className="absolute top-3 left-3 flex flex-col gap-1 z-20">
+                            {product.isBestSeller && (
+                              <span className="bg-brand-gold text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+                                Best Seller
+                              </span>
+                            )}
+                            {product.isNew && (
+                              <span className="bg-brand-green text-white dark:bg-brand-gold-light dark:text-brand-green text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+                                New
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Veg / Non-Veg Indicator */}
+                          <div className="absolute top-3 right-3 z-20 shadow-sm rounded-xs overflow-hidden">
+                            {product.isVeg ? (
+                              <div className="veg-mark" title="Vegetarian">
+                                <div className="veg-mark-dot" />
+                              </div>
+                            ) : (
+                              <div className="w-3.5 h-3.5 border border-red-650 bg-white flex items-center justify-center p-0.5" title="Non-Vegetarian">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-650" />
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </Link>
 
                       {/* Product Content Bottom */}
                       <div className="p-5 flex-1 flex flex-col">
@@ -465,9 +596,11 @@ function ProductsPageContent() {
                         </div>
 
                         {/* Name */}
-                        <h3 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-100 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors mb-1.5 line-clamp-1">
-                          {product.name}
-                        </h3>
+                        <Link href={`/products/${product.slug || product.id}`}>
+                          <h3 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-100 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors mb-1.5 line-clamp-1">
+                            {product.name}
+                          </h3>
+                        </Link>
 
                         {/* Description */}
                         <p className="text-xs text-zinc-500 dark:text-zinc-450 line-clamp-2 mb-4 leading-relaxed flex-1">
@@ -505,7 +638,7 @@ function ProductsPageContent() {
                           </div>
 
                           <button
-                            onClick={() => handleAddToCart(product.id)}
+                            onClick={() => handleAddToCart(product)}
                             disabled={isAdding}
                             className={`flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all ${
                               isAdding

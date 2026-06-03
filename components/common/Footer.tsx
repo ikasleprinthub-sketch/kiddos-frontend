@@ -20,7 +20,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#1e4620] text-white">
       {/* Main footer content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-0 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
 
           {/* Column 1 — Brand */}
@@ -84,7 +84,7 @@ export default function Footer() {
           </div>
 
           {/* Column 2 — Quick Links */}
-          <div>
+          <div className="md:ml-10">
             <h3 className="font-semibold text-base mb-5">Quick Link</h3>
             <ul className="flex flex-col gap-3">
               {quickLinks.map((link) => (
@@ -153,7 +153,7 @@ export default function Footer() {
       <div className="border-t border-white/15" />
 
       {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-0 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
         <p className="text-white/70 text-xs text-center md:text-left">
           Copyright © 2026 Kiddos Foods | Crafted And Maintained By{" "}
           <a

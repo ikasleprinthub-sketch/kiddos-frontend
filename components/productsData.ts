@@ -9,12 +9,14 @@ export interface Product {
   rating: number;
   reviewsCount: number;
   emoji: string;
+  image?: string;
   gradient: string;
   isBestSeller?: boolean;
   isNew?: boolean;
   isVeg: boolean;
   weightOrQty: string;
   tags: string[];
+  slug?: string;
 }
 
 export interface CategoryInfo {

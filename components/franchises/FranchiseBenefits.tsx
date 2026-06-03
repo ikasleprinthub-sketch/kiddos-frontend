@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Heart, TrendingUp, Truck } from "lucide-react";
 

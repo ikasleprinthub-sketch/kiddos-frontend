@@ -16,6 +16,7 @@ import {
   Compass
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
   const pathname = usePathname();
@@ -24,7 +25,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const cartCount = 3; // Simulated static items in cart
+  const { count: cartCount } = useCart();
 
   const initials = user
     ? user.name
