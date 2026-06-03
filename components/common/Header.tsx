@@ -15,14 +15,25 @@ import {
   Settings, 
   Compass
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const isLoggedIn = !!user;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated login state
   const cartCount = 3; // Simulated static items in cart
+
+  const initials = user
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    : "";
 
   // Handle scroll detection for glassmorphism effect transition
   useEffect(() => {
@@ -120,28 +131,21 @@ export default function Header() {
 
             {/* Profile / Login Section */}
             <div className="relative">
-              {isLoggedIn ? (
+              {isLoggedIn && user ? (
                 // Logged In Dropdown Trigger
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                   className="flex items-center gap-2 p-1.5 pr-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/80 dark:bg-zinc-900/50 rounded-full border border-zinc-200/30 dark:border-zinc-800/30 hover:shadow-md transition-all duration-200 focus:outline-none"
                 >
                   <div className="w-8 h-8 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center shadow-sm text-sm">
-                    JD
+                    {initials}
                   </div>
-                  <span className="hidden lg:inline-block max-w-[80px] truncate">Jane Doe</span>
+                  <span className="hidden lg:inline-block max-w-[80px] truncate">{user.name}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
                 // Login Buttons
                 <div className="flex items-center gap-2">
-                  {/* Subtle toggle for demo purposes */}
-                  <button 
-                    onClick={() => setIsLoggedIn(true)}
-                    className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 underline mr-1 hidden lg:inline-block transition-colors"
-                  >
-                    (Demo Sign In)
-                  </button>
                   <Link
                     href="/login"
                     onClick={handleCloseAll}
@@ -164,7 +168,7 @@ export default function Header() {
                   <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-2xl bg-white dark:bg-zinc-900 p-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10 z-20 focus:outline-none transition-all duration-200">
                     <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
                       <p className="text-xs text-zinc-400 dark:text-zinc-500">Signed in as</p>
-                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">jane.doe@example.com</p>
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{user.email}</p>
                     </div>
                     <div className="mt-1 space-y-0.5">
                       <Link
@@ -194,8 +198,8 @@ export default function Header() {
                     </div>
                     <div className="border-t border-zinc-100 dark:border-zinc-800 mt-1 pt-1">
                       <button
-                        onClick={() => {
-                          setIsLoggedIn(false);
+                        onClick={async () => {
+                          await logout();
                           handleCloseAll();
                         }}
                         className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors text-left"
@@ -263,15 +267,15 @@ export default function Header() {
             </div>
 
             <div className="border-t border-zinc-100 dark:border-zinc-800 pt-6 mt-auto">
-              {isLoggedIn ? (
+              {isLoggedIn && user ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
                     <div className="w-10 h-10 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center text-base">
-                      JD
+                      {initials}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-zinc-850 dark:text-zinc-200">Jane Doe</p>
-                      <p className="text-xs text-zinc-400 dark:text-zinc-500">jane.doe@example.com</p>
+                      <p className="text-sm font-semibold text-zinc-850 dark:text-zinc-200">{user.name}</p>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500">{user.email}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -284,11 +288,11 @@ export default function Header() {
                       <span>Profile</span>
                     </Link>
                     <button
-                      onClick={() => {
-                        setIsLoggedIn(false);
+                      onClick={async () => {
+                        await logout();
                         handleCloseAll();
                       }}
-                      className="flex items-center justify-center gap-2 p-3 text-sm text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 rounded-2xl transition-colors"
+                      className="flex items-center justify-center gap-2 p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 rounded-2xl transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Sign Out</span>
@@ -297,15 +301,6 @@ export default function Header() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2.5">
-                  <button
-                    onClick={() => {
-                      setIsLoggedIn(true);
-                      handleCloseAll();
-                    }}
-                    className="w-full text-center text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 underline mb-1 transition-colors"
-                  >
-                    (Demo Sign In)
-                  </button>
                   <Link
                     href="/login"
                     onClick={handleCloseAll}
