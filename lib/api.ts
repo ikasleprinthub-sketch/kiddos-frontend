@@ -53,8 +53,15 @@ export interface ApiProduct {
     name: string;
     slug: string;
   };
-  images: {
-    url: string;
-    isPrimary: boolean;
-  }[];
+  images: { id: string; url: string; isPrimary: boolean }[];
+}
+
+export interface ApiBanner {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image: string;
+  link: string | null;
+  isActive: boolean;
+  sortOrder: number;
 }

@@ -327,7 +327,6 @@ function ProductsPageContent() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span>🌾</span>
                     <span>All Products</span>
                   </div>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -359,11 +358,9 @@ function ProductsPageContent() {
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            {cat.image ? (
+                            {cat.image && (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={cat.image} alt={cat.name} className="w-5 h-5 rounded-full object-cover" />
-                            ) : (
-                              <span>{emoji}</span>
                             )}
                             <span>{cat.name}</span>
                           </div>
