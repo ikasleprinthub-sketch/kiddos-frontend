@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Minus,
@@ -19,6 +20,7 @@ import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart } = useCart();
+  const router = useRouter();
 
   // Coupon states
   const [couponCode, setCouponCode] = useState("");
@@ -28,8 +30,8 @@ export default function CartPage() {
 
   // Checkout overlay states
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutStep, setCheckoutStep] = useState<"cart" | "success">("cart");
-  const [generatedOrderNumber, setGeneratedOrderNumber] = useState("");
+  const [checkoutStep] = useState<"cart">("cart");
+  const [generatedOrderNumber] = useState("");
 
   // Apply Coupon logic
   const handleApplyCoupon = (e: React.FormEvent) => {
@@ -68,21 +70,18 @@ export default function CartPage() {
     return { subtotal, deliveryFee, tax, discount, total, isFreeDelivery };
   }, [items, activeCoupon]);
 
-  // Handle Checkout submission simulation
+  // Navigate to checkout with active coupon
   const handleCheckout = async () => {
     setIsCheckingOut(true);
-    await new Promise((resolve) => setTimeout(resolve, 1800));
-    const randNum = Math.floor(100000 + Math.random() * 900000);
-    setGeneratedOrderNumber(`KID-${randNum}`);
-    setIsCheckingOut(false);
-    setCheckoutStep("success");
+    const params = new URLSearchParams();
+    if (activeCoupon) params.set("coupon", activeCoupon);
+    router.push(`/checkout?${params.toString()}`);
   };
 
   const resetCart = () => {
     clearCart();
     setActiveCoupon(null);
     setCouponCode("");
-    setCheckoutStep("cart");
   };
 
   return (
