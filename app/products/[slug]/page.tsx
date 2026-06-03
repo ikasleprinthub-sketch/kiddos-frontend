@@ -15,6 +15,8 @@ import {
   Tag,
   Minus,
   Plus,
+  ChevronDown,
+  Share2,
 } from "lucide-react";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
@@ -52,6 +54,26 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 const FALLBACK_EMOJIS = ["🫙", "🌶️", "🌿", "🫒", "🥒", "📖", "🌾", "🍚", "🧈", "🍯", "🥜", "✨"];
 const FALLBACK_GRADIENTS = ["from-amber-100 to-orange-200", "from-red-100 to-rose-200", "from-green-100 to-emerald-200", "from-yellow-100 to-lime-200"];
 
+function Accordion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-zinc-200 dark:border-zinc-700 rounded-2xl overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 text-sm font-bold text-zinc-800 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors text-left"
+      >
+        <span>{title}</span>
+        <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="px-5 pb-5 border-t border-zinc-100 dark:border-zinc-700 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -64,6 +86,7 @@ export default function ProductDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -74,7 +97,12 @@ export default function ProductDetailPage() {
         return r.json();
       })
       .then((data) => {
-        if (data) setProduct(data.product ?? data);
+        if (data) {
+          const p: ApiProduct = data.product ?? data;
+          setProduct(p);
+          const primary = p.images?.find((i) => i.isPrimary)?.url ?? p.images?.[0]?.url ?? null;
+          setActiveImage(primary);
+        }
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
@@ -85,9 +113,9 @@ export default function ProductDetailPage() {
     const catSlug = product.category?.slug ?? "";
     const emoji = CATEGORY_EMOJIS[catSlug] ?? FALLBACK_EMOJIS[0];
     const gradient = CATEGORY_GRADIENTS[catSlug] ?? FALLBACK_GRADIENTS[0];
-    const price = Number(product.salePrice ?? product.price);
-    const originalPrice = product.salePrice ? Number(product.price) : undefined;
-    const primaryImage = product.images?.find((i) => i.isPrimary)?.url ?? product.images?.[0]?.url;
+    const hasSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);
+    const price = hasSale ? Number(product.salePrice) : Number(product.price);
+    const originalPrice = hasSale ? Number(product.price) : undefined;
     const weight = product.weight ? `${Number(product.weight)} ${product.unit ?? "kg"}` : (product.unit ?? "");
 
     for (let i = 0; i < qty; i++) {
@@ -96,7 +124,7 @@ export default function ProductDetailPage() {
         name: product.name,
         price,
         originalPrice,
-        image: primaryImage,
+        image: activeImage ?? undefined,
         emoji,
         gradient,
         weightOrQty: weight,
@@ -105,6 +133,17 @@ export default function ProductDetailPage() {
     }
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleShare = (platform: "whatsapp" | "facebook" | "instagram") => {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`Check out ${product?.name} on Kiddos Foods!`);
+    const links: Record<string, string> = {
+      whatsapp: `https://wa.me/?text=${text}%20${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      instagram: `https://www.instagram.com/`,
+    };
+    window.open(links[platform], "_blank", "noopener");
   };
 
   // Loading skeleton
@@ -145,10 +184,10 @@ export default function ProductDetailPage() {
   const catSlug = product.category?.slug ?? "";
   const emoji = CATEGORY_EMOJIS[catSlug] ?? FALLBACK_EMOJIS[0];
   const gradient = CATEGORY_GRADIENTS[catSlug] ?? FALLBACK_GRADIENTS[0];
-  const price = Number(product.salePrice ?? product.price);
-  const originalPrice = product.salePrice ? Number(product.price) : undefined;
+  const hasSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);
+  const price = hasSale ? Number(product.salePrice) : Number(product.price);
+  const originalPrice = hasSale ? Number(product.price) : undefined;
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-  const primaryImage = product.images?.find((i) => i.isPrimary)?.url ?? product.images?.[0]?.url;
   const weight = product.weight ? `${Number(product.weight)} ${product.unit ?? "kg"}` : product.unit ?? "";
 
   return (
@@ -170,15 +209,13 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
 
           {/* ── LEFT: Product Visual ── */}
-          <div className="sticky top-24">
+          <div className="sticky top-24 space-y-3">
             <div className={`relative aspect-square rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden shadow-lg border border-white/30`}>
-              {/* Sheen overlay */}
               <div className="absolute inset-0 plastic-sheen opacity-50" />
-
-              {primaryImage ? (
+              {activeImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={primaryImage}
+                  src={activeImage}
                   alt={product.name}
                   className="w-3/4 h-3/4 object-contain relative z-10 drop-shadow-xl"
                 />
@@ -201,26 +238,31 @@ export default function ProductDetailPage() {
                   </span>
                 )}
               </div>
-
-              {/* Image thumbnails row */}
-              {product.images && product.images.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                  {product.images.slice(0, 5).map((img, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={img.url}
-                      alt={`View ${i + 1}`}
-                      className="w-10 h-10 rounded-xl object-cover border-2 border-white shadow cursor-pointer hover:scale-110 transition-transform"
-                    />
-                  ))}
-                </div>
-              )}
             </div>
+
+            {/* Thumbnail row */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex gap-2 flex-wrap">
+                {product.images.slice(0, 6).map((img, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={img.url}
+                    alt={`View ${i + 1}`}
+                    onClick={() => setActiveImage(img.url)}
+                    className={`w-14 h-14 rounded-xl object-cover border-2 cursor-pointer hover:scale-105 transition-all ${
+                      activeImage === img.url
+                        ? "border-brand-green dark:border-brand-gold shadow-md"
+                        : "border-zinc-200 dark:border-zinc-700"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── RIGHT: Product Details ── */}
-          <div className="space-y-6">
+          <div className="space-y-5">
 
             {/* Category badge */}
             <Link
@@ -236,7 +278,7 @@ export default function ProductDetailPage() {
               {product.name}
             </h1>
 
-            {/* Rating row (static display) */}
+            {/* Rating row */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-0.5 text-amber-400">
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -248,41 +290,31 @@ export default function ProductDetailPage() {
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-black text-zinc-800 dark:text-zinc-100">
-                ₹{price}
-              </span>
+              <span className="text-3xl font-black text-zinc-800 dark:text-zinc-100">₹{price}</span>
               {originalPrice && (
                 <>
-                  <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">
-                    ₹{originalPrice}
-                  </span>
+                  <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">₹{originalPrice}</span>
                   <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    Save ₹{originalPrice - price}
+                    ({discount}% off, save ₹{originalPrice - price})
                   </span>
                 </>
               )}
             </div>
 
-            {/* Weight / SKU */}
-            {(weight || product.sku) && (
-              <div className="flex flex-wrap gap-3">
-                {weight && (
-                  <span className="inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-3 py-1.5 rounded-xl text-xs font-semibold">
-                    <Package className="w-3.5 h-3.5" />
-                    {weight}
-                  </span>
-                )}
-                {product.sku && (
-                  <span className="inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-3 py-1.5 rounded-xl text-xs font-semibold">
-                    SKU: {product.sku}
-                  </span>
-                )}
+            {/* Net Weight chip */}
+            {weight && (
+              <div>
+                <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Net Weight</p>
+                <span className="inline-flex items-center gap-1.5 bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
+                  <Package className="w-3.5 h-3.5" />
+                  {weight}
+                </span>
               </div>
             )}
 
             {/* Description */}
             {product.description && (
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-zinc-800 pt-5">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 {product.description}
               </p>
             )}
@@ -293,7 +325,7 @@ export default function ProductDetailPage() {
                 {product.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 bg-brand-cream dark:bg-zinc-800/60 text-brand-green dark:text-brand-gold text-[11px] font-semibold rounded-full border border-brand-green/20 dark:border-brand-gold/20"
+                    className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800/60 text-brand-green dark:text-brand-gold text-[11px] font-semibold rounded-full border border-brand-green/20 dark:border-brand-gold/20"
                   >
                     #{tag}
                   </span>
@@ -302,8 +334,7 @@ export default function ProductDetailPage() {
             )}
 
             {/* Quantity + Add to Cart */}
-            <div className="flex items-center gap-3 pt-2">
-              {/* Qty control */}
+            <div className="flex items-center gap-3 pt-1">
               <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200/40 dark:border-zinc-700/40">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -320,7 +351,6 @@ export default function ProductDetailPage() {
                 </button>
               </div>
 
-              {/* Add to cart */}
               <button
                 id="product-add-to-cart-btn"
                 onClick={handleAddToCart}
@@ -334,23 +364,55 @@ export default function ProductDetailPage() {
                 }`}
               >
                 {added ? (
-                  <>
-                    <Check className="w-4 h-4 stroke-[3px]" />
-                    <span>Added to Cart!</span>
-                  </>
+                  <><Check className="w-4 h-4 stroke-[3px]" /><span>Added to Cart!</span></>
                 ) : product.stock === 0 ? (
                   <span>Out of Stock</span>
                 ) : (
-                  <>
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>Add {qty > 1 ? `${qty}x` : ""} to Cart</span>
-                  </>
+                  <><ShoppingBag className="w-4 h-4" /><span>Add {qty > 1 ? `${qty}×` : ""} to Cart</span></>
                 )}
               </button>
             </div>
 
+            {/* Share On */}
+            <div className="flex items-center gap-3 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share On</span>
+              </div>
+              {/* WhatsApp */}
+              <button
+                onClick={() => handleShare("whatsapp")}
+                className="p-2 rounded-xl bg-green-50 dark:bg-green-950/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                title="Share on WhatsApp"
+              >
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </button>
+              {/* Facebook */}
+              <button
+                onClick={() => handleShare("facebook")}
+                className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                title="Share on Facebook"
+              >
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </button>
+              {/* Instagram */}
+              <button
+                onClick={() => handleShare("instagram")}
+                className="p-2 rounded-xl bg-pink-50 dark:bg-pink-950/20 hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-colors"
+                title="Share on Instagram"
+              >
+                <svg className="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                </svg>
+              </button>
+            </div>
+
             {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4">
               {[
                 { icon: Shield, label: "100% Safe", sub: "Quality assured" },
                 { icon: Truck, label: "Fast Delivery", sub: "2–4 business days" },
@@ -363,9 +425,97 @@ export default function ProductDetailPage() {
                 </div>
               ))}
             </div>
+
+            {/* ── Accordion Sections ── */}
+            <div className="space-y-3 pt-2">
+
+              {product.ingredients && (
+                <Accordion title="Ingredients">
+                  <p className="pt-3 whitespace-pre-line">{product.ingredients}</p>
+                </Accordion>
+              )}
+
+              {product.healthBenefits && (
+                <Accordion title="Health Benefits">
+                  <p className="pt-3 whitespace-pre-line">{product.healthBenefits}</p>
+                </Accordion>
+              )}
+
+              {product.usageInstructions && (
+                <Accordion title="Usage Instructions">
+                  <p className="pt-3 whitespace-pre-line">{product.usageInstructions}</p>
+                </Accordion>
+              )}
+
+              {product.shelfLife && (
+                <Accordion title="Shelf Life & Storage">
+                  <p className="pt-3">
+                    {product.shelfLife}
+                    {product.storageInstructions && <><br /><br />{product.storageInstructions}</>}
+                  </p>
+                </Accordion>
+              )}
+
+              {product.nutrientFacts && Object.keys(product.nutrientFacts).length > 0 && (
+                <Accordion title="Nutrient Facts">
+                  <div className="pt-3">
+                    <NutrientTable facts={product.nutrientFacts} />
+                  </div>
+                </Accordion>
+              )}
+
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function NutrientTable({ facts }: { facts: Record<string, string | number> }) {
+  const DAILY_VALUES: Record<string, number> = {
+    "Total Fat": 78, "Saturated Fat": 20, "Trans Fat": 0, "Cholesterol": 300,
+    "Sodium": 2300, "Total Carbohydrate": 275, "Dietary Fibre": 28,
+    "Total Sugars": 50, "Protein": 50, "Vitamin D": 20, "Calcium": 1300,
+    "Iron": 18, "Potassium": 4700,
+  };
+
+  const calories = facts["Calories"] ?? facts["calories"];
+  const amountPer = facts["amountPer"] ?? facts["AmountPer"] ?? "100 g";
+  const rows = Object.entries(facts).filter(
+    ([k]) => !["Calories", "calories", "amountPer", "AmountPer"].includes(k)
+  );
+
+  return (
+    <div className="border border-zinc-300 dark:border-zinc-600 rounded-xl overflow-hidden text-sm">
+      {/* Header */}
+      <div className="bg-zinc-800 dark:bg-zinc-700 text-white px-4 py-3">
+        <p className="font-semibold">Amount per {amountPer}</p>
+        {calories !== undefined && (
+          <p className="text-lg font-bold mt-0.5">Calories {calories}</p>
+        )}
+      </div>
+
+      {/* Column header */}
+      <div className="flex justify-end px-4 py-2 border-b border-zinc-200 dark:border-zinc-700 text-xs font-bold text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/40">
+        <span>% Daily value*</span>
+      </div>
+
+      {/* Rows */}
+      {rows.map(([nutrient, value]) => {
+        const dv = DAILY_VALUES[nutrient];
+        const pct = dv && dv > 0 ? Math.round((Number(value) / dv) * 100) : null;
+        return (
+          <div key={nutrient} className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0 bg-white dark:bg-zinc-900">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">{nutrient} <span className="font-normal">{value}</span></span>
+            <span className="font-bold text-zinc-600 dark:text-zinc-400">{pct !== null ? `${pct}%` : "—"}</span>
+          </div>
+        );
+      })}
+
+      <p className="px-4 py-2 text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/30">
+        * Percent Daily Values are based on a 2,000 calorie diet.
+      </p>
     </div>
   );
 }

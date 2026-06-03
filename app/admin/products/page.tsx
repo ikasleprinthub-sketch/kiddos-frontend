@@ -4,7 +4,21 @@ import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import DataTable, { Column } from "@/components/admin/DataTable";
 import { adminApi } from "@/lib/adminApi";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, X } from "lucide-react";
+
+interface NutrientRow { name: string; value: string }
+
+const DEFAULT_NUTRIENTS: NutrientRow[] = [
+  { name: "Total Fat", value: "" },
+  { name: "Saturated Fat", value: "" },
+  { name: "Trans Fat", value: "" },
+  { name: "Cholesterol", value: "" },
+  { name: "Sodium", value: "" },
+  { name: "Total Carbohydrate", value: "" },
+  { name: "Dietary Fibre", value: "" },
+  { name: "Total Sugars", value: "" },
+  { name: "Protein", value: "" },
+];
 
 interface Category { id: string; name: string }
 interface ProductImage { url: string; isPrimary: boolean }
@@ -12,6 +26,7 @@ interface Product {
   id: string;
   name: string;
   slug: string;
+  description: string | null;
   price: string;
   salePrice: string | null;
   stock: number;
@@ -21,8 +36,15 @@ interface Product {
   isPopularBatter: boolean;
   isSpiceOil: boolean;
   unit: string | null;
+  tags: string[];
   category: { id: string; name: string };
   images: ProductImage[];
+  ingredients: string | null;
+  healthBenefits: string | null;
+  usageInstructions: string | null;
+  nutrientFacts: Record<string, string | number> | null;
+  shelfLife: string | null;
+  storageInstructions: string | null;
 }
 
 interface FormState {
@@ -41,6 +63,12 @@ interface FormState {
   unit: string;
   tags: string;
   images: string[];
+  ingredients: string;
+  healthBenefits: string;
+  usageInstructions: string;
+  nutrientFacts: string;
+  shelfLife: string;
+  storageInstructions: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -64,6 +92,53 @@ export default function ProductsPage() {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
 
+  // Nutrient facts visual editor state
+  const [nutrientAmountPer, setNutrientAmountPer] = useState("100 gram");
+  const [nutrientCalories, setNutrientCalories] = useState("");
+  const [nutrientRows, setNutrientRows] = useState<NutrientRow[]>(DEFAULT_NUTRIENTS);
+
+  const syncNutrientFacts = (amountPer: string, calories: string, rows: NutrientRow[]) => {
+    const filled = rows.filter((r) => r.name.trim() && r.value.trim());
+    if (!amountPer && !calories && filled.length === 0) {
+      setForm((f) => ({ ...f, nutrientFacts: "" }));
+      return;
+    }
+    const obj: Record<string, string | number> = {};
+    if (amountPer) obj["amountPer"] = amountPer;
+    if (calories) obj["Calories"] = isNaN(Number(calories)) ? calories : Number(calories);
+    filled.forEach((r) => { obj[r.name.trim()] = r.value.trim(); });
+    setForm((f) => ({ ...f, nutrientFacts: JSON.stringify(obj) }));
+  };
+
+  const parseNutrientFacts = (jsonStr: string) => {
+    if (!jsonStr) {
+      setNutrientAmountPer("100 gram");
+      setNutrientCalories("");
+      setNutrientRows(DEFAULT_NUTRIENTS.map((r) => ({ ...r })));
+      return;
+    }
+    try {
+      const obj: Record<string, string | number> = JSON.parse(jsonStr);
+      setNutrientAmountPer(String(obj["amountPer"] ?? "100 gram"));
+      setNutrientCalories(obj["Calories"] !== undefined ? String(obj["Calories"]) : "");
+      const skip = new Set(["amountPer", "Calories"]);
+      const rows: NutrientRow[] = Object.entries(obj)
+        .filter(([k]) => !skip.has(k))
+        .map(([name, value]) => ({ name, value: String(value) }));
+      const defaultNames = DEFAULT_NUTRIENTS.map((r) => r.name);
+      const merged = DEFAULT_NUTRIENTS.map((def) => {
+        const found = rows.find((r) => r.name === def.name);
+        return found ?? { ...def };
+      });
+      rows.filter((r) => !defaultNames.includes(r.name)).forEach((r) => merged.push(r));
+      setNutrientRows(merged);
+    } catch {
+      setNutrientAmountPer("100 gram");
+      setNutrientCalories("");
+      setNutrientRows(DEFAULT_NUTRIENTS.map((r) => ({ ...r })));
+    }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -86,7 +161,13 @@ export default function ProductsPage() {
       .then((d) => setCategories(d.categories));
   }, []);
 
-  const openAdd = () => { setForm(EMPTY_FORM); setEditing(null); setModal("add"); setError(""); };
+  const openAdd = () => {
+    setForm(EMPTY_FORM);
+    setEditing(null);
+    setModal("add");
+    setError("");
+    parseNutrientFacts("");
+  };
   const openEdit = (p: Product) => {
     setForm({
       name: p.name, description: "", price: p.price, salePrice: p.salePrice || "", stock: p.stock,
@@ -98,28 +179,9 @@ export default function ProductsPage() {
     setEditing(p);
     setModal("edit");
     setError("");
+    parseNutrientFacts(p.nutrientFacts ? JSON.stringify(p.nutrientFacts) : "");
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
-    setUploading(true);
-    try {
-      const urls: string[] = [];
-      for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("folder", "products");
-        const res = await adminApi.upload<{ url: string }>("/upload", fd);
-        urls.push(res.url);
-      }
-      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
-    } catch {
-      setError("Image upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const removeImage = (url: string) =>
     setForm((f) => ({ ...f, images: f.images.filter((i) => i !== url) }));
@@ -129,6 +191,11 @@ export default function ProductsPage() {
     if (!form.name.trim()) { setError("Name is required"); return; }
     if (!form.price || isNaN(Number(form.price))) { setError("Valid price is required"); return; }
     if (!form.categoryId) { setError("Category is required"); return; }
+    let parsedNutrientFacts = null;
+    if (form.nutrientFacts.trim()) {
+      try { parsedNutrientFacts = JSON.parse(form.nutrientFacts); }
+      catch { setError("Nutrient Facts must be valid JSON"); return; }
+    }
     setSaving(true);
     try {
       const payload = {
@@ -137,6 +204,7 @@ export default function ProductsPage() {
         salePrice: form.salePrice ? Number(form.salePrice) : null,
         weight: form.weight ? Number(form.weight) : null,
         tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+        nutrientFacts: parsedNutrientFacts,
       };
       if (modal === "add") {
         await adminApi.post("/admin/products", payload);
@@ -179,7 +247,9 @@ export default function ProductsPage() {
     { key: "category", label: "Category", render: (row) => row.category.name },
     { key: "price", label: "Price", render: (row) => `₹${row.price}` },
     { key: "stock", label: "Stock", render: (row) => (
-      <span className={row.stock <= 10 ? "text-orange-600 font-semibold" : ""}>{row.stock}</span>
+      row.stock <= 0 
+        ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Out of Stock</span>
+        : <span className={row.stock <= 10 ? "text-orange-600 font-semibold" : ""}>{row.stock}</span>
     )},
     { key: "isActive", label: "Status", render: (row) => (
       <div className="flex flex-wrap gap-1.5 max-w-[200px]">
@@ -305,22 +375,192 @@ export default function ProductsPage() {
                   placeholder="organic, fresh, premium"
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>
+
+              {/* ── Product Detail Fields ── */}
+              <div className="col-span-2 border-t border-gray-100 pt-3">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Product Details</p>
+              </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {form.images.map((url) => (
-                    <div key={url} className="relative w-16 h-16">
-                      <img src={url} alt="" className="w-full h-full rounded object-cover bg-gray-100" />
-                      <button onClick={() => removeImage(url)}
-                        className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">
-                        ×
-                      </button>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
+                <textarea value={form.ingredients} onChange={(e) => setForm((f) => ({ ...f, ingredients: e.target.value }))}
+                  rows={3} placeholder="Rice, Urad Dal, Salt..."
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Health Benefits</label>
+                <textarea value={form.healthBenefits} onChange={(e) => setForm((f) => ({ ...f, healthBenefits: e.target.value }))}
+                  rows={3} placeholder="Rich in protein, aids digestion..."
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Usage Instructions</label>
+                <textarea value={form.usageInstructions} onChange={(e) => setForm((f) => ({ ...f, usageInstructions: e.target.value }))}
+                  rows={3} placeholder="Mix well before use, add water as needed..."
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Shelf Life</label>
+                <input value={form.shelfLife} onChange={(e) => setForm((f) => ({ ...f, shelfLife: e.target.value }))}
+                  placeholder="e.g. 6 months"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Storage Instructions</label>
+                <input value={form.storageInstructions} onChange={(e) => setForm((f) => ({ ...f, storageInstructions: e.target.value }))}
+                  placeholder="Store in a cool, dry place"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+              </div>
+              {/* ── Nutrient Facts Visual Editor ── */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nutrient Facts</label>
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  {/* Amount Per + Calories header */}
+                  <div className="bg-gray-800 text-white px-4 py-3 grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Amount Per</p>
+                      <input
+                        value={nutrientAmountPer}
+                        onChange={(e) => { setNutrientAmountPer(e.target.value); syncNutrientFacts(e.target.value, nutrientCalories, nutrientRows); }}
+                        placeholder="100 gram"
+                        className="w-full bg-gray-700 text-white text-sm px-2.5 py-1.5 rounded-lg border border-gray-600 focus:outline-none focus:border-emerald-400"
+                      />
                     </div>
-                  ))}
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Calories</p>
+                      <input
+                        value={nutrientCalories}
+                        onChange={(e) => { setNutrientCalories(e.target.value); syncNutrientFacts(nutrientAmountPer, e.target.value, nutrientRows); }}
+                        placeholder="133"
+                        className="w-full bg-gray-700 text-white text-sm px-2.5 py-1.5 rounded-lg border border-gray-600 focus:outline-none focus:border-emerald-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Column headers */}
+                  <div className="grid grid-cols-[1fr_120px_32px] gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Nutrient</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Value</span>
+                    <span />
+                  </div>
+
+                  {/* Nutrient rows */}
+                  <div className="divide-y divide-gray-100">
+                    {nutrientRows.map((row, idx) => (
+                      <div key={idx} className="grid grid-cols-[1fr_120px_32px] gap-2 items-center px-3 py-2">
+                        <input
+                          value={row.name}
+                          onChange={(e) => {
+                            const rows = nutrientRows.map((r, i) => i === idx ? { ...r, name: e.target.value } : r);
+                            setNutrientRows(rows);
+                            syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
+                          }}
+                          placeholder="Nutrient name"
+                          className="text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                        />
+                        <input
+                          value={row.value}
+                          onChange={(e) => {
+                            const rows = nutrientRows.map((r, i) => i === idx ? { ...r, value: e.target.value } : r);
+                            setNutrientRows(rows);
+                            syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
+                          }}
+                          placeholder="e.g. 0.3g"
+                          className="text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const rows = nutrientRows.filter((_, i) => i !== idx);
+                            setNutrientRows(rows);
+                            syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
+                          }}
+                          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add row button */}
+                  <div className="px-3 py-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const rows = [...nutrientRows, { name: "", value: "" }];
+                        setNutrientRows(rows);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                    >
+                      <Plus size={13} /> Add Nutrient Row
+                    </button>
+                  </div>
                 </div>
-                <input type="file" accept="image/*" multiple onChange={handleImageUpload} disabled={uploading}
-                  className="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-emerald-50 file:text-emerald-700 file:text-sm file:font-medium hover:file:bg-emerald-100" />
-                {uploading && <p className="text-xs text-gray-400 mt-1">Uploading…</p>}
+                <p className="text-[11px] text-gray-400 mt-1">Leave values empty to omit a nutrient from the label.</p>
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Images <span className="text-gray-400 font-normal">(max 2)</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  {[0, 1].map((slot) => {
+                    const url = form.images[slot];
+                    const label = slot === 0 ? "Image 1 · Primary" : "Image 2 · Hover";
+                    return (
+                      <div key={slot} className="relative">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">{label}</p>
+                        {url ? (
+                          <div className="relative w-full aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt={label} className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => removeImage(url)}
+                              className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center shadow transition-colors"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : (
+                          <label className={`flex flex-col items-center justify-center w-full aspect-square rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : "border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/40"}`}>
+                            <span className="text-2xl mb-1">📷</span>
+                            <span className="text-xs font-medium text-gray-400">Upload</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploading}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setUploading(true);
+                                try {
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  fd.append("folder", "products");
+                                  const res = await (await import("@/lib/adminApi")).adminApi.upload<{ url: string }>("/upload", fd);
+                                  setForm((f) => {
+                                    const imgs = [...f.images];
+                                    imgs[slot] = res.url;
+                                    return { ...f, images: imgs.filter(Boolean) };
+                                  });
+                                } catch { setError("Image upload failed"); }
+                                finally { setUploading(false); }
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {uploading && (
+                  <p className="text-xs text-emerald-600 flex items-center gap-1.5">
+                    <span className="inline-block w-3 h-3 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+                    Uploading image…
+                  </p>
+                )}
+                <p className="text-[11px] text-gray-400 mt-1">Image 1 is shown by default. Image 2 appears on hover in the product listing.</p>
               </div>
               <div className="col-span-2 flex flex-wrap gap-4 pt-1">
                 <label className="flex items-center gap-2 cursor-pointer">
