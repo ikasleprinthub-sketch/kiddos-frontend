@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Send, User, Mail, MessageSquare, FileText, CheckCircle } from "lucide-react";
+import { ArrowUpRight, CheckCircle, Sparkles } from "lucide-react";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
@@ -49,7 +50,7 @@ export default function ContactForm() {
         <button
           onClick={() => {
             setSubmitted(false);
-            setFormData({ name: "", email: "", subject: "", message: "" });
+            setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
           }}
           className="mt-2 px-6 py-2.5 text-sm font-semibold rounded-full bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green hover:opacity-90 transition-opacity"
         >
@@ -63,147 +64,104 @@ export default function ContactForm() {
     <div className="w-full">
       {/* Header */}
       <div className="mb-8">
-        <span className="inline-block text-xs font-semibold tracking-widest text-brand-gold uppercase mb-3">
-          Get in Touch
-        </span>
-        <h2 className="text-3xl sm:text-4xl font-bold text-zinc-800 dark:text-zinc-100 leading-tight">
-          We&apos;d love to{" "}
-          <span className="text-brand-green dark:text-brand-gold">hear from you</span>
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-zinc-100 shadow-sm mb-4">
+          <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
+          <span className="text-[11px] font-bold tracking-wide text-zinc-600">
+            Get In Touch
+          </span>
+        </div>
+        
+        <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-100 leading-tight mb-3">
+          We&apos;d love to hear from you
         </h2>
-        <p className="mt-3 text-zinc-500 dark:text-zinc-400 text-base">
-          Fill in the form and our team will respond within one business day.
+        <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          Fill in the form and our team will respond within one business day. We are always ready to assist you with professional solutions and reliable support.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-        {/* Name */}
-        <div className="group">
-          <label
-            htmlFor="contact-name"
-            className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5"
-          >
-            Full Name
-          </label>
-          <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-brand-green dark:group-focus-within:text-brand-gold transition-colors" />
-            <input
-              id="contact-name"
-              name="name"
-              type="text"
-              required
-              autoComplete="name"
-              placeholder="Your full name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-green/40 dark:focus:ring-brand-gold/40 focus:border-brand-green dark:focus:border-brand-gold transition-all duration-200 text-sm"
-            />
-          </div>
-        </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        {/* Grid for short inputs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            name="name"
+            type="text"
+            required
+            placeholder="Name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px]"
+          />
 
-        {/* Email */}
-        <div className="group">
-          <label
-            htmlFor="contact-email"
-            className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5"
-          >
-            Email Address
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-brand-green dark:group-focus-within:text-brand-gold transition-colors" />
-            <input
-              id="contact-email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-green/40 dark:focus:ring-brand-gold/40 focus:border-brand-green dark:focus:border-brand-gold transition-all duration-200 text-sm"
-            />
-          </div>
-        </div>
+          <input
+            name="email"
+            type="email"
+            required
+            placeholder="Email Address"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px]"
+          />
 
-        {/* Subject */}
-        <div className="group">
-          <label
-            htmlFor="contact-subject"
-            className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5"
+          <input
+            name="phone"
+            type="tel"
+            placeholder="Phone Number"
+            value={formData.phone}
+            onChange={handleChange}
+            className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px]"
+          />
+
+          <select
+            name="subject"
+            required
+            value={formData.subject}
+            onChange={handleChange}
+            className={`w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px] appearance-none cursor-pointer ${
+              formData.subject ? "text-zinc-800" : "text-zinc-500"
+            }`}
           >
-            Subject
-          </label>
-          <div className="relative">
-            <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-brand-green dark:group-focus-within:text-brand-gold transition-colors" />
-            <select
-              id="contact-subject"
-              name="subject"
-              required
-              value={formData.subject}
-              onChange={handleChange}
-              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand-green/40 dark:focus:ring-brand-gold/40 focus:border-brand-green dark:focus:border-brand-gold transition-all duration-200 text-sm appearance-none cursor-pointer"
-            >
-              <option value="" disabled>
-                Select a topic…
-              </option>
-              <option value="General Inquiry">General Inquiry</option>
-              <option value="Franchise">Franchise Opportunity</option>
-              <option value="Order Issue">Order Issue</option>
-              <option value="Feedback">Feedback</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+            <option value="" disabled>
+              Service You're Interested
+            </option>
+            <option value="General Inquiry">General Inquiry</option>
+            <option value="Franchise">Franchise Opportunity</option>
+            <option value="Order Issue">Order Issue</option>
+            <option value="Feedback">Feedback</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
 
         {/* Message */}
-        <div className="group">
-          <label
-            htmlFor="contact-message"
-            className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5"
-          >
-            Message
-          </label>
-          <div className="relative">
-            <MessageSquare className="absolute left-4 top-4 w-4 h-4 text-zinc-400 group-focus-within:text-brand-green dark:group-focus-within:text-brand-gold transition-colors" />
-            <textarea
-              id="contact-message"
-              name="message"
-              required
-              rows={5}
-              placeholder="Tell us how we can help…"
-              value={formData.message}
-              onChange={handleChange}
-              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-green/40 dark:focus:ring-brand-gold/40 focus:border-brand-green dark:focus:border-brand-gold transition-all duration-200 text-sm resize-none"
-            />
-          </div>
-        </div>
+        <textarea
+          name="message"
+          required
+          rows={5}
+          placeholder="Message"
+          value={formData.message}
+          onChange={handleChange}
+          className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px] resize-none"
+        />
 
         {/* Submit */}
-        <button
-          id="contact-submit-btn"
-          type="submit"
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0"
-        >
-          {loading ? (
-            <>
-              <svg
-                className="w-4 h-4 animate-spin"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-              </svg>
-              Sending…
-            </>
-          ) : (
-            <>
-              <Send className="w-4 h-4" />
-              Send Message
-            </>
-          )}
-        </button>
+        <div className="mt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative inline-flex items-center gap-4 py-2.5 pl-6 pr-2 rounded-full bg-[#f88636] hover:bg-[#e77525] text-white font-bold text-[13px] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="py-1 pr-4">Sending...</span>
+            ) : (
+              <>
+                <span>Send Message</span>
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#f88636] group-hover:scale-105 transition-transform">
+                  <ArrowUpRight className="w-4 h-4 stroke-[3]" />
+                </div>
+              </>
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );

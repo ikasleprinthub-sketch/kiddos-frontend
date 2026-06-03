@@ -75,6 +75,7 @@ const EMPTY_FORM: FormState = {
   name: "", description: "", price: "", salePrice: "", stock: 0, sku: "",
   categoryId: "", isActive: true, isFeatured: false, isPopularBatter: false, isSpiceOil: false,
   weight: "", unit: "", tags: "", images: [],
+  ingredients: "", healthBenefits: "", usageInstructions: "", nutrientFacts: "", shelfLife: "", storageInstructions: "",
 };
 
 export default function ProductsPage() {
@@ -175,6 +176,12 @@ export default function ProductsPage() {
       isPopularBatter: p.isPopularBatter || false,
       isSpiceOil: p.isSpiceOil || false,
       weight: "", unit: p.unit || "", tags: "", images: p.images.map((i) => i.url),
+      ingredients: p.ingredients || "",
+      healthBenefits: p.healthBenefits || "",
+      usageInstructions: p.usageInstructions || "",
+      nutrientFacts: p.nutrientFacts ? JSON.stringify(p.nutrientFacts) : "",
+      shelfLife: p.shelfLife || "",
+      storageInstructions: p.storageInstructions || "",
     });
     setEditing(p);
     setModal("edit");
