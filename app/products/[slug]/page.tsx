@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   ShoppingBag,
   Check,
-  Star,
   Shield,
   Truck,
   RefreshCcw,
@@ -278,15 +277,7 @@ export default function ProductDetailPage() {
               {product.name}
             </h1>
 
-            {/* Rating row */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-0.5 text-amber-400">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className={`w-4 h-4 ${s <= 4 ? "fill-amber-400" : "fill-zinc-200 dark:fill-zinc-700"}`} />
-                ))}
-              </div>
-              <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">4.5 · Verified Reviews</span>
-            </div>
+
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
