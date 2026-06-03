@@ -35,6 +35,7 @@ interface Product {
   isFeatured: boolean;
   isPopularBatter: boolean;
   isSpiceOil: boolean;
+  weight: string | number | null;
   unit: string | null;
   tags: string[];
   category: { id: string; name: string };
@@ -75,6 +76,8 @@ const EMPTY_FORM: FormState = {
   name: "", description: "", price: "", salePrice: "", stock: 0, sku: "",
   categoryId: "", isActive: true, isFeatured: false, isPopularBatter: false, isSpiceOil: false,
   weight: "", unit: "", tags: "", images: [],
+  ingredients: "", healthBenefits: "", usageInstructions: "", nutrientFacts: "",
+  shelfLife: "", storageInstructions: "",
 };
 
 export default function ProductsPage() {
@@ -170,11 +173,27 @@ export default function ProductsPage() {
   };
   const openEdit = (p: Product) => {
     setForm({
-      name: p.name, description: "", price: p.price, salePrice: p.salePrice || "", stock: p.stock,
-      sku: p.sku || "", categoryId: p.category.id, isActive: p.isActive, isFeatured: p.isFeatured,
+      name: p.name,
+      description: p.description || "",
+      price: p.price,
+      salePrice: p.salePrice || "",
+      stock: p.stock,
+      sku: p.sku || "",
+      categoryId: p.category.id,
+      isActive: p.isActive,
+      isFeatured: p.isFeatured,
       isPopularBatter: p.isPopularBatter || false,
       isSpiceOil: p.isSpiceOil || false,
-      weight: "", unit: p.unit || "", tags: "", images: p.images.map((i) => i.url),
+      weight: p.weight !== null && p.weight !== undefined ? String(p.weight) : "",
+      unit: p.unit || "",
+      tags: p.tags ? p.tags.join(", ") : "",
+      images: p.images.map((i) => i.url),
+      ingredients: p.ingredients || "",
+      healthBenefits: p.healthBenefits || "",
+      usageInstructions: p.usageInstructions || "",
+      nutrientFacts: p.nutrientFacts ? JSON.stringify(p.nutrientFacts) : "",
+      shelfLife: p.shelfLife || "",
+      storageInstructions: p.storageInstructions || "",
     });
     setEditing(p);
     setModal("edit");

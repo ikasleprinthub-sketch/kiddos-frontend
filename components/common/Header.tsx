@@ -13,7 +13,8 @@ import {
   LogOut, 
   ShoppingBag, 
   Settings, 
-  Heart
+  Heart,
+  Compass
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
