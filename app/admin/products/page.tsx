@@ -80,6 +80,8 @@ const EMPTY_FORM: FormState = {
   shelfLife: "", storageInstructions: "",
 };
 
+const PRESET_UNITS = ["g", "kg", "ml", "L", "pcs", "packet", "box"];
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
@@ -222,6 +224,7 @@ export default function ProductsPage() {
         price: Number(form.price),
         salePrice: form.salePrice ? Number(form.salePrice) : null,
         weight: form.weight ? Number(form.weight) : null,
+        unit: form.unit === "custom_temp" ? "" : form.unit,
         tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
         nutrientFacts: parsedNutrientFacts,
       };
@@ -312,6 +315,8 @@ export default function ProductsPage() {
     },
   ];
 
+  const cleanUnit = form.unit === "custom_temp" ? "" : form.unit;
+
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <AdminHeader title="Products" />
@@ -375,14 +380,45 @@ export default function ProductsPage() {
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unit (e.g. kg, g)</label>
-                <input value={form.unit} onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                <div className="flex gap-2">
+                  <select
+                    value={PRESET_UNITS.includes(form.unit) || form.unit === "" ? form.unit : "custom"}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "custom") {
+                        setForm((f) => ({ ...f, unit: "custom_temp" }));
+                      } else {
+                        setForm((f) => ({ ...f, unit: val }));
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white"
+                  >
+                    <option value="">None</option>
+                    <option value="g">g (Grams)</option>
+                    <option value="kg">kg (Kilograms)</option>
+                    <option value="ml">ml (Milliliters)</option>
+                    <option value="L">L (Liters)</option>
+                    <option value="pcs">pcs (Pieces)</option>
+                    <option value="packet">packet (Packets)</option>
+                    <option value="box">box (Boxes)</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                  {(!PRESET_UNITS.includes(form.unit) && form.unit !== "") && (
+                    <input
+                      value={form.unit === "custom_temp" ? "" : form.unit}
+                      onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
+                      placeholder="Enter unit (e.g. jar)"
+                      className="w-1/2 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                    />
+                  )}
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Weight {cleanUnit ? `(${cleanUnit})` : "(value)"}</label>
                 <input type="number" value={form.weight} onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  placeholder={cleanUnit ? `e.g. 250 for 250 ${cleanUnit}` : "e.g. 1"} />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
