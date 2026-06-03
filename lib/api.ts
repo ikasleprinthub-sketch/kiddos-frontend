@@ -54,6 +54,13 @@ export interface ApiProduct {
     slug: string;
   };
   images: { id: string; url: string; isPrimary: boolean }[];
+  /** Extended detail fields (present on single-product fetch) */
+  ingredients?: string | null;
+  healthBenefits?: string | null;
+  usageInstructions?: string | null;
+  nutrientFacts?: Record<string, string | number> | null;
+  shelfLife?: string | null;
+  storageInstructions?: string | null;
 }
 
 export interface ApiBanner {

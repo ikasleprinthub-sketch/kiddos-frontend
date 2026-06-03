@@ -13,10 +13,11 @@ import {
   LogOut, 
   ShoppingBag, 
   Settings, 
-  Compass
+  Heart
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function Header() {
   const pathname = usePathname();
@@ -26,6 +27,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const { count: cartCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
 
   const initials = user
     ? user.name
@@ -115,6 +117,21 @@ export default function Header() {
           {/* Right Section - Cart & Profile/Login */}
           <div className="flex items-center gap-3">
             
+            {/* Wishlist Button */}
+            <Link
+              href="/wishlist"
+              onClick={handleCloseAll}
+              className="relative p-2.5 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 dark:hover:bg-red-950/20 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
+              aria-label="View Wishlist"
+            >
+              <Heart className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
             {/* Cart Button */}
             <Link
               href="/cart"

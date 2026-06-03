@@ -4,6 +4,7 @@ import "./globals.css";
 import PublicShell from "@/components/common/PublicShell";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
         <AuthProvider>
           <CartProvider>
-            <PublicShell>{children}</PublicShell>
+            <WishlistProvider>
+              <PublicShell>{children}</PublicShell>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

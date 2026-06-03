@@ -10,6 +10,7 @@ export interface Product {
   reviewsCount: number;
   emoji: string;
   image?: string;
+  image2?: string;
   gradient: string;
   isBestSeller?: boolean;
   isNew?: boolean;
@@ -17,6 +18,7 @@ export interface Product {
   weightOrQty: string;
   tags: string[];
   slug?: string;
+  stock?: number;
 }
 
 export interface CategoryInfo {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -48,8 +48,44 @@ export default function CartPage() {
 
   // Checkout overlay states
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutStep] = useState<"cart">("cart");
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "address" | "success">("cart");
   const [generatedOrderNumber] = useState("");
+  const [placedOrderNumber, setPlacedOrderNumber] = useState("");
+  const [isPlacing, setIsPlacing] = useState(false);
+  const [placeError, setPlaceError] = useState<string | null>(null);
+
+  const [address, setAddress] = useState<ShippingAddress>({
+    name: "",
+    phone: "",
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+  const [addressErrors, setAddressErrors] = useState<Partial<ShippingAddress>>({});
+
+  // Stock map: productId → current stock from backend
+  const [stockMap, setStockMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    fetch("/api/products?limit=200")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: { id: string; stock: number }[] = Array.isArray(data) ? data : (data.products ?? []);
+        const map: Record<string, number> = {};
+        list.forEach((p) => { map[p.id] = p.stock; });
+        setStockMap(map);
+      })
+      .catch(() => {/* keep stockMap empty — don't block UI */});
+  }, [items.length]);
+
+  const handlePlaceOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Dummy handler
+    setCheckoutStep("success");
+    setPlacedOrderNumber("ORD-12345");
+  };
 
   // Apply Coupon logic
   const handleApplyCoupon = (e: React.FormEvent) => {
@@ -73,6 +109,8 @@ export default function CartPage() {
     setCouponSuccess(null);
     setCouponCode("");
   };
+
+  const hasOutOfStock = items.some((item) => (stockMap[item.id] ?? 1) === 0);
 
   // Cart Calculations
   const calculations = useMemo(() => {
@@ -376,17 +414,25 @@ export default function CartPage() {
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* ── LEFT COLUMN: CART ITEMS LIST ── */}
             <div className="flex-1 w-full space-y-4">
-              {items.map((item) => (
+              {items.map((item) => {
+                const stock = stockMap[item.id];
+                const outOfStock = stock === 0;
+                const lowStock = stock !== undefined && stock > 0 && stock < item.quantity;
+                return (
                 <article
                   key={item.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/50 dark:border-zinc-850 shadow-sm hover:shadow-md transition-shadow duration-200"
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-zinc-900 rounded-3xl border shadow-sm transition-shadow duration-200 ${
+                    outOfStock
+                      ? "border-red-200 dark:border-red-800/50 opacity-70"
+                      : "border-zinc-200/50 dark:border-zinc-850 hover:shadow-md"
+                  }`}
                 >
                   {/* Visual & Details */}
                   <div className="flex items-center gap-4">
                     {/* Product Thumbnail Box */}
-                    <Link href={`/products/${item.slug}`} className="shrink-0">
+                    <Link href={`/products/${item.slug}`} className="shrink-0 relative">
                       <div
-                        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-inner relative overflow-hidden hover:scale-105 transition-transform`}
+                        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-inner relative overflow-hidden hover:scale-105 transition-transform ${outOfStock ? "grayscale" : ""}`}
                       >
                         <div className="absolute inset-0 plastic-sheen opacity-40" />
                         {item.image ? (
@@ -400,6 +446,11 @@ export default function CartPage() {
                           <span className="text-4xl select-none relative z-10">{item.emoji}</span>
                         )}
                       </div>
+                      {outOfStock && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full shadow z-20">
+                          Empty
+                        </span>
+                      )}
                     </Link>
 
                     {/* Details */}
@@ -412,26 +463,38 @@ export default function CartPage() {
                       <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mt-0.5">
                         {item.weightOrQty}
                       </p>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
-                          ₹{item.price}
+                      {outOfStock ? (
+                        <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400">
+                          <AlertCircle className="w-3 h-3" />
+                          Out of Stock — please remove
                         </span>
-                        {item.originalPrice && (
-                          <span className="text-[10px] text-zinc-400 dark:text-zinc-500 line-through">
-                            ₹{item.originalPrice}
+                      ) : lowStock ? (
+                        <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                          <AlertCircle className="w-3 h-3" />
+                          Only {stock} left in stock
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                            ₹{item.price}
                           </span>
-                        )}
-                      </div>
+                          {item.originalPrice && (
+                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 line-through">
+                              ₹{item.originalPrice}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Quantity Selector & Item Total */}
                   <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800 pt-3 sm:pt-0">
                     {/* Controls */}
-                    <div className="flex items-center gap-1 bg-zinc-100/80 dark:bg-zinc-850 p-1 rounded-xl border border-zinc-200/30 dark:border-zinc-800/30">
+                    <div className={`flex items-center gap-1 bg-zinc-100/80 dark:bg-zinc-850 p-1 rounded-xl border border-zinc-200/30 dark:border-zinc-800/30 ${outOfStock ? "pointer-events-none opacity-40" : ""}`}>
                       <button
                         onClick={() => updateQuantity(item.id, -1)}
-                        disabled={item.quantity <= 1}
+                        disabled={item.quantity <= 1 || outOfStock}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-40 transition-all"
                         aria-label="Decrease quantity"
                       >
@@ -442,7 +505,8 @@ export default function CartPage() {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.id, 1)}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-white dark:hover:bg-zinc-800 transition-all"
+                        disabled={outOfStock}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-40 transition-all"
                         aria-label="Increase quantity"
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -451,7 +515,7 @@ export default function CartPage() {
 
                     {/* Price calculation & remove */}
                     <div className="flex items-center gap-4">
-                      <span className="text-base font-black text-zinc-800 dark:text-zinc-150 min-w-[70px] text-right">
+                      <span className={`text-base font-black min-w-[70px] text-right ${outOfStock ? "text-zinc-400 dark:text-zinc-600 line-through" : "text-zinc-800 dark:text-zinc-150"}`}>
                         ₹{item.price * item.quantity}
                       </span>
                       <button
@@ -464,7 +528,8 @@ export default function CartPage() {
                     </div>
                   </div>
                 </article>
-              ))}
+                );
+              })}
 
               <Link
                 href="/products"
@@ -596,11 +661,20 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {/* Out-of-stock warning */}
+                {hasOutOfStock && (
+                  <div className="mt-4 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-400 font-medium">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>Some items are out of stock. Remove them before checkout.</span>
+                  </div>
+                )}
+
                 {/* SECURE CHECKOUT BUTTON */}
                 <button
                   id="cart-checkout-btn"
-                  onClick={handleProceedToCheckout}
-                  className="w-full mt-6 py-4 bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl text-sm font-bold tracking-wide uppercase shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                  onClick={handleCheckout}
+                  disabled={hasOutOfStock}
+                  className="w-full mt-4 py-4 bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl text-sm font-bold tracking-wide uppercase shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none flex items-center justify-center gap-2"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   <span>Proceed To Checkout</span>
