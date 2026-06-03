@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { api, type ApiBanner } from "@/lib/api";
 
 const pastaPackages = [
   {
@@ -268,12 +269,25 @@ function BatterPacket({ name, color, textColor, bgColor, grainIcon }: any) {
 export default function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [banners, setBanners] = useState<ApiBanner[]>([]);
+  const [loading, setLoading] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    api.get<ApiBanner[]>("/banners?position=HOME")
+      .then((data) => setBanners(data || []))
+      .catch((err) => console.error("Failed to load banners:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const hasBanners = banners.length > 0;
+  const totalSlides = hasBanners ? banners.length : 2;
 
   const startAutoplay = () => {
     stopAutoplay();
+    if (totalSlides <= 1) return;
     timerRef.current = setInterval(() => {
-      setActiveSlide((prev) => (prev === 0 ? 1 : 0));
+      setActiveSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
     }, 6000);
   };
 
@@ -293,11 +307,13 @@ export default function HeroSection() {
   }, [isHovered]);
 
   const handlePrev = () => {
-    setActiveSlide((prev) => (prev === 0 ? 1 : 0));
+    if (totalSlides <= 1) return;
+    setActiveSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setActiveSlide((prev) => (prev === 0 ? 1 : 0));
+    if (totalSlides <= 1) return;
+    setActiveSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
   };
 
   return (
@@ -322,9 +338,52 @@ export default function HeroSection() {
 
       {/* CAROUSEL SLIDES WRAPPER */}
       <div className="relative w-full h-full">
-        
-        {/* SLIDE 1: MILLET PASTA (REPLICATION) */}
-        <div
+        {loading ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
+            <div className="w-10 h-10 border-4 border-zinc-700 border-t-white rounded-full animate-spin" />
+          </div>
+        ) : hasBanners ? (
+          banners.map((banner, idx) => (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col justify-center items-center ${
+                activeSlide === idx ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
+            >
+              <div className="absolute inset-0 z-0">
+                <Image
+                  src={banner.image}
+                  alt={banner.title}
+                  fill
+                  priority={idx === 0}
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/20" />
+              </div>
+              <div className="relative z-10 text-center px-4 max-w-4xl">
+                <h1 className="text-white text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight drop-shadow-md mb-4">
+                  {banner.title}
+                </h1>
+                {banner.subtitle && (
+                  <p className="text-white/90 text-lg sm:text-xl md:text-2xl drop-shadow-sm mb-8">
+                    {banner.subtitle}
+                  </p>
+                )}
+                {banner.link && (
+                  <Link
+                    href={banner.link}
+                    className="inline-flex items-center justify-center px-8 py-3 bg-brand-green hover:bg-emerald-700 text-white font-bold rounded-full transition-all hover:scale-105"
+                  >
+                    Explore Now
+                  </Link>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <>
+            {/* SLIDE 1: MILLET PASTA (REPLICATION) */}
+            <div
           className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col justify-between ${
             activeSlide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
           }`}
@@ -533,6 +592,8 @@ export default function HeroSection() {
           </div>
         </div>
 
+        </>
+      )}
       </div>
 
       {/* CAROUSEL NAVIGATION CONTROLS */}
@@ -555,22 +616,20 @@ export default function HeroSection() {
       </button>
 
       {/* Carousel Slide Indicators (Dots) */}
-      <div className="absolute bottom-18 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-40 flex gap-2">
-        <button
-          onClick={() => setActiveSlide(0)}
-          className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-            activeSlide === 0 ? "w-6 bg-white shadow-sm" : "w-2 bg-white/50 hover:bg-white/80"
-          }`}
-          aria-label="Slide 1 Indicator"
-        />
-        <button
-          onClick={() => setActiveSlide(1)}
-          className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-            activeSlide === 1 ? "w-6 bg-white shadow-sm" : "w-2 bg-white/50 hover:bg-white/80"
-          }`}
-          aria-label="Slide 2 Indicator"
-        />
-      </div>
+      {totalSlides > 1 && (
+        <div className="absolute bottom-18 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-40 flex gap-2">
+          {Array.from({ length: totalSlides }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveSlide(idx)}
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                activeSlide === idx ? "w-6 bg-white shadow-sm" : "w-2 bg-white/50 hover:bg-white/80"
+              }`}
+              aria-label={`Slide ${idx + 1} Indicator`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
