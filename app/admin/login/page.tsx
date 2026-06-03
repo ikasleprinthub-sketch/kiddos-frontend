@@ -69,7 +69,17 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center p-4">
+    <>
+      {submitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/80 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-3xl flex flex-col items-center gap-5 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
+            <p className="text-emerald-900 font-bold text-lg animate-pulse">Authenticating...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="text-center mb-8">
@@ -162,5 +172,6 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </div>
+    </>
   );
 }
