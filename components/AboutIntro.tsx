@@ -40,7 +40,7 @@ export default function AboutIntro() {
             At Kiddos Foods, Our Mantra Is Simple Make Healthy Posterity.
           </h2>
 
-          <p className="text-gray-500 text-sm leading-relaxed mb-7">
+          <p className="text-gray-500 text-sm leading-relaxed mb-7 text-justify">
             We believe that the actions we take today decide the health and
             well-being of the next generation. Every product we make is created
             with this responsibility in mind especially for the little ones who
@@ -51,12 +51,12 @@ export default function AboutIntro() {
             Why Kiddos Foods?
           </h3>
 
-          <p className="text-gray-500 text-sm leading-relaxed mb-4">
+          <p className="text-gray-500 text-sm leading-relaxed mb-4 text-justify">
             Because we cook like home with love, honesty and tradition, not
             like a factory.
           </p>
 
-          <p className="text-gray-500 text-sm leading-relaxed">
+          <p className="text-gray-500 text-sm leading-relaxed text-justify">
             All products are made the way a mother would make at home with
             care, patience, and zero shortcuts.
           </p>

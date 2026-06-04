@@ -41,7 +41,7 @@ export default function ContactLocation() {
           Contact Information
         </h2>
         <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          Stop by and experience the freshness in person — we&apos;re right in the heart of Coimbatore. Feel free to contact us anytime and we will respond as quickly as possible.
+          Stop by and experience the freshness in person, we&apos;re right in the heart of Coimbatore. Feel free to contact us anytime and we will respond as quickly as possible.
         </p>
       </div>
 

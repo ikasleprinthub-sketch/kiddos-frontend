@@ -13,7 +13,7 @@ type FormState = {
   country: string;
   state: string;
   city: string;
-  zipcode: string;
+  pincode: string;
   profession: string;
   aboutBusiness: string;
   package: string;
@@ -31,7 +31,7 @@ const EMPTY: FormState = {
   country: "India",
   state: "",
   city: "",
-  zipcode: "",
+  pincode: "",
   profession: "",
   aboutBusiness: "",
   package: "",
@@ -131,9 +131,9 @@ export default function FranchiseForm() {
               <input name="city" type="text" required value={form.city} onChange={handleChange} placeholder="City" className={inputCls} />
             </div>
 
-            {/* Row 5: Zipcode | Profession | About business */}
+            {/* Row 5: Pincode | Profession | About business */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input name="zipcode" type="text" value={form.zipcode} onChange={handleChange} placeholder="Zipcode" className={inputCls} />
+              <input name="pincode" type="text" value={form.pincode} onChange={handleChange} placeholder="Pin Code" className={inputCls} />
               <input name="profession" type="text" value={form.profession} onChange={handleChange} placeholder="Profession" className={inputCls} />
               <input name="aboutBusiness" type="text" value={form.aboutBusiness} onChange={handleChange} placeholder="About your business" className={inputCls} />
             </div>

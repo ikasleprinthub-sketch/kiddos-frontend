@@ -4,19 +4,19 @@ export default function FranchiseHero() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-        
+
         {/* Left Column: Heading and Buttons */}
         <div className="space-y-8 max-w-xl">
-          
+
           <div className="space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-5.5xl font-black tracking-tight text-[#1e4620] dark:text-zinc-150 leading-tight">
               Empower Your <br className="hidden md:inline" />
               Future With Kiddos <br className="hidden md:inline" />
               Foods
             </h1>
-            
+
             <p className="text-zinc-550 dark:text-zinc-400 text-sm md:text-base leading-relaxed font-medium">
-              Become part of one of India&apos;s fastest-growing healthy food networks where tradition, nutrition, and innovation come together in every meal.
+              Become part of one of India&apos;s fastest growing healthy food networks where tradition, nutrition, and innovation come together in every meal.
             </p>
           </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { adminApi } from "@/lib/adminApi";
-import { Save, Plus, Trash2 } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface SettingItem {
   id: string;
@@ -42,16 +42,6 @@ const DEFAULT_GROUPS = [
       { key: "low_stock_email", label: "Low Stock Alert Email", type: "email" },
     ],
   },
-  {
-    group: "social",
-    label: "Social Media",
-    fields: [
-      { key: "facebook_url", label: "Facebook URL", type: "url" },
-      { key: "instagram_url", label: "Instagram URL", type: "url" },
-      { key: "twitter_url", label: "Twitter URL", type: "url" },
-      { key: "whatsapp_number", label: "WhatsApp Number", type: "text" },
-    ],
-  },
 ];
 
 export default function SettingsPage() {
@@ -60,9 +50,6 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
-  const [customKey, setCustomKey] = useState("");
-  const [customValue, setCustomValue] = useState("");
-  const [customSettings, setCustomSettings] = useState<SettingItem[]>([]);
 
   useEffect(() => {
     adminApi
@@ -71,8 +58,6 @@ export default function SettingsPage() {
         const flat: Record<string, string> = {};
         for (const s of data.settings) flat[s.key] = s.value;
         setSettings(flat);
-        const knownKeys = new Set(DEFAULT_GROUPS.flatMap((g) => g.fields.map((f) => f.key)));
-        setCustomSettings(data.settings.filter((s) => !knownKeys.has(s.key)));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -95,14 +80,6 @@ export default function SettingsPage() {
     }
   };
 
-  const addCustomSetting = async () => {
-    if (!customKey.trim() || !customValue.trim()) return;
-    await adminApi.post("/admin/settings", { key: customKey.trim(), value: customValue.trim(), group: "custom" });
-    setCustomSettings((cs) => [...cs, { id: Date.now().toString(), key: customKey, value: customValue, group: "custom" }]);
-    setCustomKey("");
-    setCustomValue("");
-  };
-
   const currentGroup = DEFAULT_GROUPS.find((g) => g.group === activeTab);
 
   return (
@@ -122,43 +99,11 @@ export default function SettingsPage() {
                 {g.label}
               </button>
             ))}
-            <button onClick={() => setActiveTab("custom")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === "custom"
-                  ? "bg-emerald-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}>
-              Custom
-            </button>
           </div>
 
           {loading ? (
             <div className="flex justify-center py-16">
               <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : activeTab === "custom" ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-              <h2 className="font-semibold text-gray-800">Custom Settings</h2>
-              <div className="space-y-2">
-                {customSettings.map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <span className="font-mono text-sm text-gray-600 flex-1">{s.key}</span>
-                    <span className="text-sm text-gray-800 flex-1 truncate">{s.value}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-3 pt-2">
-                <input value={customKey} onChange={(e) => setCustomKey(e.target.value)}
-                  placeholder="setting_key"
-                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 font-mono" />
-                <input value={customValue} onChange={(e) => setCustomValue(e.target.value)}
-                  placeholder="value"
-                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-                <button onClick={addCustomSetting}
-                  className="flex items-center gap-1 px-3 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700">
-                  <Plus size={14} /> Add
-                </button>
-              </div>
             </div>
           ) : currentGroup ? (
             <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">

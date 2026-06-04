@@ -33,7 +33,7 @@ export default function FranchiseHero() {
 
             <p className="text-white/60 text-base leading-relaxed max-w-md">
               Become part of one of India&apos;s fastest-growing healthy food
-              networks — where tradition, nutrition, and innovation come
+              networks, where tradition, nutrition, and innovation come
               together in every meal.
             </p>
 
@@ -47,13 +47,13 @@ export default function FranchiseHero() {
               </a>
             </div>
 
-          
+
           </div>
 
           {/* Right — Image, flush to bottom */}
           <div className="relative flex justify-center lg:justify-end self-end mt-auto">
-           
-         <div className="relative w-full max-w-[480px] rounded-t-3xl overflow-hidden shadow-2xl border border-white/10">
+
+            <div className="relative w-full max-w-[480px] rounded-t-3xl overflow-hidden shadow-2xl border border-white/10">
               <Image
                 src="/images/franchisis/franchisis_hero.svg"
                 alt="Kiddos Foods Franchise Outlet"

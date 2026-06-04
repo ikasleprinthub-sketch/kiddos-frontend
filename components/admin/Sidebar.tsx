@@ -20,7 +20,7 @@ const NAV = [
   { href: "/admin/banners", label: "Banners", icon: Image },
   // { href: "/admin/reports", label: "Reports", icon: BarChart2 },
   { href: "/admin/import", label: "Import", icon: Upload },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  // { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar() {
