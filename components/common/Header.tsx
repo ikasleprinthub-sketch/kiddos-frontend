@@ -31,19 +31,25 @@ export default function Header() {
   const { count: wishlistCount } = useWishlist();
 
   const initials = user
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .substring(0, 2)
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2)
     : "";
 
+  // Glassmorphism on scroll
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Lock body scroll when mobile drawer is open (fixes drawer scroll glitch)
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isMobileMenuOpen]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -67,88 +73,41 @@ export default function Header() {
       }`}
     >
       <div className="mx-auto max-w-full px-4 sm:px-8 lg:px-12">
+        {/*
+         * Single unified flex row — works at all breakpoints.
+         * Hamburger uses md:hidden so it's always in the DOM on mobile,
+         * never missing regardless of viewport width.
+         */}
+        <div className="flex items-center justify-between gap-2 md:gap-4">
 
-        {/* ── Mobile header: 3-column grid ── */}
-        <div className="grid grid-cols-3 items-center md:hidden">
-          {/* Left: hamburger */}
-          <div>
+          {/* ── Left: hamburger (mobile) + logo ── */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Hamburger — ALWAYS present in markup, hidden on md+ via md:hidden */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 focus:outline-none"
+              className="md:hidden p-2 rounded-full bg-zinc-100/60 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:text-brand-green dark:hover:text-brand-gold border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-          </div>
 
-          {/* Center: logo */}
-          <div className="flex justify-center">
-            <Link href="/" onClick={handleCloseAll}>
-              <div className="relative h-12 w-32 overflow-hidden">
+            {/* Logo — compact on mobile, full-size on desktop */}
+            <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0">
+              <div className="relative h-12 w-28 md:h-20 md:w-64 overflow-hidden">
                 <Image
                   src="/logo.svg"
                   alt="Kiddos Foods Logo"
                   fill
-                  sizes="128px"
-                  className="object-contain dark:brightness-110"
+                  sizes="(max-width: 768px) 112px, 256px"
+                  className="object-contain dark:brightness-110 md:group-hover:scale-105 transition-transform duration-200"
                   priority
                 />
               </div>
             </Link>
           </div>
 
-          {/* Right: wishlist + cart */}
-          <div className="flex items-center justify-end gap-2">
-            <Link
-              href="/wishlist"
-              onClick={handleCloseAll}
-              className="relative p-2 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200"
-              aria-label="Wishlist"
-            >
-              <Heart className="w-5 h-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border border-white dark:border-zinc-950">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
-            <Link
-              href="/cart"
-              onClick={handleCloseAll}
-              className="relative p-2 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 dark:bg-zinc-900/40 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200"
-              aria-label="Cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-[9px] font-bold text-brand-green border border-white dark:border-zinc-950">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-
-        {/* ── Desktop header: original layout, untouched ── */}
-        <div className="hidden md:flex items-center justify-between gap-4">
-
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" onClick={handleCloseAll} className="flex items-center gap-2 group">
-              <div className="relative h-20 w-64 flex items-center justify-start overflow-hidden">
-                <Image
-                  src="/logo.svg"
-                  alt="Kiddos Foods Logo"
-                  fill
-                  sizes="(max-width: 768px) 200px, 256px"
-                  className="object-contain dark:brightness-110 group-hover:scale-105 transition-transform duration-200"
-                  priority
-                />
-              </div>
-            </Link>
-          </div>
-
-          {/* Middle Navbar */}
-          <nav className="flex items-center">
+          {/* ── Center: desktop nav pill ── */}
+          <nav className="hidden md:flex items-center flex-1 justify-center">
             <div className="flex items-center gap-1 p-1 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
@@ -170,37 +129,40 @@ export default function Header() {
             </div>
           </nav>
 
-          {/* Right section */}
-          <div className="flex items-center gap-3">
+          {/* ── Right: wishlist, cart, login/profile ── */}
+          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            {/* Wishlist */}
             <Link
               href="/wishlist"
               onClick={handleCloseAll}
-              className="relative p-2.5 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 dark:hover:bg-red-950/20 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
+              className="relative p-2 md:p-2.5 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 dark:hover:bg-red-950/20 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
               aria-label="View Wishlist"
             >
               <Heart className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-red-500 text-[9px] md:text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
                   {wishlistCount}
                 </span>
               )}
             </Link>
 
+            {/* Cart */}
             <Link
               href="/cart"
               onClick={handleCloseAll}
-              className="relative p-2.5 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/80 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
+              className="relative p-2 md:p-2.5 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/80 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
               aria-label="View Cart"
             >
               <ShoppingCart className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-gold text-[10px] font-bold text-brand-green border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-brand-gold text-[9px] md:text-[10px] font-bold text-brand-green border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
                   {cartCount}
                 </span>
               )}
             </Link>
 
-            <div className="relative">
+            {/* Profile / Login — desktop only; mobile uses the drawer */}
+            <div className="relative hidden md:block">
               {isLoggedIn && user ? (
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
@@ -226,7 +188,7 @@ export default function Header() {
               {isLoggedIn && isProfileDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setIsProfileDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-2xl bg-white dark:bg-zinc-900 p-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10 z-20 focus:outline-none transition-all duration-200">
+                  <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-2xl bg-white dark:bg-zinc-900 p-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10 z-20">
                     <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
                       <p className="text-xs text-zinc-400 dark:text-zinc-500">Signed in as</p>
                       <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{user.email}</p>
@@ -258,14 +220,16 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ── Mobile navigation drawer (slides in from left) ── */}
+      {/* ── Mobile navigation drawer (left slide-in) ── */}
       {isMobileMenuOpen && (
         <>
+          {/* Backdrop */}
           <div
             className="fixed inset-0 top-[80px] bg-black/40 backdrop-blur-xs z-40 md:hidden"
             onClick={handleCloseAll}
           />
-          <div className="fixed inset-y-0 left-0 top-[80px] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl md:hidden animate-in slide-in-from-left duration-250">
+          {/* Drawer */}
+          <div className="fixed left-0 top-[80px] h-[calc(100svh-80px)] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl md:hidden overflow-y-auto animate-in slide-in-from-left duration-250">
             <div className="space-y-6">
               <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                 Navigation Menu
@@ -292,7 +256,7 @@ export default function Header() {
               </nav>
             </div>
 
-            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-6 mt-auto">
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-6 mt-6">
               {isLoggedIn && user ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
