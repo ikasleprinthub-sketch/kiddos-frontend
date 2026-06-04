@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Tag, Package, ShoppingCart, Users,
   Image, Settings, LogOut, ChevronLeft, Upload, X,
+  BookOpen, Store, MessageSquare,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
