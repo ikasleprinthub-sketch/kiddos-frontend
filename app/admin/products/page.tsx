@@ -212,6 +212,7 @@ export default function ProductsPage() {
     if (!form.name.trim()) { setError("Name is required"); return; }
     if (!form.price || isNaN(Number(form.price))) { setError("Valid price is required"); return; }
     if (!form.categoryId) { setError("Category is required"); return; }
+    if (!form.images || form.images.length === 0) { setError("At least one product image is required."); return; }
     let parsedNutrientFacts = null;
     if (form.nutrientFacts.trim()) {
       try { parsedNutrientFacts = JSON.parse(form.nutrientFacts); }
@@ -574,8 +575,10 @@ export default function ProductsPage() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={url} alt={label} className="w-full h-full object-cover" />
                             <button
-                              onClick={() => removeImage(url)}
-                              className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center shadow transition-colors"
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); removeImage(url); }}
+                              className="absolute top-2 right-2 w-7 h-7 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full text-lg flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                              title="Remove image"
                             >
                               ×
                             </button>

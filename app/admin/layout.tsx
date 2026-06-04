@@ -16,9 +16,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (isLoginPage) return;
     if (!loading && (!user || user.role !== "ADMIN")) {
-      router.replace("/admin/login");
+      window.location.href = "/admin/login?expired=true";
     }
-  }, [user, loading, router, isLoginPage]);
+  }, [user, loading, isLoginPage]);
 
   // Admin login renders without the sidebar shell
   if (isLoginPage) {
@@ -33,7 +33,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!user || user.role !== "ADMIN") return null;
+  if (!user || user.role !== "ADMIN") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 flex-col gap-4">
+        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-500 text-sm font-medium animate-pulse">Redirecting to login...</p>
+      </div>
+    );
+  }
 
   return (
     <AdminMobileProvider>

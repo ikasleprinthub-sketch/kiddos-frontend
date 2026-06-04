@@ -13,20 +13,38 @@ export default function ContactForm() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    let value = e.target.value;
+    if (e.target.type === "tel") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+    setFormData((prev) => ({ ...prev, [e.target.name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate network request
-    await new Promise((r) => setTimeout(r, 1400));
-    setLoading(false);
-    setSubmitted(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact-inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.message || `Server error (${res.status})`);
+      }
+      setSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Submission failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -109,6 +127,9 @@ export default function ContactForm() {
             placeholder="Phone Number"
             value={formData.phone}
             onChange={handleChange}
+            maxLength={10}
+            inputMode="numeric"
+            pattern="[0-9]{10}"
             className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px]"
           />
 
@@ -142,6 +163,13 @@ export default function ContactForm() {
           onChange={handleChange}
           className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px] resize-none"
         />
+
+        {/* Error */}
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            {error}
+          </p>
+        )}
 
         {/* Submit */}
         <div className="mt-2">

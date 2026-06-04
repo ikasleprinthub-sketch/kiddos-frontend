@@ -69,7 +69,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (items.length === 0) return;
-    fetch("/api/products?limit=200")
+    fetch("/api/products?limit=200", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         const list: { id: string; stock: number | null }[] = Array.isArray(data) ? data : (data.products ?? []);
@@ -110,7 +110,10 @@ export default function CartPage() {
     setCouponCode("");
   };
 
-  const hasOutOfStock = items.some((item) => (stockMap[item.id] ?? 1) === 0);
+  const hasOutOfStock = items.some((item) => {
+    const stock = stockMap[item.id];
+    return stock === 0 || (stock !== undefined && item.quantity > stock);
+  });
 
   // Cart Calculations
   const calculations = useMemo(() => {
@@ -543,7 +546,7 @@ export default function CartPage() {
             {/* ── RIGHT COLUMN: ORDER SUMMARY ── */}
             <aside className="w-full lg:w-[380px] shrink-0 space-y-6">
               {/* PROMO CODE BOX */}
-              <div className="bg-white dark:bg-zinc-900/60 rounded-3xl p-5 shadow-sm border border-zinc-250/20 dark:border-zinc-800/40">
+              {/* <div className="bg-white dark:bg-zinc-900/60 rounded-3xl p-5 shadow-sm border border-zinc-250/20 dark:border-zinc-800/40">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3.5 flex items-center gap-1.5">
                   <Tag className="w-4 h-4" />
                   <span>Promo Coupon</span>
@@ -603,7 +606,7 @@ export default function CartPage() {
                     free shipping.
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* PRICING BREAKDOWN */}
               <div className="bg-white dark:bg-zinc-900/60 rounded-3xl p-6 shadow-sm border border-zinc-250/20 dark:border-zinc-800/40">
@@ -661,11 +664,11 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {/* Out-of-stock warning */}
+                {/* Stock Warning */}
                 {hasOutOfStock && (
                   <div className="mt-4 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-400 font-medium">
                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>Some items are out of stock. Remove them before checkout.</span>
+                    <span>Some items are out of stock or exceed available quantity. Please update your cart before checkout.</span>
                   </div>
                 )}
 

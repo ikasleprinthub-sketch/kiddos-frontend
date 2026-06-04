@@ -213,13 +213,18 @@ function CheckoutInner() {
     }
   }, [orderSummary, address, couponCode, notes, clearCart]);
 
-  const field = (key: keyof ShippingAddress, label: string, placeholder: string, type = "text") => (
+  const field = (key: keyof ShippingAddress, label: string, placeholder: string, type = "text", maxLength?: number) => (
     <div>
       <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">{label}</label>
       <input
         type={type}
         value={address[key]}
-        onChange={(e) => setAddress((a) => ({ ...a, [key]: e.target.value }))}
+        onChange={(e) => {
+          let val = e.target.value;
+          if (type === "tel") val = val.replace(/\D/g, ""); // allow only digits
+          setAddress((a) => ({ ...a, [key]: val }));
+        }}
+        maxLength={maxLength}
         placeholder={placeholder}
         className={`w-full px-4 py-2.5 text-sm rounded-xl border ${
           errors[key]
@@ -444,14 +449,14 @@ function CheckoutInner() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {field("name", "Full Name *", "Your name")}
-            {field("phone", "Mobile Number *", "10-digit number", "tel")}
+            {field("phone", "Mobile Number *", "10-digit number", "tel", 10)}
           </div>
           {field("addressLine1", "Address Line 1 *", "House / Flat No., Building, Street")}
           {field("addressLine2", "Address Line 2", "Area, Landmark (optional)")}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {field("city", "City *", "Mumbai")}
             {field("state", "State *", "Maharashtra")}
-            {field("pincode", "Pincode *", "400001")}
+            {field("pincode", "Pincode *", "400001", "tel", 6)}
           </div>
 
           <div>

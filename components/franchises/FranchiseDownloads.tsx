@@ -14,7 +14,8 @@ const resources = [
     tagColor: "text-[#f05252] bg-red-50 dark:bg-red-950/30",
     title: "Explore Franchise Brochure",
     desc: "Learn about our brand values, market potential, investment slabs, store layouts, and full support systems.",
-    href: "/brochure-dummy.pdf",
+    href: "/Brochures/explorefranchise.pdf",
+    fileName: "Kiddos-Franchise-Brochure.pdf",
     btnLabel: "Download Brochure",
     btnStyle: "bg-[#f05252] hover:bg-[#e53e3e] text-white",
   },
@@ -25,7 +26,8 @@ const resources = [
     tagColor: "text-[#4285F4] bg-blue-50 dark:bg-blue-950/30",
     title: "Franchise Application Form",
     desc: "Prefer offline? Download the official form, fill the required details, and send it back to our franchise team.",
-    href: "/form-dummy.pdf",
+    href: "/Franchiseform/franchise-form.pdf",
+    fileName: "Kiddos-Franchise-Application.pdf",
     btnLabel: "Download Form",
     btnStyle: "bg-[#1e4620] hover:bg-[#2c5e2f] text-white",
   },
@@ -76,7 +78,9 @@ export default function FranchiseDownloads() {
 
               <a
                 href={r.href}
-                download
+                download={r.fileName}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:-translate-y-0.5 transition-all ${r.btnStyle}`}
               >
                 <Download className="w-4 h-4" />

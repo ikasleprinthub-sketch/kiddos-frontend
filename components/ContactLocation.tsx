@@ -2,7 +2,7 @@
 
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 
-const ADDRESS = "2/298, Bharathiyar Nagar, Pannimadal, Coimbatore‑641017";
+const ADDRESS = "2/298, Bharathiyar Nagar, Pannimadai, Coimbatore‑641017";
 const MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 
 const INFO = [
@@ -21,7 +21,7 @@ const INFO = [
   {
     icon: Clock,
     label: "Opening Hour",
-    value: "Mon – Sat: 9 AM – 7 PM",
+    value: "Mon to Sat: 9 AM to 7 PM",
     href: undefined,
   },
   {
@@ -41,7 +41,7 @@ export default function ContactLocation() {
           Contact Information
         </h2>
         <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          Stop by and experience the freshness in person, we&apos;re right in the heart of Coimbatore. Feel free to contact us anytime and we will respond as quickly as possible.
+          Stop by and experience the freshness in person — we&apos;re right in the heart of Coimbatore. Feel free to contact us anytime and we will respond as quickly as possible.
         </p>
       </div>
 
