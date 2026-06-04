@@ -88,7 +88,7 @@ export default function FeaturedProducts() {
         </div>
 
         {/* Scrollable product cards row */}
-        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-none sm:justify-center">
+        <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none sm:justify-center snap-x snap-mandatory scroll-pl-4">
           {products.map((p, idx) => {
             const price = Number(p.salePrice ?? p.price);
             const originalPrice = p.salePrice ? Number(p.price) : null;
@@ -104,7 +104,7 @@ export default function FeaturedProducts() {
             return (
               <div
                 key={p.id}
-                className="bg-white rounded-3xl shadow-sm border border-zinc-100/80 p-5 flex flex-col min-w-[230px] w-[230px] shrink-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                className="bg-white rounded-3xl shadow-sm border border-zinc-100/80 p-5 flex flex-col min-w-[200px] w-[200px] sm:min-w-[230px] sm:w-[230px] shrink-0 snap-start hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               >
                 {/* Image area */}
                 <div className="relative mb-4 overflow-hidden rounded-2xl bg-zinc-50 border border-zinc-100/50">

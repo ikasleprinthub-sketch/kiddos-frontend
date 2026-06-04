@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  ShoppingCart, 
-  User, 
-  Menu, 
-  X, 
-  ChevronDown, 
-  LogOut, 
-  ShoppingBag, 
-  Settings, 
+import {
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+  ChevronDown,
+  LogOut,
+  ShoppingBag,
+  Settings,
   Heart,
-  Compass
+  Compass,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -39,15 +39,8 @@ export default function Header() {
         .substring(0, 2)
     : "";
 
-  // Handle scroll detection for glassmorphism effect transition
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -74,9 +67,71 @@ export default function Header() {
       }`}
     >
       <div className="mx-auto max-w-full px-4 sm:px-8 lg:px-12">
-        <div className="flex items-center justify-between gap-4">
-          
-          {/* Logo Section */}
+
+        {/* ── Mobile header: 3-column grid ── */}
+        <div className="grid grid-cols-3 items-center md:hidden">
+          {/* Left: hamburger */}
+          <div>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 focus:outline-none"
+              aria-label="Toggle Navigation Menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Center: logo */}
+          <div className="flex justify-center">
+            <Link href="/" onClick={handleCloseAll}>
+              <div className="relative h-12 w-32 overflow-hidden">
+                <Image
+                  src="/logo.svg"
+                  alt="Kiddos Foods Logo"
+                  fill
+                  sizes="128px"
+                  className="object-contain dark:brightness-110"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
+
+          {/* Right: wishlist + cart */}
+          <div className="flex items-center justify-end gap-2">
+            <Link
+              href="/wishlist"
+              onClick={handleCloseAll}
+              className="relative p-2 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200"
+              aria-label="Wishlist"
+            >
+              <Heart className="w-5 h-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border border-white dark:border-zinc-950">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+            <Link
+              href="/cart"
+              onClick={handleCloseAll}
+              className="relative p-2 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 dark:bg-zinc-900/40 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200"
+              aria-label="Cart"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-[9px] font-bold text-brand-green border border-white dark:border-zinc-950">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Desktop header: original layout, untouched ── */}
+        <div className="hidden md:flex items-center justify-between gap-4">
+
+          {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" onClick={handleCloseAll} className="flex items-center gap-2 group">
               <div className="relative h-20 w-64 flex items-center justify-start overflow-hidden">
@@ -92,8 +147,8 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Middle Navbar - Card / Pill Styled Menu */}
-          <nav className="hidden md:flex items-center">
+          {/* Middle Navbar */}
+          <nav className="flex items-center">
             <div className="flex items-center gap-1 p-1 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
@@ -115,10 +170,8 @@ export default function Header() {
             </div>
           </nav>
 
-          {/* Right Section - Cart & Profile/Login */}
+          {/* Right section */}
           <div className="flex items-center gap-3">
-            
-            {/* Wishlist Button */}
             <Link
               href="/wishlist"
               onClick={handleCloseAll}
@@ -133,7 +186,6 @@ export default function Header() {
               )}
             </Link>
 
-            {/* Cart Button */}
             <Link
               href="/cart"
               onClick={handleCloseAll}
@@ -148,10 +200,8 @@ export default function Header() {
               )}
             </Link>
 
-            {/* Profile / Login Section */}
             <div className="relative">
               {isLoggedIn && user ? (
-                // Logged In Dropdown Trigger
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                   className="flex items-center gap-2 p-1.5 pr-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/80 dark:bg-zinc-900/50 rounded-full border border-zinc-200/30 dark:border-zinc-800/30 hover:shadow-md transition-all duration-200 focus:outline-none"
@@ -163,102 +213,59 @@ export default function Header() {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
-                // Login Buttons
-                <div className="flex items-center gap-2">
-                  <Link
-                    href="/login"
-                    onClick={handleCloseAll}
-                    className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <User className="w-4 h-4" />
-                    <span>Login</span>
-                  </Link>
-                </div>
+                <Link
+                  href="/login"
+                  onClick={handleCloseAll}
+                  className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Login</span>
+                </Link>
               )}
 
-              {/* Profile Dropdown Menu */}
               {isLoggedIn && isProfileDropdownOpen && (
                 <>
-                  {/* Backdrop overlay to close dropdown */}
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setIsProfileDropdownOpen(false)}
-                  />
+                  <div className="fixed inset-0 z-10" onClick={() => setIsProfileDropdownOpen(false)} />
                   <div className="absolute right-0 mt-2.5 w-56 origin-top-right rounded-2xl bg-white dark:bg-zinc-900 p-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10 z-20 focus:outline-none transition-all duration-200">
                     <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
                       <p className="text-xs text-zinc-400 dark:text-zinc-500">Signed in as</p>
                       <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{user.email}</p>
                     </div>
                     <div className="mt-1 space-y-0.5">
-                      <Link
-                        href="/profile"
-                        onClick={handleCloseAll}
-                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
-                      >
-                        <User className="w-4.5 h-4.5 text-zinc-400" />
-                        <span>My Profile</span>
+                      <Link href="/profile" onClick={handleCloseAll} className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                        <User className="w-4 h-4 text-zinc-400" /><span>My Profile</span>
                       </Link>
-                      <Link
-                        href="/orders"
-                        onClick={handleCloseAll}
-                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
-                      >
-                        <ShoppingBag className="w-4.5 h-4.5 text-zinc-400" />
-                        <span>My Orders</span>
+                      <Link href="/orders" onClick={handleCloseAll} className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                        <ShoppingBag className="w-4 h-4 text-zinc-400" /><span>My Orders</span>
                       </Link>
-                      <Link
-                        href="/settings"
-                        onClick={handleCloseAll}
-                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
-                      >
-                        <Settings className="w-4.5 h-4.5 text-zinc-400" />
-                        <span>Settings</span>
+                      <Link href="/settings" onClick={handleCloseAll} className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                        <Settings className="w-4 h-4 text-zinc-400" /><span>Settings</span>
                       </Link>
                     </div>
                     <div className="border-t border-zinc-100 dark:border-zinc-800 mt-1 pt-1">
                       <button
-                        onClick={async () => {
-                          await logout();
-                          handleCloseAll();
-                        }}
+                        onClick={async () => { await logout(); handleCloseAll(); }}
                         className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors text-left"
                       >
-                        <LogOut className="w-4.5 h-4.5" />
-                        <span>Sign Out</span>
+                        <LogOut className="w-4 h-4" /><span>Sign Out</span>
                       </button>
                     </div>
                   </div>
                 </>
               )}
             </div>
-
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2.5 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/80 rounded-full border border-zinc-200/20 dark:border-zinc-850 md:hidden transition-all duration-200 focus:outline-none"
-              aria-label="Toggle Navigation Menu"
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
-
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer Overlay */}
+      {/* ── Mobile navigation drawer (slides in from left) ── */}
       {isMobileMenuOpen && (
         <>
-          {/* Drawer Backdrop */}
-          <div 
-            className="fixed inset-0 top-[77px] bg-black/40 backdrop-blur-xs z-40 md:hidden"
+          <div
+            className="fixed inset-0 top-[80px] bg-black/40 backdrop-blur-xs z-40 md:hidden"
             onClick={handleCloseAll}
           />
-          {/* Drawer Menu */}
-          <div className="fixed inset-y-0 right-0 top-[77px] w-full max-w-sm bg-white dark:bg-zinc-950 border-l border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl md:hidden animate-in slide-in-from-right duration-250">
+          <div className="fixed inset-y-0 left-0 top-[80px] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl md:hidden animate-in slide-in-from-left duration-250">
             <div className="space-y-6">
               <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                 Navigation Menu
@@ -303,32 +310,24 @@ export default function Header() {
                       onClick={handleCloseAll}
                       className="flex items-center justify-center gap-2 p-3 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/80 rounded-2xl transition-colors"
                     >
-                      <User className="w-4 h-4" />
-                      <span>Profile</span>
+                      <User className="w-4 h-4" /><span>Profile</span>
                     </Link>
                     <button
-                      onClick={async () => {
-                        await logout();
-                        handleCloseAll();
-                      }}
+                      onClick={async () => { await logout(); handleCloseAll(); }}
                       className="flex items-center justify-center gap-2 p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 rounded-2xl transition-colors"
                     >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
+                      <LogOut className="w-4 h-4" /><span>Sign Out</span>
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2.5">
-                  <Link
-                    href="/login"
-                    onClick={handleCloseAll}
-                    className="flex items-center justify-center gap-2 w-full py-3.5 px-4 text-base font-semibold text-white bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl shadow-md transition-all duration-200"
-                  >
-                    <User className="w-5 h-5" />
-                    <span>Login / Sign Up</span>
-                  </Link>
-                </div>
+                <Link
+                  href="/login"
+                  onClick={handleCloseAll}
+                  className="flex items-center justify-center gap-2 w-full py-3.5 px-4 text-base font-semibold text-white bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl shadow-md transition-all duration-200"
+                >
+                  <User className="w-5 h-5" /><span>Login / Sign Up</span>
+                </Link>
               )}
             </div>
           </div>

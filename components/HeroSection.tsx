@@ -144,7 +144,7 @@ const batterPackages = [
 
 function PastaPacket({ name, subName, color, borderColor, textColor, bgColor, vegIcon }: any) {
   return (
-    <div className="group relative flex flex-col items-center w-[14.5%] min-w-[85px] max-w-[130px] aspect-[1/2.05] transition-all duration-500 hover:-translate-y-5 hover:scale-105 z-10 cursor-pointer">
+    <div className="group relative flex flex-col items-center w-[14.5%] min-w-[52px] sm:min-w-[85px] max-w-[130px] aspect-[1/2.05] transition-all duration-500 hover:-translate-y-5 hover:scale-105 z-10 cursor-pointer">
       {/* 3D Drop Shadow on the Table */}
       <div className="absolute -bottom-1.5 left-2 right-2 h-2.5 bg-black/30 blur-md rounded-full scale-x-90 opacity-80 group-hover:scale-x-105 group-hover:opacity-50 transition-all duration-500" />
       
@@ -218,7 +218,7 @@ function PastaPacket({ name, subName, color, borderColor, textColor, bgColor, ve
 
 function BatterPacket({ name, color, textColor, bgColor, grainIcon }: any) {
   return (
-    <div className="group relative flex flex-col items-center w-[20%] min-w-[100px] max-w-[155px] aspect-[1/1.3] transition-all duration-500 hover:-translate-y-5 hover:scale-105 z-10 cursor-pointer">
+    <div className="group relative flex flex-col items-center w-[20%] min-w-[68px] sm:min-w-[100px] max-w-[155px] aspect-[1/1.3] transition-all duration-500 hover:-translate-y-5 hover:scale-105 z-10 cursor-pointer">
       {/* 3D Drop Shadow on the Table */}
       <div className="absolute -bottom-1.5 left-2 right-2 h-2.5 bg-black/35 blur-md rounded-full scale-x-90 opacity-80 group-hover:scale-x-105 group-hover:opacity-50 transition-all duration-500" />
       
@@ -417,7 +417,7 @@ export default function HeroSection() {
           </div>
 
           {/* Pasta Packets standing on the table */}
-          <div className="relative z-10 w-full px-[8%] pb-[5.5%] flex items-end justify-center gap-1.5 sm:gap-2.5 md:gap-3.5">
+          <div className="relative z-10 w-full px-[2%] sm:px-[8%] pb-[5.5%] flex items-end justify-center gap-1 sm:gap-2.5 md:gap-3.5">
             {pastaPackages.map((pkg, idx) => (
               <PastaPacket key={idx} {...pkg} />
             ))}
@@ -426,7 +426,7 @@ export default function HeroSection() {
           {/* Floating Ingredients */}
           <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
             {/* Left Floating Carrot */}
-            <div className="absolute left-[3%] top-[30%] w-[12%] max-w-[130px] aspect-square pointer-events-auto cursor-pointer animate-float-slow group transition-all duration-300">
+            <div className="hidden sm:block absolute left-[3%] top-[30%] w-[12%] max-w-[130px] aspect-square pointer-events-auto cursor-pointer animate-float-slow group transition-all duration-300">
               <Image
                 src="/images/carrot.png"
                 alt="Floating carrot"
@@ -438,7 +438,7 @@ export default function HeroSection() {
             </div>
             
             {/* Top Left Beetroot Slice */}
-            <div className="absolute left-[2%] top-[8%] w-[6%] max-w-[65px] aspect-square pointer-events-auto cursor-pointer animate-float-fast group transition-all duration-300">
+            <div className="hidden sm:block absolute left-[2%] top-[8%] w-[6%] max-w-[65px] aspect-square pointer-events-auto cursor-pointer animate-float-fast group transition-all duration-300">
               <Image
                 src="/images/beetroot.png"
                 alt="Floating beetroot slice"
@@ -486,7 +486,7 @@ export default function HeroSection() {
             </div>
 
             {/* Right Floating Beetroot Slice */}
-            <div className="absolute right-[19%] top-[28%] w-[6.5%] max-w-[70px] aspect-square pointer-events-auto cursor-pointer animate-float-medium group transition-all duration-300">
+            <div className="hidden sm:block absolute right-[19%] top-[28%] w-[6.5%] max-w-[70px] aspect-square pointer-events-auto cursor-pointer animate-float-medium group transition-all duration-300">
               <Image
                 src="/images/beetroot.png"
                 alt="Floating beetroot slice"
@@ -523,10 +523,10 @@ export default function HeroSection() {
           </div>
 
           {/* Shop Now Button sitting on the table */}
-          <div className="absolute bottom-[2%] left-1/2 transform -translate-x-1/2 z-30 select-none">
+          <div className="absolute bottom-[3%] sm:bottom-[2%] left-1/2 transform -translate-x-1/2 z-30 select-none">
             <Link
               href="/category/millet-based"
-              className="inline-flex items-center justify-center px-10 py-2.5 bg-[#1b431c] hover:bg-[#255b27] text-white font-bold text-sm sm:text-base rounded-full shadow-[0_4px_14px_rgba(27,67,28,0.4)] border border-emerald-800 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_6px_20px_rgba(27,67,28,0.55)] cursor-pointer"
+              className="inline-flex items-center justify-center px-6 sm:px-10 py-2 sm:py-2.5 bg-[#1b431c] hover:bg-[#255b27] text-white font-bold text-sm sm:text-base rounded-full shadow-[0_4px_14px_rgba(27,67,28,0.4)] border border-emerald-800 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_6px_20px_rgba(27,67,28,0.55)] cursor-pointer"
             >
               Shop Now
             </Link>
@@ -562,15 +562,14 @@ export default function HeroSection() {
           </div>
 
           {/* Batter Packets standing on the table */}
-          <div className="relative z-10 w-full px-[15%] pb-[6%] flex items-end justify-center gap-3.5 sm:gap-5 md:gap-7">
+          <div className="relative z-10 w-full px-[3%] sm:px-[15%] pb-[6%] flex items-end justify-center gap-2 sm:gap-5 md:gap-7">
             {batterPackages.map((pkg, idx) => (
               <BatterPacket key={idx} {...pkg} />
             ))}
           </div>
 
-          {/* Floating Ingredients for Batter Slide */}
-          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
-            {/* Floating grains or items */}
+          {/* Floating Ingredients for Batter Slide — hidden on mobile to keep it clean */}
+          <div className="hidden sm:block absolute inset-0 z-20 pointer-events-none overflow-hidden">
             <div className="absolute left-[6%] top-[30%] w-[5%] aspect-square pointer-events-auto cursor-pointer animate-float-slow group">
               <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center shadow-md border border-amber-200 text-amber-700 font-bold group-hover:scale-110 transition-transform">
                 🌾
@@ -588,11 +587,11 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Shop Now Button sitting on the table */}
-          <div className="absolute bottom-[2%] left-1/2 transform -translate-x-1/2 z-30 select-none">
+          {/* Explore Batters Button */}
+          <div className="absolute bottom-[3%] sm:bottom-[2%] left-1/2 transform -translate-x-1/2 z-30 select-none">
             <Link
               href="/category/batter"
-              className="inline-flex items-center justify-center px-10 py-2.5 bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-sm sm:text-base rounded-full shadow-[0_4px_14px_rgba(249,115,22,0.4)] border border-orange-500 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_6px_20px_rgba(249,115,22,0.55)] cursor-pointer"
+              className="inline-flex items-center justify-center px-6 sm:px-10 py-2 sm:py-2.5 bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-sm sm:text-base rounded-full shadow-[0_4px_14px_rgba(249,115,22,0.4)] border border-orange-500 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_6px_20px_rgba(249,115,22,0.55)] cursor-pointer"
             >
               Explore Batters
             </Link>
