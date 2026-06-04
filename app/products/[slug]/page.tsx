@@ -316,7 +316,7 @@ export default function ProductDetailPage() {
                 <span className="text-xl">📖</span>
                 <div>
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Free Recipe</p>
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale · View & enjoy for free</p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale. View and enjoy for free</p>
                 </div>
               </div>
             )}

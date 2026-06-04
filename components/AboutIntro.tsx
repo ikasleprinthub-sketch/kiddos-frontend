@@ -33,7 +33,7 @@ export default function AboutIntro() {
         {/* ── Right: text content ── */}
         <div className="w-full lg:w-[45%] max-w-lg">
           <p className="text-gray-400 text-sm mb-3 tracking-wide">
-            About Us – Kiddos Foods
+            About Us
           </p>
 
           <h2 className="text-gray-900 font-extrabold text-2xl lg:text-3xl leading-snug mb-5">

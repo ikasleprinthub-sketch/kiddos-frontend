@@ -397,7 +397,7 @@ function ProductsPageContent() {
               <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">Price</h3>
               <div className="space-y-4">
                 <div className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium tracking-wide">
-                  ₹{minPrice} – ₹{maxPrice === DEFAULT_MAX_PRICE ? `${maxSliderValue}+` : maxPrice}
+                  ₹{minPrice} to ₹{maxPrice === DEFAULT_MAX_PRICE ? `${maxSliderValue}+` : maxPrice}
                 </div>
 
                 {/* Dual-range track */}
@@ -922,7 +922,7 @@ function ProductsPageContent() {
                     <span className="text-xl">📖</span>
                     <div>
                       <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Free Recipe</p>
-                      <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale · View & enjoy for free</p>
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale. View and enjoy for free</p>
                     </div>
                   </div>
                 ) : (

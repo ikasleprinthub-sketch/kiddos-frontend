@@ -58,7 +58,7 @@ export default function Footer() {
             </div>
             <p className="text-white/80 text-sm leading-relaxed">
               Bringing Amma&apos;s love to your plate with <strong>20 unique dosa batters</strong>.
-              Pure, traditional, and irresistibly delicious – that&apos;s Kiddos Foods.
+              Pure, traditional, and irresistibly delicious. That&apos;s Kiddos Foods.
             </p>
             {/* Social Icons */}
             <div className="flex gap-3 mt-1">

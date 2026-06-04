@@ -33,7 +33,7 @@ export default function FranchiseHero() {
 
             <p className="text-white/60 text-base leading-relaxed max-w-md">
               Become part of one of India&apos;s fastest-growing healthy food
-              networks — where tradition, nutrition, and innovation come
+              networks where tradition, nutrition, and innovation come
               together in every meal.
             </p>
 

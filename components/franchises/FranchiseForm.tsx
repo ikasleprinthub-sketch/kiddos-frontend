@@ -178,8 +178,8 @@ export default function FranchiseForm() {
                 <select name="readyToStart" required value={form.readyToStart} onChange={handleChange} className={selectCls}>
                   <option value="" disabled>Ready To Start</option>
                   <option value="immediately">Immediately</option>
-                  <option value="1-3-months">Within 1–3 Months</option>
-                  <option value="3-6-months">Within 3–6 Months</option>
+                  <option value="1-3-months">Within 1 to 3 Months</option>
+                  <option value="3-6-months">Within 3 to 6 Months</option>
                   <option value="6-plus-months">6+ Months</option>
                 </select>
                 <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">

@@ -9,7 +9,7 @@ export default function FranchiseExcellence() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <p className="text-[#f97316] text-xs font-bold tracking-widest uppercase mb-3">
-              Real Outlets · Real Growth
+              Real Outlets  Real Growth
             </p>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-tight">
               Experience The Kiddos<br />Foods Excellence
@@ -37,7 +37,7 @@ export default function FranchiseExcellence() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5">
               <span className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-bold border border-white/30">
-                Model Outlet — Coimbatore
+                Model Outlet, Coimbatore
               </span>
             </div>
           </div>

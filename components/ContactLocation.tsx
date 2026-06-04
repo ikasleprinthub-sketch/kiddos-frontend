@@ -21,7 +21,7 @@ const INFO = [
   {
     icon: Clock,
     label: "Opening Hour",
-    value: "Mon – Sat: 9 AM – 7 PM",
+    value: "Mon to Sat: 9 AM to 7 PM",
     href: undefined,
   },
   {
