@@ -141,7 +141,7 @@ export default function Footer() {
                   <circle cx="12" cy="10" r="3" />
                 </svg>
                 <span className="text-white/80 text-sm leading-relaxed">
-                  2/298, Bharathiyar Nagar, Pannimadai, Coimbatore‑641017
+                  2/298, Bharathiyar Nagar, Pannimadai, Coimbatore-641017
                 </span>
               </li>
               <li className="flex items-center gap-3">

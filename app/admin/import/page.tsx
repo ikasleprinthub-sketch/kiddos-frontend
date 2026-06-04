@@ -182,7 +182,7 @@ export default function ImportPage() {
           isFeatured: false,
           images: [],
           tags: [row.category.toLowerCase(), row.name.toLowerCase()],
-          description: `${row.name} — ${row.weight} | Category: ${row.category} | SKU: ${row.code}`,
+          description: `${row.name}, ${row.weight} | Category: ${row.category} | SKU: ${row.code}`,
         });
 
         res.push({ code: row.code, name: row.name, status: "ok" });
@@ -275,7 +275,7 @@ export default function ImportPage() {
               >
                 <Eye size={16} /> Preview Data
               </button>
-              <p className="text-xs text-gray-400">Prices can be left blank — you can set them in the next step.</p>
+              <p className="text-xs text-gray-400">Prices can be left blank. You can set them in the next step.</p>
             </div>
           </div>
         )}
@@ -440,7 +440,7 @@ export default function ImportPage() {
                   }
                   <span className="font-mono text-xs text-gray-500 w-24 shrink-0">{r.code}</span>
                   <span className="text-gray-700 truncate">{r.name}</span>
-                  {r.message && <span className="text-red-500 text-xs shrink-0">— {r.message}</span>}
+                  {r.message && <span className="text-red-500 text-xs shrink-0">: {r.message}</span>}
                 </div>
               ))}
             </div>
@@ -457,7 +457,7 @@ export default function ImportPage() {
               }
               <div>
                 <p className="font-semibold text-gray-800 text-base">
-                  Import complete — {successCount} succeeded, {errorCount} failed
+                  Import complete: {successCount} succeeded, {errorCount} failed
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   {errorCount > 0

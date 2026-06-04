@@ -469,7 +469,7 @@ export default function CartPage() {
                       {outOfStock ? (
                         <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400">
                           <AlertCircle className="w-3 h-3" />
-                          Out of Stock — please remove
+                          Out of Stock, please remove
                         </span>
                       ) : lowStock ? (
                         <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
