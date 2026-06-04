@@ -86,6 +86,7 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [chutneyBooks, setChutneyBooks] = useState<ApiProduct[]>([]);
 
   useEffect(() => {
     if (!slug) return;
@@ -106,6 +107,20 @@ export default function ProductDetailPage() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  // Fetch chutney books when viewing a batter product
+  useEffect(() => {
+    if (!product) return;
+    const catSlug = product.category?.slug ?? "";
+    if (!["batter", "batters"].includes(catSlug)) return;
+    fetch("/api/products?category=chutney-book&limit=10")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
+        setChutneyBooks(list);
+      })
+      .catch(() => {/* ignore */});
+  }, [product]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -181,6 +196,7 @@ export default function ProductDetailPage() {
   }
 
   const catSlug = product.category?.slug ?? "";
+  const isRecipe = catSlug === "chutney-book";
   const emoji = CATEGORY_EMOJIS[catSlug] ?? FALLBACK_EMOJIS[0];
   const gradient = CATEGORY_GRADIENTS[catSlug] ?? FALLBACK_GRADIENTS[0];
   const hasSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);
@@ -209,7 +225,7 @@ export default function ProductDetailPage() {
 
           {/* ── LEFT: Product Visual ── */}
           <div className="sticky top-24 space-y-3">
-            <div className={`relative aspect-square rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden shadow-lg border border-white/30`}>
+            <div className={`relative ${isRecipe ? "aspect-[3/4]" : "aspect-square"} rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden shadow-lg border border-white/30`}>
               <div className="absolute inset-0 plastic-sheen opacity-50" />
               {activeImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -279,21 +295,34 @@ export default function ProductDetailPage() {
 
 
 
-            {/* Price */}
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-black text-zinc-800 dark:text-zinc-100">₹{price}</span>
-              {originalPrice && (
-                <>
-                  <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">₹{originalPrice}</span>
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    ({discount}% off, save ₹{originalPrice - price})
-                  </span>
-                </>
-              )}
-            </div>
+            {/* Price — hidden for recipe pages */}
+            {!isRecipe && (
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-black text-zinc-800 dark:text-zinc-100">₹{price}</span>
+                {originalPrice && (
+                  <>
+                    <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">₹{originalPrice}</span>
+                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      ({discount}% off, save ₹{originalPrice - price})
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
 
-            {/* Net Weight chip */}
-            {weight && (
+            {/* Free Recipe badge — shown only for chutney-book */}
+            {isRecipe && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <span className="text-xl">📖</span>
+                <div>
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Free Recipe</p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale · View & enjoy for free</p>
+                </div>
+              </div>
+            )}
+
+            {/* Net Weight chip — hidden for recipe pages */}
+            {!isRecipe && weight && (
               <div>
                 <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Net Weight</p>
                 <span className="inline-flex items-center gap-1.5 bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
@@ -324,8 +353,8 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* Quantity + Add to Cart */}
-            <div className="flex items-center gap-3 pt-1">
+            {/* Quantity + Add to Cart — hidden for recipe pages */}
+            {!isRecipe && <div className="flex items-center gap-3 pt-1">
               <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200/40 dark:border-zinc-700/40">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -362,7 +391,7 @@ export default function ProductDetailPage() {
                   <><ShoppingBag className="w-4 h-4" /><span>Add {qty > 1 ? `${qty}×` : ""} to Cart</span></>
                 )}
               </button>
-            </div>
+            </div>}
 
             {/* Share On */}
             <div className="flex items-center gap-3 pt-1 border-t border-zinc-100 dark:border-zinc-800">
@@ -402,20 +431,22 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4">
-              {[
-                { icon: Shield, label: "100% Safe", sub: "Quality assured" },
-                { icon: Truck, label: "Fast Delivery", sub: "2–4 business days" },
-                { icon: RefreshCcw, label: "Easy Returns", sub: "7-day returns" },
-              ].map(({ icon: Icon, label, sub }) => (
-                <div key={label} className="flex flex-col items-center text-center gap-1 py-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
-                  <Icon className="w-5 h-5 text-brand-green dark:text-brand-gold" />
-                  <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">{label}</span>
-                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{sub}</span>
-                </div>
-              ))}
-            </div>
+            {/* Trust badges — hidden for recipe pages */}
+            {!isRecipe && (
+              <div className="grid grid-cols-3 gap-3 border-t border-zinc-100 dark:border-zinc-800 pt-4">
+                {[
+                  { icon: Shield, label: "100% Safe", sub: "Quality assured" },
+                  { icon: Truck, label: "Fast Delivery", sub: "2–4 business days" },
+                  { icon: RefreshCcw, label: "Easy Returns", sub: "7-day returns" },
+                ].map(({ icon: Icon, label, sub }) => (
+                  <div key={label} className="flex flex-col items-center text-center gap-1 py-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800">
+                    <Icon className="w-5 h-5 text-brand-green dark:text-brand-gold" />
+                    <span className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">{label}</span>
+                    <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{sub}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* ── Accordion Sections ── */}
             <div className="space-y-3 pt-2">
@@ -459,6 +490,60 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Recommended Chutney Book (batter products only) ── */}
+      {chutneyBooks.length > 0 && (
+        <section className="mt-16 max-w-5xl mx-auto">
+          <h2 className="text-xl font-black text-zinc-800 dark:text-zinc-100 mb-6 relative inline-block">
+            Recommended Chutney Book
+            <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-brand-green dark:bg-brand-gold rounded-full" />
+          </h2>
+          <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {chutneyBooks.map((book) => {
+              const img = book.images?.find((i) => i.isPrimary)?.url ?? book.images?.[0]?.url;
+              return (
+                <div
+                  key={book.id}
+                  className="flex-none w-52 snap-start bg-white dark:bg-zinc-900 rounded-2xl shadow-md border border-zinc-100 dark:border-zinc-800 overflow-hidden flex flex-col"
+                >
+                  {/* Cover image */}
+                  <div className="w-full aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={img}
+                        alt={book.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">📖</div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-3 flex flex-col flex-1 gap-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                      Kiddos Foods
+                    </p>
+                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2">
+                      {book.name}
+                    </p>
+                    <div className="mt-auto pt-2">
+                      <Link
+                        href={`/products/${book.slug}`}
+                        className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-brand-green dark:bg-brand-gold text-white dark:text-brand-green text-xs font-bold hover:opacity-90 transition-opacity"
+                      >
+                        View Recipes
+                        <span className="text-base leading-none">›</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

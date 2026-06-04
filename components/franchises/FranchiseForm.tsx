@@ -53,15 +53,35 @@ export default function FranchiseForm() {
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    let value = e.target.value;
+    if (e.target.type === "tel") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+    setForm((prev) => ({ ...prev, [e.target.name]: value }));
   }
+
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    setError("");
+    try {
+      const res = await fetch("/api/franchise-inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.message || `Server error (${res.status})`);
+      }
+      setIsSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Submission failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -114,8 +134,8 @@ export default function FranchiseForm() {
 
             {/* Row 2: Mobile | Alternate */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input name="mobile" type="tel" required value={form.mobile} onChange={handleChange} placeholder="Mobile Number" className={inputCls} />
-              <input name="alternate" type="tel" value={form.alternate} onChange={handleChange} placeholder="Alternate Number" className={inputCls} />
+              <input name="mobile" type="tel" required value={form.mobile} onChange={handleChange} placeholder="Mobile Number" maxLength={10} inputMode="numeric" pattern="[0-9]{10}" className={inputCls} />
+              <input name="alternate" type="tel" value={form.alternate} onChange={handleChange} placeholder="Alternate Number" maxLength={10} inputMode="numeric" pattern="[0-9]{10}" className={inputCls} />
             </div>
 
             {/* Row 3: Preferred Location | How did you hear */}
@@ -179,6 +199,13 @@ export default function FranchiseForm() {
               placeholder="Message"
               className={`${inputCls} resize-y`}
             />
+
+            {/* Error */}
+            {error && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                {error}
+              </p>
+            )}
 
             {/* Submit */}
             <div className="pt-2">

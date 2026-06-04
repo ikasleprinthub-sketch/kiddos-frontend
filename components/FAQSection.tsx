@@ -12,7 +12,7 @@ interface FAQ {
 const faqs: FAQ[] = [
   {
     question: "What is Kiddos Foods?",
-    answer: "Kiddos Foods is a premium brand bringing Amma's love to your plate with pure, traditional, and irresistibly delicious South Indian foods. We focus on health, taste, and quality.",
+    answer: "Kiddos Foods is a company dedicated to making healthy, traditional, and authentic food products, with a core mission to \"Make healthy posterity\" by ensuring the health and well-being of future generations.",
   },
   {
     question: "What types of products does Kiddos Foods sell?",
@@ -20,28 +20,28 @@ const faqs: FAQ[] = [
   },
   {
     question: "Are your batters genuinely home-made and traditional?",
-    answer: "Yes, our batters are made using traditional stone-grinding methods and authentic recipes passed down through generations to ensure the perfect homemade taste.",
+    answer: "Yes, our products are 100% Home-Made and follow \"Amma's Receipe\" (recipe) for an authentic, traditional taste, just like a mother's touch. They are made with love and ensure premium quality.",
   },
   {
     question: "What makes Kiddos Foods products healthy for my family and kids?",
-    answer: "We carefully select the highest quality ingredients, use traditional preparation methods that preserve nutrients, and never compromise on hygiene and food safety standards.",
+    answer: "Our products are made with Pure Ingredients, are Protein-Rich, Healthy & Nutritious, and are Easily Digestible. We also strictly follow the policy of: No Preservatives, No Added Colors, No Artificial Flavors, Zero Additives, and No Sugar/Rising Agents.",
   },
   {
     question: "Do you use any artificial additives or preservatives?",
-    answer: "Absolutely not. All our products are 100% natural. We do not use any artificial colors, flavors, additives, or preservatives in any of our foods.",
+    answer: "Absolutely not. We promise: No Preservatives, No Added Colours, No Artificial Flavors, Zero Additives, and No Sugar/Rising Agents. We ensure a 100% Natural and safe product for your kids.",
   },
   {
     question: "How can I purchase or contact Kiddos Foods?",
-    answer: "You can purchase directly through this website, or find us in select retail stores. If you need assistance, please use the Contact Us page to get in touch with our team.",
+    answer: "You can contact us at +91 78459 45455 or email care@kiddosfoods.com. Our location is at 2/298, Bharathiyar Nagar, Pannimadai, Coimbatore-641017. You can also find us on social media: @kiddosfoodskovai",
   },
   {
     question: "How many varieties of batter do you offer?",
-    answer: "We offer 20 unique varieties of dosa and idli batter, including classic, millet-based, and specialty healthy options tailored for kids and adults alike.",
+    answer: "We offer 20 types of Idli and Dosa batter to provide a wide range of healthy meal options.",
   },
 ];
 
 export default function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(1); // Open the second one by default
+  const [openIndex, setOpenIndex] = useState<number | null>(null); // All closed by default
 
   const toggleOpen = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);

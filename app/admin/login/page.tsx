@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { Leaf, Eye, EyeOff, ShieldAlert } from "lucide-react";
+import { Eye, EyeOff, ShieldAlert } from "lucide-react";
 
 export default function AdminLoginPage() {
   const { user, loading, login } = useAuth();
-  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,9 +16,16 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (!loading && user?.role === "ADMIN") {
-      router.replace("/admin");
+      window.location.href = "/admin";
     }
-  }, [user, loading, router]);
+  }, [user, loading]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
+      setError("Your session has expired. Please sign in again.");
+      window.history.replaceState({}, document.title, "/admin/login");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,60 +40,54 @@ export default function AdminLoginPage() {
     try {
       const result = await login(email.trim(), password);
 
-      if (!result.success) {
+      if (!result.success || !result.user) {
         setError(result.message || "Invalid credentials.");
+        setSubmitting(false);
         return;
       }
 
-      const meRes = await fetch("/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (meRes.ok) {
-        const { user: me } = await meRes.json();
-        if (me.role !== "ADMIN") {
-          localStorage.removeItem("token");
-          setError("Access denied. This panel is for administrators only.");
-          return;
-        }
+      if (result.user.role !== "ADMIN") {
+        localStorage.removeItem("token");
+        setError("Access denied. This panel is for administrators only.");
+        setSubmitting(false);
+        return;
       }
 
-      router.replace("/admin");
-    } finally {
+      window.location.href = "/admin";
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred. Please try again.");
       setSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (loading || (user && user.role === "ADMIN")) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex h-screen items-center justify-center bg-emerald-950">
+        <div className="bg-white p-8 rounded-3xl flex flex-col items-center gap-5 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
+          <p className="text-emerald-900 font-bold text-lg animate-pulse">Redirecting to Dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
-      {submitting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/80 backdrop-blur-sm">
-          <div className="bg-white p-8 rounded-3xl flex flex-col items-center gap-5 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
-            <p className="text-emerald-900 font-bold text-lg animate-pulse">Authenticating...</p>
-          </div>
-        </div>
-      )}
-
-      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-2xl mb-4 backdrop-blur">
-            <Leaf size={28} className="text-white" />
+          <div className="inline-flex items-center justify-center w-32 h-32 mb-4 backdrop-blur rounded-2xl bg-white/5 p-3 border border-white/10 shadow-lg">
+            <Image
+              src="/logo.svg"
+              alt="Kiddos Foods"
+              width={110}
+              height={110}
+              className="object-contain drop-shadow-xl"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-white">Kiddos Organic</h1>
-          <p className="text-emerald-200 text-sm mt-1">Admin Panel</p>
+          <h1 className="text-2xl font-bold text-white tracking-wide">Kiddos Foods</h1>
+          <p className="text-emerald-200 text-sm mt-1 font-medium">Admin Panel</p>
         </div>
 
         {/* Card */}
@@ -172,6 +172,5 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </div>
-    </>
   );
 }

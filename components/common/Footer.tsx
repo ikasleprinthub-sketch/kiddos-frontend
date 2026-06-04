@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const quickLinks = [
   { label: "About Us", href: "/about" },
@@ -7,16 +10,31 @@ const quickLinks = [
   { label: "FAQs", href: "/faqs" },
 ];
 
-const categories = [
-  { label: "Batter", href: "/category/batter" },
-  { label: "Spice Blends", href: "/category/spice-blends" },
-  { label: "Raw Spices", href: "/category/raw-spices" },
-  { label: "Oils", href: "/category/oils" },
-  { label: "Pickles", href: "/category/pickles" },
-  { label: "Chutney Book", href: "/category/chutney-book" },
-];
-
 export default function Footer() {
+  const [fetchedCategories, setFetchedCategories] = useState<{ label: string; href: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories?limit=3")
+      .then(res => res.json())
+      .then(data => {
+        if (data.categories && Array.isArray(data.categories)) {
+          setFetchedCategories(
+            data.categories.map((c: { name: string; slug: string }) => ({
+              label: c.name,
+              href: `/category/${c.slug}`,
+            }))
+          );
+        }
+      })
+      .catch(err => console.error("Failed to fetch footer categories", err));
+  }, []);
+
+  const categories = fetchedCategories.length > 0 ? fetchedCategories : [
+    { label: "Batter", href: "/category/batter" },
+    { label: "Spice Blends", href: "/category/spice-blends" },
+    { label: "Chutney Book", href: "/category/chutney-book" },
+  ];
+
   return (
     <footer className="bg-[#1e4620] text-white">
       {/* Main footer content */}
@@ -45,9 +63,7 @@ export default function Footer() {
             {/* Social Icons */}
             <div className="flex gap-3 mt-1">
               <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 aria-label="Facebook"
                 className="w-9 h-9 rounded-full border border-white/40 flex items-center justify-center hover:border-white hover:bg-white/10 transition-colors"
               >
@@ -56,9 +72,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
                 aria-label="YouTube"
                 className="w-9 h-9 rounded-full border border-white/40 flex items-center justify-center hover:border-white hover:bg-white/10 transition-colors"
               >
@@ -68,7 +82,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/kiddosfoods_official/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -127,21 +141,25 @@ export default function Footer() {
                   <circle cx="12" cy="10" r="3" />
                 </svg>
                 <span className="text-white/80 text-sm leading-relaxed">
-                  2/298, Bharathiyar Nagar, Pannimadal, Coimbatore‑641017
+                  2/298, Bharathiyar Nagar, Pannimadai, Coimbatore‑641017
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <svg className="w-4 h-4 shrink-0 fill-none stroke-white stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
                 </svg>
-                <span className="text-white/80 text-sm">+91 78459 45455</span>
+                <a href="tel:+917845945455" className="text-white/80 text-sm hover:text-white transition-colors">
+                  +91 78459 45455
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <svg className="w-4 h-4 shrink-0 fill-none stroke-white stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                   <polyline points="22,6 12,13 2,6" />
                 </svg>
-                <span className="text-white/80 text-sm">care@kiddosfoods.com</span>
+                <a href="mailto:care@kiddosfoods.com" className="text-white/80 text-sm hover:text-white transition-colors">
+                  care@kiddosfoods.com
+                </a>
               </li>
             </ul>
           </div>
@@ -166,29 +184,15 @@ export default function Footer() {
           </a>
         </p>
 
-        {/* Payment method icons */}
-        <div className="flex items-center gap-2">
-          {/* Visa */}
-          <div className="bg-white rounded px-2 py-1 flex items-center justify-center h-6">
-            <span className="text-[#1a1f71] font-bold text-[10px] tracking-tight">VISA</span>
-          </div>
-          {/* Discover */}
-          <div className="bg-white rounded px-2 py-1 flex items-center justify-center h-6">
-            <span className="text-[#f76f20] font-bold text-[9px]">DISC</span>
-          </div>
-          {/* Amex */}
-          <div className="bg-[#2671b9] rounded px-2 py-1 flex items-center justify-center h-6">
-            <span className="text-white font-bold text-[9px]">AMEX</span>
-          </div>
-          {/* Mastercard */}
-          <div className="bg-white rounded px-1 py-1 flex items-center justify-center h-6 gap-0.5">
-            <div className="w-4 h-4 rounded-full bg-[#eb001b] opacity-90" />
-            <div className="w-4 h-4 rounded-full bg-[#f79e1b] opacity-90 -ml-2" />
-          </div>
-          {/* RuPay / generic */}
-          <div className="bg-white rounded px-2 py-1 flex items-center justify-center h-6">
-            <span className="text-[#1e6b3a] font-bold text-[9px]">PAY</span>
-          </div>
+        {/* Payment method */}
+        <div className="flex items-center">
+          <Image
+            src="/images/razorpay.jpg"
+            alt="Razorpay"
+            width={120}
+            height={40}
+            className="rounded object-contain h-10 w-auto"
+          />
         </div>
       </div>
     </footer>

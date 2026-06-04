@@ -392,30 +392,71 @@ function ProductsPageContent() {
               </div>
             </div>
 
-            {/* Price Filter */}
+            {/* Price Filter — dual range slider */}
             <div className="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800/50">
-              <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">
-                Price
-              </h3>
+              <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">Price</h3>
               <div className="space-y-4">
                 <div className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium tracking-wide">
-                  ₹{minPrice.toFixed(2)} - ₹{maxPrice === DEFAULT_MAX_PRICE ? `${maxSliderValue.toFixed(2)}+` : maxPrice.toFixed(2)}
+                  ₹{minPrice} – ₹{maxPrice === DEFAULT_MAX_PRICE ? `${maxSliderValue}+` : maxPrice}
                 </div>
-                <div className="relative pt-2">
+
+                {/* Dual-range track */}
+                <div className="relative h-5 flex items-center">
+                  {/* Background track */}
+                  <div className="absolute w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                  {/* Active range highlight */}
+                  <div
+                    className="absolute h-1.5 rounded-full bg-brand-green dark:bg-brand-gold"
+                    style={{
+                      left: `${(minPrice / maxSliderValue) * 100}%`,
+                      right: `${100 - (Math.min(maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice, maxSliderValue) / maxSliderValue) * 100}%`,
+                    }}
+                  />
+
+                  {/* Min thumb knob */}
+                  <div
+                    className="absolute w-4 h-4 rounded-full bg-brand-green dark:bg-brand-gold border-2 border-white dark:border-zinc-900 shadow-md pointer-events-none z-10"
+                    style={{ left: `calc(${(minPrice / maxSliderValue) * 100}% - 8px)` }}
+                  />
+                  {/* Max thumb knob */}
+                  <div
+                    className="absolute w-4 h-4 rounded-full bg-brand-green dark:bg-brand-gold border-2 border-white dark:border-zinc-900 shadow-md pointer-events-none z-10"
+                    style={{
+                      left: `calc(${(Math.min(maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice, maxSliderValue) / maxSliderValue) * 100}% - 8px)`,
+                    }}
+                  />
+
+                  {/* Min range input (transparent, on top) */}
                   <input
                     type="range"
-                    min="0"
+                    min={0}
                     max={maxSliderValue}
-                    step="5"
-                    value={maxPrice > maxSliderValue ? maxSliderValue : maxPrice}
+                    step={5}
+                    value={minPrice}
                     onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      setMaxPrice(val >= maxSliderValue ? DEFAULT_MAX_PRICE : val);
+                      const val = Number(e.target.value);
+                      const effectiveMax = maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice;
+                      if (val < effectiveMax - 5) setMinPrice(val);
                     }}
-                    className="w-full accent-brand-green dark:accent-brand-gold bg-zinc-200 dark:bg-zinc-800 h-[3px] rounded-lg appearance-none cursor-pointer"
+                    className="absolute w-full h-full opacity-0 cursor-pointer"
+                    style={{ zIndex: minPrice > maxSliderValue * 0.8 ? 5 : 3 }}
                   />
-                  {/* Decorative dual knob effect */}
-                  <div className="absolute left-0 top-1.5 w-3.5 h-3.5 bg-brand-green dark:bg-brand-gold rounded-full -ml-1.5 pointer-events-none" />
+                  {/* Max range input (transparent, on top) */}
+                  <input
+                    type="range"
+                    min={0}
+                    max={maxSliderValue}
+                    step={5}
+                    value={maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      if (val > minPrice + 5) {
+                        setMaxPrice(val >= maxSliderValue ? DEFAULT_MAX_PRICE : val);
+                      }
+                    }}
+                    className="absolute w-full h-full opacity-0 cursor-pointer"
+                    style={{ zIndex: 4 }}
+                  />
                 </div>
               </div>
             </div>
@@ -494,11 +535,30 @@ function ProductsPageContent() {
 
           {/* ── RIGHT COLUMN: PRODUCTS LIST ── */}
           <main className="flex-1">
-            
-            {/* GRID CONTROLS / SORTING */}
+
+            {/* Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products…"
+                className="w-full pl-11 pr-10 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-green dark:focus:ring-brand-gold shadow-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
             {/* GRID CONTROLS / SORTING */}
             <div className="flex flex-col mb-8 space-y-4">
-              
+
               {/* Top Row: Showing Results & Sort */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
@@ -615,6 +675,7 @@ function ProductsPageContent() {
                     const isAdding = addingToCartId === product.id;
                     const hasHoverImg = !!product.image2;
                     const isOutOfStock = (product.stock ?? 1) <= 0;
+                    const isRecipe = product.category === "chutney-book";
                     
                     return (
                       <article
@@ -654,9 +715,14 @@ function ProductsPageContent() {
 
                           {/* Top Left Badges */}
                           <div className="absolute top-3 left-3 flex flex-col gap-2 z-20 pointer-events-none">
-                            {product.originalPrice && product.originalPrice > product.price && (
+                            {!isRecipe && product.originalPrice && product.originalPrice > product.price && (
                               <span className="bg-[#2C4A3B] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm">
                                 {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
+                              </span>
+                            )}
+                            {isRecipe && (
+                              <span className="bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm w-fit">
+                                Free Recipe
                               </span>
                             )}
                             {product.isBestSeller && (
@@ -693,17 +759,19 @@ function ProductsPageContent() {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (!isOutOfStock) handleAddToCart(product);
-                            }}
-                            disabled={isOutOfStock || isAdding}
-                            className={`w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md transition-colors opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 delay-100 ${isOutOfStock ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed" : isAdding ? "text-brand-green" : "text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold"}`}
-                            title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                          >
-                            {isAdding ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-                          </button>
+                            {!isRecipe && (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (!isOutOfStock) handleAddToCart(product);
+                                }}
+                                disabled={isOutOfStock || isAdding}
+                                className={`w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md transition-colors opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 delay-100 ${isOutOfStock ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed" : isAdding ? "text-brand-green" : "text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold"}`}
+                                title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                              >
+                                {isAdding ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                              </button>
+                            )}
                         </div>
                         </div>
 
@@ -722,16 +790,24 @@ function ProductsPageContent() {
                             </h3>
                           </Link>
 
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="text-[15px] font-bold text-[#b49852]">
-                              ₹{product.price.toFixed(2)}
-                            </span>
-                            {product.originalPrice && (
-                              <span className="text-[13px] font-medium text-zinc-400 line-through">
-                                ₹{product.originalPrice.toFixed(2)}
+                          {isRecipe ? (
+                            <div className="mt-2">
+                              <span className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                📖 View Recipe →
                               </span>
-                            )}
-                          </div>
+                            </div>
+                          ) : (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-[15px] font-bold text-[#b49852]">
+                                ₹{product.price.toFixed(2)}
+                              </span>
+                              {product.originalPrice && (
+                                <span className="text-[13px] font-medium text-zinc-400 line-through">
+                                  ₹{product.originalPrice.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                          )}
 
                         </div>
                       </article>
@@ -841,39 +917,59 @@ function ProductsPageContent() {
                 </h2>
 
                 
-                <div className="flex items-end gap-3 mb-6">
-                  <span className="text-3xl font-black text-brand-green dark:text-brand-gold">
-                    ₹{quickViewProduct.price}
-                  </span>
-                  {quickViewProduct.originalPrice && (
-                    <span className="text-lg font-bold text-zinc-400 dark:text-zinc-500 line-through mb-1">
-                      ₹{quickViewProduct.originalPrice}
+                {quickViewProduct.category === "chutney-book" ? (
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 mb-6">
+                    <span className="text-xl">📖</span>
+                    <div>
+                      <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Free Recipe</p>
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale · View & enjoy for free</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-end gap-3 mb-6">
+                    <span className="text-3xl font-black text-brand-green dark:text-brand-gold">
+                      ₹{quickViewProduct.price}
                     </span>
-                  )}
-                </div>
+                    {quickViewProduct.originalPrice && (
+                      <span className="text-lg font-bold text-zinc-400 dark:text-zinc-500 line-through mb-1">
+                        ₹{quickViewProduct.originalPrice}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed mb-8 flex-1">
                   {quickViewProduct.description || "A delicious and wholesome traditional product crafted with care, preserving the authentic flavors."}
                 </p>
 
                 <div className="flex flex-col gap-3 mt-auto">
-                  <button
-                    onClick={() => {
-                      if (!((quickViewProduct.stock ?? 1) <= 0)) {
-                        handleAddToCart(quickViewProduct);
-                        setQuickViewProduct(null);
-                      }
-                    }}
-                    disabled={(quickViewProduct.stock ?? 1) <= 0}
-                    className={`w-full py-4 rounded-2xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                      (quickViewProduct.stock ?? 1) <= 0
-                        ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
-                        : "bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green"
-                    }`}
-                  >
-                    <ShoppingBag className="w-5 h-5" />
-                    {(quickViewProduct.stock ?? 1) <= 0 ? "Out of Stock" : "Add to Cart"}
-                  </button>
+                  {quickViewProduct.category === "chutney-book" ? (
+                    <Link
+                      href={`/products/${quickViewProduct.slug || quickViewProduct.id}`}
+                      onClick={() => setQuickViewProduct(null)}
+                      className="w-full py-4 rounded-2xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green"
+                    >
+                      <span>📖</span> View Recipe
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (!((quickViewProduct.stock ?? 1) <= 0)) {
+                          handleAddToCart(quickViewProduct);
+                          setQuickViewProduct(null);
+                        }
+                      }}
+                      disabled={(quickViewProduct.stock ?? 1) <= 0}
+                      className={`w-full py-4 rounded-2xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                        (quickViewProduct.stock ?? 1) <= 0
+                          ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
+                          : "bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green"
+                      }`}
+                    >
+                      <ShoppingBag className="w-5 h-5" />
+                      {(quickViewProduct.stock ?? 1) <= 0 ? "Out of Stock" : "Add to Cart"}
+                    </button>
+                  )}
                   <button
                     onClick={() => toggleWishlist(quickViewProduct)}
                     className="w-full py-4 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-2xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"

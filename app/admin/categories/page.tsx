@@ -86,6 +86,7 @@ export default function CategoriesPage() {
   const handleSave = async () => {
     setError("");
     if (!form.name.trim()) { setError("Name is required"); return; }
+    if (!form.image) { setError("Category image is required"); return; }
     setSaving(true);
     try {
       if (modal === "add") {
@@ -216,9 +217,19 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image *</label>
                 {form.image && (
-                  <img src={form.image} alt="preview" className="w-16 h-16 rounded object-cover mb-2 bg-gray-100" />
+                  <div className="relative inline-block mb-2">
+                    <img src={form.image} alt="preview" className="w-20 h-20 rounded-lg object-cover bg-gray-100 border border-gray-200" />
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setForm((f) => ({ ...f, image: "" })); }}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                      title="Remove image"
+                    >
+                      ×
+                    </button>
+                  </div>
                 )}
                 <input type="file" accept="image/*" onChange={handleUpload} disabled={uploadingImage}
                   className="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-emerald-50 file:text-emerald-700 file:text-sm file:font-medium hover:file:bg-emerald-100"

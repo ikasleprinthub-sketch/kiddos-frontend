@@ -41,7 +41,7 @@ export default function FranchiseHero() {
             <div className="flex flex-wrap gap-3">
               <a
                 href="#inquiry-form"
-                className="px-8 py-3.5 bg-[#f05252] hover:bg-[#e53e3e] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm hover:-translate-y-0.5"
+                className="px-8 py-3.5 bg-[#f88636] hover:bg-[#e77525] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm hover:-translate-y-0.5"
               >
                 Apply Now →
               </a>
