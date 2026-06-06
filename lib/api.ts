@@ -30,6 +30,9 @@ export interface ApiCategory {
   image: string | null;
   isActive: boolean;
   sortOrder: number;
+  _count?: {
+    products: number;
+  };
 }
 
 /** Represents a product returned from the public /api/products endpoint */

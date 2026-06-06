@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 import { api, type ApiBanner } from "@/lib/api";
 
 const pastaPackages = [
@@ -142,9 +142,9 @@ const batterPackages = [
   }
 ];
 
-function PastaPacket({ name, subName, color, borderColor, textColor, bgColor, vegIcon }: any) {
+function PastaPacket({ name, subName, color, borderColor, textColor, bgColor, vegIcon, className }: any) {
   return (
-    <div className="group relative flex flex-col items-center w-[14.5%] min-w-[52px] sm:min-w-[85px] max-w-[130px] aspect-[1/2.05] transition-all duration-500 hover:-translate-y-5 hover:scale-105 z-10 cursor-pointer">
+    <div className={`group relative flex flex-col items-center aspect-[1/2.05] transition-all duration-500 z-10 cursor-pointer ${className || "w-[14.5%] min-w-[52px] sm:min-w-[85px] max-w-[130px] hover:-translate-y-5 hover:scale-105"}`}>
       {/* 3D Drop Shadow on the Table */}
       <div className="absolute -bottom-1.5 left-2 right-2 h-2.5 bg-black/30 blur-md rounded-full scale-x-90 opacity-80 group-hover:scale-x-105 group-hover:opacity-50 transition-all duration-500" />
       
@@ -216,9 +216,9 @@ function PastaPacket({ name, subName, color, borderColor, textColor, bgColor, ve
   );
 }
 
-function BatterPacket({ name, color, textColor, bgColor, grainIcon }: any) {
+function BatterPacket({ name, color, textColor, bgColor, grainIcon, className }: any) {
   return (
-    <div className="group relative flex flex-col items-center w-[20%] min-w-[68px] sm:min-w-[100px] max-w-[155px] aspect-[1/1.3] transition-all duration-500 hover:-translate-y-5 hover:scale-105 z-10 cursor-pointer">
+    <div className={`group relative flex flex-col items-center aspect-[1/1.3] transition-all duration-500 z-10 cursor-pointer ${className || "w-[20%] min-w-[68px] sm:min-w-[100px] max-w-[155px] hover:-translate-y-5 hover:scale-105"}`}>
       {/* 3D Drop Shadow on the Table */}
       <div className="absolute -bottom-1.5 left-2 right-2 h-2.5 bg-black/35 blur-md rounded-full scale-x-90 opacity-80 group-hover:scale-x-105 group-hover:opacity-50 transition-all duration-500" />
       
@@ -325,317 +325,240 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative w-full h-[40vw] min-h-[380px] max-h-[640px] overflow-hidden select-none bg-emerald-950"
+      className="w-full bg-white dark:bg-zinc-950 py-4 sm:py-6"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* SVG definitions for patterns */}
-      <svg width="0" height="0" className="absolute pointer-events-none">
-        <defs>
-          <pattern id="pasta-pattern" width="16" height="16" patternUnits="userSpaceOnUse">
-            <rect width="16" height="16" fill="#fef3c7" />
-            <path d="M4,1 Q6,3 4,5 T4,9 T4,13" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" />
-            <path d="M5,1 Q7,3 5,5 T5,9 T5,13" fill="none" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
-            <path d="M12,2 Q10,4 12,6 T12,10 T12,14" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" />
-            <path d="M2,6 A3,3 0 0,1 6,8" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M10,4 A2,2 0 0,0 13,2" fill="none" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
-          </pattern>
-        </defs>
-      </svg>
+      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="group/hero relative w-full h-[400px] sm:h-[460px] md:h-[500px] lg:h-[530px] rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
+          {/* SVG definitions for patterns */}
+          <svg width="0" height="0" className="absolute pointer-events-none">
+            <defs>
+              <pattern id="pasta-pattern" width="16" height="16" patternUnits="userSpaceOnUse">
+                <rect width="16" height="16" fill="#fef3c7" />
+                <path d="M4,1 Q6,3 4,5 T4,9 T4,13" fill="none" stroke="#fbbf24" strokeWidth="2.2" strokeLinecap="round" />
+                <path d="M5,1 Q7,3 5,5 T5,9 T5,13" fill="none" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+                <path d="M12,2 Q10,4 12,6 T12,10 T12,14" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" />
+                <path d="M2,6 A3,3 0 0,1 6,8" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M10,4 A2,2 0 0,0 13,2" fill="none" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
+              </pattern>
+            </defs>
+          </svg>
 
-      {/* CAROUSEL SLIDES WRAPPER */}
-      <div className="relative w-full h-full">
-        {loading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
-            <div className="w-10 h-10 border-4 border-zinc-700 border-t-white rounded-full animate-spin" />
+          {/* CAROUSEL SLIDES WRAPPER */}
+          <div className="relative w-full h-full">
+            {loading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900">
+                <div className="w-10 h-10 border-4 border-zinc-300 dark:border-zinc-700 border-t-emerald-600 rounded-full animate-spin" />
+              </div>
+            ) : hasBanners ? (
+              banners.map((banner, idx) => (
+                <div
+                  key={banner.id}
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-24 py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
+                    activeSlide === idx ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    {banner.image ? (
+                      <>
+                        <Image
+                          src={banner.image}
+                          alt={banner.title || "Banner"}
+                          fill
+                          priority={idx === 0}
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/15" />
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 bg-[#e3f9ff] bg-dot-grid" />
+                    )}
+                  </div>
+                  <div className="relative z-10 text-left w-full md:w-[50%] lg:w-[45%] flex flex-col items-start px-4 md:px-8">
+                    {banner.link && (
+                      <Link
+                        href={banner.link}
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#3bb77e] hover:bg-[#2aa36c] text-white font-bold text-sm sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-emerald-700/10 cursor-pointer"
+                      >
+                        Shop Now
+                        <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                {/* SLIDE 1: MILLET PASTA (REDESIGNED) */}
+                <div
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-20 py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
+                    activeSlide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  {/* Left Side: Content */}
+                  <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative">
+                    <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
+                      Don&apos;t miss amazing<br />
+                      <span className="font-playfair italic text-[#3bb77e] font-normal">grocery</span> deals
+                    </h1>
+                    <p className="text-[#7e7e7e] text-sm sm:text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, eiusmod tempor incididunt ut aliquip.
+                    </p>
+                    <Link
+                      href="/category/millet-based"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#3bb77e] hover:bg-[#2aa36c] text-white font-bold text-sm sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-emerald-700/10 cursor-pointer"
+                    >
+                      Shop Now
+                      <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </Link>
+                  </div>
+
+                  {/* Right Side: Visuals */}
+                  <div className="w-full md:w-[50%] lg:w-[55%] h-full flex items-center justify-center relative mt-6 md:mt-0 z-10 select-none">
+                    <div className="relative flex items-center justify-center w-[260px] sm:w-[300px] md:w-[360px] lg:w-[400px] aspect-[1.2/1]">
+                      {/* Left Package */}
+                      <PastaPacket
+                        {...pastaPackages[1]}
+                        className="w-[110px] sm:w-[130px] md:w-[150px] lg:w-[170px] rotate-[-12deg] -translate-x-[15%] translate-y-[5%] hover:rotate-[-6deg] hover:scale-105 transition-all duration-500 z-10"
+                      />
+                      {/* Right Package */}
+                      <PastaPacket
+                        {...pastaPackages[3]}
+                        className="w-[110px] sm:w-[130px] md:w-[150px] lg:w-[170px] rotate-[12deg] translate-x-[15%] -translate-y-[5%] hover:rotate-[6deg] hover:scale-105 transition-all duration-500 z-20"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Floating Ingredients */}
+                  <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                    <div className="hidden lg:block absolute left-[38%] top-[15%] w-[8%] aspect-square pointer-events-auto cursor-pointer animate-float-slow group transition-all duration-300">
+                      <Image
+                        src="/images/carrot.png"
+                        alt="Floating carrot"
+                        width={60}
+                        height={60}
+                        className="object-contain transform -rotate-12 group-hover:scale-110 group-hover:rotate-6 transition-all duration-350"
+                        style={{ mixBlendMode: "multiply" }}
+                      />
+                    </div>
+                    <div className="absolute left-[40%] top-[68%] w-[4%] aspect-square pointer-events-auto cursor-pointer animate-drift-spin group">
+                      <Image
+                        src="/images/pasta_spiral.png"
+                        alt="Floating fusilli pasta"
+                        width={30}
+                        height={30}
+                        className="object-contain group-hover:scale-125 transition-transform duration-350"
+                        style={{ mixBlendMode: "multiply" }}
+                      />
+                    </div>
+                    <div className="absolute right-[5%] top-[15%] w-[4%] aspect-square pointer-events-auto cursor-pointer animate-drift-spin group">
+                      <Image
+                        src="/images/pasta_spiral.png"
+                        alt="Floating fusilli pasta"
+                        width={30}
+                        height={30}
+                        className="object-contain transform rotate-45 group-hover:scale-125 transition-transform duration-350"
+                        style={{ mixBlendMode: "multiply" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* SLIDE 2: FRESH BATTER SLIDER (REDESIGNED) */}
+                <div
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-20 py-8 md:py-0 bg-[#fffcf8] bg-dot-grid ${
+                    activeSlide === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  {/* Left Side: Content */}
+                  <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative">
+                    <h2 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
+                      Fresh & traditional<br />
+                      <span className="font-playfair italic text-[#f97316] font-normal">organic</span> batters
+                    </h2>
+                    <p className="text-[#7e7e7e] text-sm sm:text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, eiusmod tempor incididunt ut aliquip.
+                    </p>
+                    <Link
+                      href="/category/batter"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#f97316] hover:bg-[#e05e00] text-white font-bold text-sm sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-orange-700/10 cursor-pointer"
+                    >
+                      Shop Now
+                      <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </Link>
+                  </div>
+
+                  {/* Right Side: Visuals */}
+                  <div className="w-full md:w-[50%] lg:w-[55%] h-full flex items-center justify-center relative mt-6 md:mt-0 z-10 select-none">
+                    <div className="relative flex items-center justify-center w-[260px] sm:w-[300px] md:w-[360px] lg:w-[400px] aspect-[1.2/1]">
+                      {/* Left Batter Pouch */}
+                      <BatterPacket
+                        {...batterPackages[0]}
+                        className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] rotate-[-10deg] -translate-x-[15%] translate-y-[5%] hover:rotate-[-5deg] hover:scale-105 transition-all duration-500 z-10"
+                      />
+                      {/* Right Batter Pouch */}
+                      <BatterPacket
+                        {...batterPackages[1]}
+                        className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] rotate-[10deg] translate-x-[15%] -translate-y-[5%] hover:rotate-[5deg] hover:scale-105 transition-all duration-500 z-20"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Floating Ingredients for Batter Slide */}
+                  <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                    <div className="hidden lg:block absolute left-[38%] top-[25%] w-[5%] aspect-square pointer-events-auto cursor-pointer animate-float-slow group">
+                      <div className="w-9 h-9 rounded-full bg-white/85 backdrop-blur-xs flex items-center justify-center shadow-xs border border-amber-200 text-amber-700 font-bold text-xs group-hover:scale-110 transition-transform">
+                        🌾
+                      </div>
+                    </div>
+                    <div className="absolute right-[6%] top-[20%] w-[5%] aspect-square pointer-events-auto cursor-pointer animate-float-medium group">
+                      <div className="w-9 h-9 rounded-full bg-white/85 backdrop-blur-xs flex items-center justify-center shadow-xs border border-emerald-250 text-emerald-700 font-bold text-xs group-hover:scale-110 transition-transform">
+                        🍃
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-        ) : hasBanners ? (
-          banners.map((banner, idx) => (
-            <div
-              key={banner.id}
-              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col justify-center items-center ${
-                activeSlide === idx ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-              }`}
-            >
-              <div className="absolute inset-0 z-0">
-                <Image
-                  src={banner.image}
-                  alt={banner.title}
-                  fill
-                  priority={idx === 0}
-                  className="object-cover"
+
+          {/* CAROUSEL NAVIGATION CONTROLS */}
+          {/* Left Arrow */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-40 p-2 rounded-full border border-zinc-200 bg-white/70 hover:bg-white text-zinc-700 hover:text-zinc-950 backdrop-blur-xs shadow-xs transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center opacity-0 group-hover/hero:opacity-100"
+            aria-label="Previous Slide"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {/* Right Arrow */}
+          <button
+            onClick={handleNext}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-40 p-2 rounded-full border border-zinc-200 bg-white/70 hover:bg-white text-zinc-700 hover:text-zinc-950 backdrop-blur-xs shadow-xs transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center opacity-0 group-hover/hero:opacity-100"
+            aria-label="Next Slide"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* Carousel Slide Indicators (Dots) inside the banner */}
+          {totalSlides > 1 && (
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40 flex gap-2">
+              {Array.from({ length: totalSlides }).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveSlide(idx)}
+                  className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    activeSlide === idx ? "w-6 bg-[#3bb77e] shadow-xs" : "w-2.5 bg-[#253d4e]/15 hover:bg-[#253d4e]/30"
+                  }`}
+                  aria-label={`Slide ${idx + 1} Indicator`}
                 />
-                <div className="absolute inset-0 bg-black/20" />
-              </div>
-              <div className="relative z-10 text-center px-4 max-w-4xl">
-                <h1 className="text-white text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight drop-shadow-md mb-4">
-                  {banner.title}
-                </h1>
-                {banner.subtitle && (
-                  <p className="text-white/90 text-lg sm:text-xl md:text-2xl drop-shadow-sm mb-8">
-                    {banner.subtitle}
-                  </p>
-                )}
-                {banner.link && (
-                  <Link
-                    href={banner.link}
-                    className="inline-flex items-center justify-center px-8 py-3 bg-brand-green hover:bg-emerald-700 text-white font-bold rounded-full transition-all hover:scale-105"
-                  >
-                    Explore Now
-                  </Link>
-                )}
-              </div>
+              ))}
             </div>
-          ))
-        ) : (
-          <>
-            {/* SLIDE 1: MILLET PASTA (REPLICATION) */}
-            <div
-          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col justify-between ${
-            activeSlide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-          }`}
-        >
-          {/* Background image covering the slide */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/hero_millet_bg.png"
-              alt="Millet field and wooden table background"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-bottom"
-            />
-            {/* Subtle vignetting/dark gradient overlay to make text pop */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/10" />
-          </div>
-
-          {/* Slide Heading */}
-          <div className="relative z-10 w-full pt-[4%] px-8 flex justify-center">
-            <h1 className="text-center text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)] leading-tight max-w-5xl">
-              Wholesome Pasta, made with Millet Goodness
-            </h1>
-          </div>
-
-          {/* Pasta Packets standing on the table */}
-          <div className="relative z-10 w-full px-[2%] sm:px-[8%] pb-[5.5%] flex items-end justify-center gap-1 sm:gap-2.5 md:gap-3.5">
-            {pastaPackages.map((pkg, idx) => (
-              <PastaPacket key={idx} {...pkg} />
-            ))}
-          </div>
-
-          {/* Floating Ingredients */}
-          <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
-            {/* Left Floating Carrot */}
-            <div className="hidden sm:block absolute left-[3%] top-[30%] w-[12%] max-w-[130px] aspect-square pointer-events-auto cursor-pointer animate-float-slow group transition-all duration-300">
-              <Image
-                src="/images/carrot.png"
-                alt="Floating carrot"
-                width={120}
-                height={120}
-                className="object-contain transform -rotate-12 group-hover:scale-110 group-hover:rotate-6 transition-all duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-            
-            {/* Top Left Beetroot Slice */}
-            <div className="hidden sm:block absolute left-[2%] top-[8%] w-[6%] max-w-[65px] aspect-square pointer-events-auto cursor-pointer animate-float-fast group transition-all duration-300">
-              <Image
-                src="/images/beetroot.png"
-                alt="Floating beetroot slice"
-                width={65}
-                height={65}
-                className="object-contain transform rotate-45 group-hover:scale-115 group-hover:-rotate-12 transition-all duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-
-            {/* Left Pasta Spiral (Lower Left) */}
-            <div className="absolute left-[13%] top-[55%] w-[4.5%] max-w-[50px] aspect-square pointer-events-auto cursor-pointer animate-drift-spin group">
-              <Image
-                src="/images/pasta_spiral.png"
-                alt="Floating fusilli pasta"
-                width={50}
-                height={50}
-                className="object-contain group-hover:scale-125 transition-transform duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-
-            {/* Left Pasta Spiral (Top Left-Center) */}
-            <div className="absolute left-[18%] top-[25%] w-[4%] max-w-[42px] aspect-square pointer-events-auto cursor-pointer animate-float-medium group">
-              <Image
-                src="/images/pasta_spiral.png"
-                alt="Floating fusilli pasta"
-                width={42}
-                height={42}
-                className="object-contain transform rotate-90 group-hover:scale-120 transition-transform duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-
-            {/* Right Floating Tomato */}
-            <div className="absolute right-[8%] top-[45%] w-[8%] max-w-[90px] aspect-square pointer-events-auto cursor-pointer animate-float-slow group transition-all duration-300">
-              <Image
-                src="/images/tomato.png"
-                alt="Floating tomato"
-                width={90}
-                height={90}
-                className="object-contain group-hover:scale-115 group-hover:rotate-12 transition-all duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-
-            {/* Right Floating Beetroot Slice */}
-            <div className="hidden sm:block absolute right-[19%] top-[28%] w-[6.5%] max-w-[70px] aspect-square pointer-events-auto cursor-pointer animate-float-medium group transition-all duration-300">
-              <Image
-                src="/images/beetroot.png"
-                alt="Floating beetroot slice"
-                width={70}
-                height={70}
-                className="object-contain transform -rotate-12 group-hover:scale-115 group-hover:rotate-45 transition-all duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-
-            {/* Right Pasta Spiral (Top Right) */}
-            <div className="absolute right-[3%] top-[20%] w-[4.5%] max-w-[45px] aspect-square pointer-events-auto cursor-pointer animate-drift-spin group">
-              <Image
-                src="/images/pasta_spiral.png"
-                alt="Floating fusilli pasta"
-                width={45}
-                height={45}
-                className="object-contain transform rotate-45 group-hover:scale-125 transition-transform duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-
-            {/* Right Tomato Slice / Small Tomato (Lower Right) */}
-            <div className="absolute right-[14%] top-[60%] w-[5%] max-w-[55px] aspect-square pointer-events-auto cursor-pointer animate-float-fast group">
-              <Image
-                src="/images/tomato.png"
-                alt="Floating small tomato"
-                width={55}
-                height={55}
-                className="object-contain scale-75 opacity-90 blur-[0.8px] group-hover:scale-95 group-hover:blur-none transition-all duration-350"
-                style={{ mixBlendMode: "multiply" }}
-              />
-            </div>
-          </div>
-
-          {/* Shop Now Button sitting on the table */}
-          <div className="absolute bottom-[3%] sm:bottom-[2%] left-1/2 transform -translate-x-1/2 z-30 select-none">
-            <Link
-              href="/category/millet-based"
-              className="inline-flex items-center justify-center px-6 sm:px-10 py-2 sm:py-2.5 bg-[#1b431c] hover:bg-[#255b27] text-white font-bold text-sm sm:text-base rounded-full shadow-[0_4px_14px_rgba(27,67,28,0.4)] border border-emerald-800 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_6px_20px_rgba(27,67,28,0.55)] cursor-pointer"
-            >
-              Shop Now
-            </Link>
-          </div>
+          )}
         </div>
-
-        {/* SLIDE 2: FRESH BATTER SLIDER (COMPLEMENTARY) */}
-        <div
-          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col justify-between ${
-            activeSlide === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-          }`}
-        >
-          {/* Background image covering the slide */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/hero_millet_bg.png"
-              alt="Millet field and wooden table background"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-bottom brightness-[0.9] saturate-[0.8]"
-            />
-            {/* Emerald/Gold overlay gradient for a premium look */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-brand-green/30 via-transparent to-brand-gold/15" />
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
-
-          {/* Slide Heading */}
-          <div className="relative z-10 w-full pt-[4%] px-8 flex justify-center">
-            <h2 className="text-center text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] leading-tight max-w-5xl">
-              Fresh & Traditional Idli Dosa Batters
-            </h2>
-          </div>
-
-          {/* Batter Packets standing on the table */}
-          <div className="relative z-10 w-full px-[3%] sm:px-[15%] pb-[6%] flex items-end justify-center gap-2 sm:gap-5 md:gap-7">
-            {batterPackages.map((pkg, idx) => (
-              <BatterPacket key={idx} {...pkg} />
-            ))}
-          </div>
-
-          {/* Floating Ingredients for Batter Slide — hidden on mobile to keep it clean */}
-          <div className="hidden sm:block absolute inset-0 z-20 pointer-events-none overflow-hidden">
-            <div className="absolute left-[6%] top-[30%] w-[5%] aspect-square pointer-events-auto cursor-pointer animate-float-slow group">
-              <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center shadow-md border border-amber-200 text-amber-700 font-bold group-hover:scale-110 transition-transform">
-                🌾
-              </div>
-            </div>
-            <div className="absolute right-[8%] top-[25%] w-[5%] aspect-square pointer-events-auto cursor-pointer animate-float-medium group">
-              <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center shadow-md border border-emerald-250 text-emerald-700 font-bold group-hover:scale-110 transition-transform">
-                🍃
-              </div>
-            </div>
-            <div className="absolute left-[20%] top-[15%] w-[4%] aspect-square pointer-events-auto cursor-pointer animate-float-fast group">
-              <div className="w-10 h-10 rounded-full bg-white/85 backdrop-blur-xs flex items-center justify-center shadow-md border border-zinc-200 text-lg group-hover:scale-110 transition-transform">
-                🍚
-              </div>
-            </div>
-          </div>
-
-          {/* Explore Batters Button */}
-          <div className="absolute bottom-[3%] sm:bottom-[2%] left-1/2 transform -translate-x-1/2 z-30 select-none">
-            <Link
-              href="/category/batter"
-              className="inline-flex items-center justify-center px-6 sm:px-10 py-2 sm:py-2.5 bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-sm sm:text-base rounded-full shadow-[0_4px_14px_rgba(249,115,22,0.4)] border border-orange-500 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_6px_20px_rgba(249,115,22,0.55)] cursor-pointer"
-            >
-              Explore Batters
-            </Link>
-          </div>
-        </div>
-
-        </>
-      )}
       </div>
-
-      {/* CAROUSEL NAVIGATION CONTROLS */}
-      {/* Left Arrow */}
-      <button
-        onClick={handlePrev}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-40 p-2 sm:p-2.5 rounded-full border border-black/15 bg-white/10 hover:bg-white/95 text-white hover:text-zinc-800 backdrop-blur-xs shadow-md transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center"
-        aria-label="Previous Slide"
-      >
-        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-      </button>
-
-      {/* Right Arrow */}
-      <button
-        onClick={handleNext}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-40 p-2 sm:p-2.5 rounded-full border border-black/15 bg-white/10 hover:bg-white/95 text-white hover:text-zinc-800 backdrop-blur-xs shadow-md transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center"
-        aria-label="Next Slide"
-      >
-        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-      </button>
-
-      {/* Carousel Slide Indicators (Dots) */}
-      {totalSlides > 1 && (
-        <div className="absolute bottom-18 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-40 flex gap-2">
-          {Array.from({ length: totalSlides }).map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveSlide(idx)}
-              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                activeSlide === idx ? "w-6 bg-white shadow-sm" : "w-2 bg-white/50 hover:bg-white/80"
-              }`}
-              aria-label={`Slide ${idx + 1} Indicator`}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 }
