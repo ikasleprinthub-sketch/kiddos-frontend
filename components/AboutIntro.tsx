@@ -1,9 +1,9 @@
 import Image from "next/image";
 
 const stats = [
-  { value: "5+",   label: "Years of Trust" },
-  { value: "50+",  label: "Products" },
-  { value: "10K+", label: "Happy Customers" },
+  { value: "1+",   label: "Years of Trust" },
+  { value: "200+",  label: "Products" },
+  { value: "5K+", label: "Happy Customers" },
   { value: "100%", label: "Natural & Safe" },
 ];
 
