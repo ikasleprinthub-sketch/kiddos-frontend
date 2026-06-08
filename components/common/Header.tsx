@@ -92,20 +92,17 @@ export default function Header() {
             </button>
 
             {/* Logo — compact on mobile, full-size on desktop */}
-            <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0 flex items-center gap-2.5">
-              <div className="relative h-10 w-10 md:h-12 md:w-12 overflow-hidden flex-shrink-0">
+            <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0">
+              <div className="relative h-12 w-28 md:h-20 md:w-64 overflow-hidden">
                 <Image
-                  src="/logo.svg"
+                  src="/orglogo.svg"
                   alt="Kiddos Foods Logo"
                   fill
-                  sizes="(max-width: 768px) 40px, 48px"
+                  sizes="(max-width: 768px) 112px, 256px"
                   className="object-contain dark:brightness-110 md:group-hover:scale-105 transition-transform duration-200"
                   priority
                 />
               </div>
-              <span className="font-playfair text-lg md:text-xl font-black text-brand-green dark:text-brand-gold tracking-wide leading-none">
-                Kiddos Foods
-              </span>
             </Link>
           </div>
 
