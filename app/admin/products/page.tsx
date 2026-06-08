@@ -209,10 +209,6 @@ export default function ProductsPage() {
 
   const handleSave = async () => {
     setError("");
-    if (!form.name.trim()) { setError("Name is required"); return; }
-    if (!form.price || isNaN(Number(form.price))) { setError("Valid price is required"); return; }
-    if (!form.categoryId) { setError("Category is required"); return; }
-    if (!form.images || form.images.length === 0) { setError("At least one product image is required."); return; }
     let parsedNutrientFacts = null;
     if (form.nutrientFacts.trim()) {
       try { parsedNutrientFacts = JSON.parse(form.nutrientFacts); }
@@ -351,7 +347,7 @@ export default function ProductsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>
@@ -361,7 +357,7 @@ export default function ProductsPage() {
                   rows={3} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
                 <input type="number" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>
@@ -422,7 +418,7 @@ export default function ProductsPage() {
                   placeholder={cleanUnit ? `e.g. 250 for 250 ${cleanUnit}` : "e.g. 1"} />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300">
                   <option value="">Select category</option>

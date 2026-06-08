@@ -6,22 +6,22 @@ export default function FranchiseExcellence() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
 
         {/* Heading */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-center gap-4">
           <div>
-            <p className="text-[#f97316] text-xs font-bold tracking-widest uppercase mb-3">
+            <p className="text-[#f97316] text-xs font-bold tracking-widest uppercase mb-3 text-center">
               Real Outlets  Real Growth
             </p>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-tight">
-              Experience The Kiddos<br />Foods Excellence
+              Experience The Excellence
             </h2>
-            <div className="w-12 h-1 bg-[#f97316] rounded-full mt-4" />
+            {/* <div className="w-12 h-1 bg-[#f97316] rounded-full mt-4" /> */}
           </div>
-          <a
+          {/* <a
             href="#inquiry-form"
             className="shrink-0 self-start sm:self-auto px-7 py-3 bg-[#1e4620] hover:bg-[#2c5e2f] text-white font-bold rounded-xl text-sm transition-all shadow hover:shadow-md"
           >
             Become A Partner →
-          </a>
+          </a> */}
         </div>
 
         {/* Images */}
