@@ -1,0 +1,4 @@
+=== DIAGNOSTICS: Checking local setup ===
+Port 8000 (Backend API) is OFFLINE.
+Port 5433 (Postgres Database) is OFFLINE.
+===========================================
