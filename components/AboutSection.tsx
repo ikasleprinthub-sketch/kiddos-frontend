@@ -37,7 +37,7 @@ export default function AboutSection() {
               {/* Top-left — taller */}
               <div className="rounded-[20px] overflow-hidden h-48 sm:h-56 bg-[#e8f5e9]">
                 <img
-                  src="/images/hero_millet_bg.png"
+                  src="/images/journey/journey1.svg"
                   alt="About Kiddos Foods"
                   className="w-full h-full object-cover"
                 />
@@ -46,7 +46,7 @@ export default function AboutSection() {
               {/* Top-right — shorter */}
               <div className="rounded-[20px] overflow-hidden h-36 sm:h-44 self-start bg-[#f0fdf4]">
                 <img
-                  src="/images/carrot.png"
+                  src="/images/journey/journey2.svg"
                   alt="Fresh ingredients"
                   className="w-full h-full object-cover"
                 />
@@ -55,7 +55,7 @@ export default function AboutSection() {
               {/* Bottom-left — shorter */}
               <div className="rounded-[20px] overflow-hidden h-36 sm:h-44 self-end bg-[#fef9e7]">
                 <img
-                  src="/images/beetroot.png"
+                  src="/images/journey/journey3.svg"
                   alt="Organic produce"
                   className="w-full h-full object-cover"
                 />
@@ -64,7 +64,7 @@ export default function AboutSection() {
               {/* Bottom-right — taller */}
               <div className="rounded-[20px] overflow-hidden h-48 sm:h-56 bg-[#e8f5e9]">
                 <img
-                  src="/images/pasta_spiral.png"
+                  src="/images/journey/journey4.svg"
                   alt="Kiddos quality"
                   className="w-full h-full object-cover"
                 />
