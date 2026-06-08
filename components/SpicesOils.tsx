@@ -20,7 +20,10 @@ export default function SpicesOils() {
 
   useEffect(() => {
     fetch("/api/products?spiceOil=true&limit=20")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("API error");
+        return r.json();
+      })
       .then((data) => {
         const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
         setProducts(list.filter((p) => p.isActive));

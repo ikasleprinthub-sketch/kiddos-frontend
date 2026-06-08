@@ -15,7 +15,10 @@ export default function Footer() {
 
   useEffect(() => {
     fetch("/api/categories?limit=3")
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
       .then(data => {
         if (data.categories && Array.isArray(data.categories)) {
           setFetchedCategories(

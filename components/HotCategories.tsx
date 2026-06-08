@@ -29,7 +29,10 @@ export default function HotCategories() {
 
   useEffect(() => {
     fetch(`/api/categories?limit=100&t=${Date.now()}`, { cache: "no-store" })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("API error");
+        return r.json();
+      })
       .then((data) => {
         const list: ApiCategory[] = Array.isArray(data) ? data : (data.categories ?? []);
         setCategories(list.filter((c) => c.isActive));
