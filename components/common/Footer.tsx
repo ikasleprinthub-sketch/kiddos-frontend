@@ -179,7 +179,7 @@ export default function Footer() {
         style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
       >
         <p className="text-white/70 text-xs text-center md:text-left">
-          Copyright © 2026 Kiddos Foods | Crafted And Maintained By{" "}
+          Copyright © {new Date().getFullYear()} Kiddos Foods | Crafted And Maintained By{" "}
           <a
             href="https://ikasle.com"
             target="_blank"

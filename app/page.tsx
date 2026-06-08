@@ -8,8 +8,8 @@ export default function Home() {
     <div className="w-full flex flex-col min-h-screen">
       <HeroSection />
       <HotCategories />
-      <ProductShowcase />
       <AboutSection />
+      <ProductShowcase />
     </div>
   );
 }

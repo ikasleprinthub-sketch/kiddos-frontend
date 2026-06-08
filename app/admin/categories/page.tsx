@@ -69,15 +69,22 @@ export default function CategoriesPage() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const MAX_MB = 5;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      setError(`Image is too large. Maximum allowed size is ${MAX_MB} MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
+      e.target.value = "";
+      return;
+    }
     const fd = new FormData();
     fd.append("file", file);
     fd.append("folder", "categories");
     setUploadingImage(true);
+    setError("");
     try {
       const res = await adminApi.upload<{ url: string }>("/upload", fd);
       setForm((f) => ({ ...f, image: res.url }));
     } catch {
-      setError("Image upload failed");
+      setError("Image upload failed. Please try again.");
     } finally {
       setUploadingImage(false);
     }

@@ -23,6 +23,7 @@ export default function ChutneyBookBadge() {
             d="M 80,80 m -62,0 a 62,62 0 1,1 124,0 a 62,62 0 1,1 -124,0"
           />
         </defs>
+        <circle cx="80" cy="80" r="76" fill="white" className="dark:fill-zinc-900" />
         <text
           fill="#1e4620"
           fontSize="12"

@@ -95,12 +95,12 @@ export default function HotCategories() {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
   };
 
-  // Auto-scroll every 3 seconds, pauses on hover
+  // Auto-scroll every 3 seconds, pauses on hover (left-to-right)
   useEffect(() => {
     if (maxIndex <= 0) return;
     const id = setInterval(() => {
       if (!isHovered.current) {
-        setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+        setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
       }
     }, 3000);
     return () => clearInterval(id);
@@ -202,11 +202,11 @@ export default function HotCategories() {
                     <p className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-[#2a7a2a] transition-colors duration-200 px-1 min-h-[44px] flex items-center justify-center">
                       {cat.name}
                     </p>
-                    {count > 0 && (
+                    {/* {count > 0 && (
                       <p className="text-xs text-zinc-450 dark:text-zinc-500 mt-2 font-medium">
                         {count} {count === 1 ? "product" : "products"}
                       </p>
-                    )}
+                    )} */}
                   </Link>
                 );
               })}

@@ -591,6 +591,13 @@ export default function ProductsPage() {
                               onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
+                                const MAX_MB = 5;
+                                if (file.size > MAX_MB * 1024 * 1024) {
+                                  setError(`Image is too large. Maximum allowed size is ${MAX_MB} MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
+                                  e.target.value = "";
+                                  return;
+                                }
+                                setError("");
                                 setUploading(true);
                                 try {
                                   const fd = new FormData();
@@ -602,7 +609,7 @@ export default function ProductsPage() {
                                     imgs[slot] = res.url;
                                     return { ...f, images: imgs.filter(Boolean) };
                                   });
-                                } catch { setError("Image upload failed"); }
+                                } catch { setError("Image upload failed. Please try again."); }
                                 finally { setUploading(false); }
                               }}
                             />
