@@ -91,7 +91,7 @@ export default function ContactForm() {
         </div>
         
         <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-100 leading-tight mb-3">
-          We&apos;d love to hear from you
+          We&apos;d Love to Hear From you
         </h2>
         <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
           Fill in the form and our team will respond within one business day. We are always ready to assist you with professional solutions and reliable support.
