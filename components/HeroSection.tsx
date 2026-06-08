@@ -275,7 +275,14 @@ export default function HeroSection() {
 
   useEffect(() => {
     fetch("/api/banners?position=HOME")
-      .then((r) => r.json())
+      .then(async (r) => {
+        const contentType = r.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          return r.json();
+        }
+        const text = await r.text();
+        throw new Error(`Non-JSON response received: ${text.slice(0, 100)}`);
+      })
       .then((data: ApiBanner[] | { banners: ApiBanner[] }) => {
         // Public route returns array directly; handle both shapes defensively
         const list: ApiBanner[] = Array.isArray(data)

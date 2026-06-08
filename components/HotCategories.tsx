@@ -18,6 +18,15 @@ const COLOR_CLASSES = [
   { bg: "#fff7ed", text: "#ea580c" },
 ];
 
+const FALLBACK_CATEGORIES: ApiCategory[] = [
+  { id: "fb-1", name: "Ghee Laddu", slug: "ghee-laddu", isActive: true, sortOrder: 0, image: null },
+  { id: "fb-2", name: "Noodles", slug: "noodles", isActive: true, sortOrder: 1, image: null },
+  { id: "fb-3", name: "Oil", slug: "oil", isActive: true, sortOrder: 2, image: null },
+  { id: "fb-4", name: "Pasta", slug: "pasta", isActive: true, sortOrder: 3, image: null },
+  { id: "fb-5", name: "Pickles", slug: "pickles", isActive: true, sortOrder: 4, image: null },
+  { id: "fb-6", name: "Spice Blends", slug: "spice-blends", isActive: true, sortOrder: 5, image: null },
+];
+
 export default function HotCategories() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,24 +51,24 @@ export default function HotCategories() {
     const handleResize = () => {
       const w = window.innerWidth;
       if (w < 640) {
-        setVisibleCount(3);
-        setCardWidth(110);
-        setGap(16);
+        setVisibleCount(2);
+        setCardWidth(155);
+        setGap(12);
       } else if (w < 768) {
-        setVisibleCount(4);
-        setCardWidth(120);
-        setGap(20);
+        setVisibleCount(3);
+        setCardWidth(165);
+        setGap(16);
       } else if (w < 1024) {
-        setVisibleCount(5);
-        setCardWidth(130);
-        setGap(24);
+        setVisibleCount(4);
+        setCardWidth(175);
+        setGap(20);
       } else if (w < 1280) {
-        setVisibleCount(6);
-        setCardWidth(130);
-        setGap(24);
+        setVisibleCount(5);
+        setCardWidth(185);
+        setGap(20);
       } else {
-        setVisibleCount(7);
-        setCardWidth(130);
+        setVisibleCount(6);
+        setCardWidth(195);
         setGap(24);
       }
     };
@@ -68,7 +77,8 @@ export default function HotCategories() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const maxIndex = Math.max(0, categories.length - visibleCount);
+  const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
+  const maxIndex = Math.max(0, displayCategories.length - visibleCount);
 
   useEffect(() => {
     if (currentIndex > maxIndex) setCurrentIndex(maxIndex);
@@ -95,18 +105,21 @@ export default function HotCategories() {
 
   if (loading) {
     return (
-      <section className="bg-white py-10 px-4 sm:px-6 lg:px-8">
+      <section className="bg-zinc-50/30 py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col items-center mb-8">
-            <div className="h-8 w-40 bg-zinc-100 rounded animate-pulse mb-2" />
-            <div className="h-3 w-16 bg-zinc-100 rounded-full animate-pulse" />
+            <div className="h-8 w-48 bg-zinc-100 rounded animate-pulse mb-2" />
           </div>
-          <div className="flex gap-6 justify-center">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-3">
-                <div className="w-28 h-28 rounded-full bg-zinc-100 animate-pulse" />
-                <div className="h-4 w-20 bg-zinc-100 rounded animate-pulse" />
-                <div className="h-3 w-14 bg-zinc-100 rounded animate-pulse" />
+          <div className="flex gap-6 justify-center overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center shrink-0 bg-white border border-zinc-100 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)]"
+                style={{ width: `${cardWidth}px` }}
+              >
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-zinc-100 animate-pulse mb-4" />
+                <div className="h-5 w-20 bg-zinc-100 rounded animate-pulse mb-2" />
+                <div className="h-4 w-14 bg-zinc-100 rounded animate-pulse" />
               </div>
             ))}
           </div>
@@ -115,18 +128,18 @@ export default function HotCategories() {
     );
   }
 
-  if (categories.length === 0) return null;
+  if (displayCategories.length === 0) return null;
 
   return (
     <section
-      className="bg-white py-10 px-4 sm:px-6 lg:px-8"
+      className="bg-zinc-50/30 dark:bg-zinc-950/10 py-12 px-4 sm:px-6 lg:px-8"
       onMouseEnter={() => { isHovered.current = true; }}
       onMouseLeave={() => { isHovered.current = false; }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
-        <div className="flex flex-col items-center mb-8">
-          <h2 className="text-[#1a2e1a] font-black text-2xl sm:text-3xl tracking-tight">
+        <div className="flex flex-col items-center mb-10">
+          <h2 className="text-[#1a2e1a] dark:text-zinc-100 font-bold text-2xl sm:text-3xl tracking-tight">
             Hot categories
           </h2>
           <svg viewBox="0 0 80 14" className="mt-1.5 w-16 h-3" fill="none">
@@ -140,28 +153,19 @@ export default function HotCategories() {
         </div>
 
         {/* Carousel wrapper */}
-        <div className="relative">
-          {/* Prev button */}
-          {maxIndex > 0 && (
-            <button
-              onClick={handlePrev}
-              className="absolute -left-4 sm:-left-5 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full border border-zinc-200 bg-white shadow-sm flex items-center justify-center text-zinc-500 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-200 active:scale-95"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          )}
-
+        <div className="relative px-1">
           {/* Sliding track */}
-          <div className="overflow-hidden py-2">
+          <div className="overflow-hidden py-4 px-2 -mx-2">
             <div
-              className="flex transition-transform duration-500 ease-in-out"
+              className={`flex transition-transform duration-500 ease-in-out ${
+                maxIndex === 0 ? "justify-center" : ""
+              }`}
               style={{
                 gap: `${gap}px`,
                 transform: `translateX(-${currentIndex * (cardWidth + gap)}px)`,
               }}
             >
-              {categories.map((cat, idx) => {
+              {displayCategories.map((cat, idx) => {
                 const color = COLOR_CLASSES[idx % COLOR_CLASSES.length];
                 const count = cat._count?.products ?? 0;
 
@@ -169,11 +173,11 @@ export default function HotCategories() {
                   <Link
                     key={cat.id}
                     href={`/products?category=${cat.slug}`}
-                    className="flex flex-col items-center shrink-0 group text-center"
+                    className="flex flex-col items-center shrink-0 group text-center bg-white dark:bg-zinc-900 border border-zinc-100/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:border-zinc-200/60 dark:hover:border-zinc-750 hover:-translate-y-1.5 transition-all duration-300"
                     style={{ width: `${cardWidth}px` }}
                   >
                     <div
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden border border-zinc-100/60 shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-300"
+                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-350 group-hover:scale-105 mb-4 shadow-sm"
                       style={{ backgroundColor: color.bg }}
                     >
                       {cat.image ? (
@@ -181,7 +185,7 @@ export default function HotCategories() {
                         <img
                           src={cat.image}
                           alt={cat.name}
-                          className="w-[80%] h-[80%] object-contain"
+                          className="w-[72%] h-[72%] object-contain"
                         />
                       ) : (
                         <span
@@ -192,41 +196,32 @@ export default function HotCategories() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-3 text-[13px] font-bold text-zinc-800 leading-snug line-clamp-2 group-hover:text-[#2a7a2a] transition-colors px-1">
+                    <p className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-[#2a7a2a] transition-colors duration-200 px-1 min-h-[44px] flex items-center justify-center">
                       {cat.name}
                     </p>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
-                      {count} {count === 1 ? "product" : "products"}
-                    </p>
+                    {count > 0 && (
+                      <p className="text-xs text-zinc-450 dark:text-zinc-500 mt-2 font-medium">
+                        {count} {count === 1 ? "product" : "products"}
+                      </p>
+                    )}
                   </Link>
                 );
               })}
             </div>
           </div>
-
-          {/* Next button */}
-          {maxIndex > 0 && (
-            <button
-              onClick={handleNext}
-              className="absolute -right-4 sm:-right-5 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full border border-zinc-200 bg-white shadow-sm flex items-center justify-center text-zinc-500 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-200 active:scale-95"
-              aria-label="Next"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
         </div>
 
         {/* Dot indicators */}
         {maxIndex > 0 && (
-          <div className="flex justify-center gap-1.5 mt-6">
+          <div className="flex justify-center gap-1.5 mt-8">
             {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`h-2.5 rounded-full transition-all duration-300 ${
                   currentIndex === idx
-                    ? "w-6 bg-emerald-600"
-                    : "w-2 bg-zinc-200 hover:bg-zinc-300"
+                    ? "w-6 bg-[#2a7a2a]"
+                    : "w-2.5 bg-zinc-200 hover:bg-zinc-300"
                 }`}
                 aria-label={`Go to ${idx + 1}`}
               />
