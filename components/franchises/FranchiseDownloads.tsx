@@ -35,8 +35,16 @@ const resources = [
 
 export default function FranchiseDownloads() {
   return (
-    <section id="downloads" className="bg-[#1e4620] py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="downloads" className="relative bg-gradient-to-br from-[#1e4620] to-[#113113] dark:from-[#061410] dark:to-[#030907] py-24 pb-28 overflow-hidden">
+      
+      {/* Top Wave Separator flowing from white into green
+      <div className="absolute top-0 left-0 right-0 overflow-hidden leading-none pointer-events-none z-10 transform rotate-180">
+        <svg className="relative block w-full h-[35px] text-white dark:text-zinc-900 fill-current" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,1,321.39,56.44Z"></path>
+        </svg>
+      </div> */}
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 z-20">
 
         {/* Heading */}
         <div className="text-center mb-12">
@@ -91,6 +99,13 @@ export default function FranchiseDownloads() {
         </div>
 
       </div>
+
+      {/* Bottom Wave Separator flowing from green into off-white
+      <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none pointer-events-none z-10">
+        <svg className="relative block w-full h-[35px] text-[#faf8f5] dark:text-[#061410] fill-current" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,1,321.39,56.44Z"></path>
+        </svg>
+      </div> */}
     </section>
   );
 }

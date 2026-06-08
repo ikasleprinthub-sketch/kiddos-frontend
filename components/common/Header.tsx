@@ -95,7 +95,7 @@ export default function Header() {
             <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0">
               <div className="relative h-12 w-28 md:h-20 md:w-64 overflow-hidden">
                 <Image
-                  src="/logo.svg"
+                  src="/orglogo.svg"
                   alt="Kiddos Foods Logo"
                   fill
                   sizes="(max-width: 768px) 112px, 256px"

@@ -1,4 +1,4 @@
-const { Client } = require('C:/Users/Administrator/Documents/KiddosFood/kiddos-backend/node_modules/pg');
+const { Client } = require('pg');
 const crypto = require('crypto');
 
 const client = new Client({

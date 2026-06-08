@@ -1,65 +1,65 @@
 import Image from "next/image";
 
+const stats = [
+  { value: "5+",   label: "Years of Trust" },
+  { value: "50+",  label: "Products" },
+  { value: "10K+", label: "Happy Customers" },
+  { value: "100%", label: "Natural & Safe" },
+];
+
 export default function AboutIntro() {
   return (
-    <section className="bg-gray-50 py-16 px-4">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+    <section className="bg-white py-14 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
 
-        {/* ── Left: image card collage ── */}
-        <div className="w-full lg:w-[55%] flex gap-4 h-[600px]">
+        {/* Top: content left + image right */}
+        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-14 mb-10">
 
-          {/* Sub-left column — left.svg poster */}
-          <div className="relative w-[44%] rounded-2xl overflow-hidden shadow-sm">
-            <Image
-              src="/images/about/right.svg"
-              alt="Kiddos Foods – Make Healthy Posterity"
-              fill
-              className="object-cover"
-            />
+          {/* ── Left: text ── */}
+          <div className="w-full lg:w-[50%]">
+            <h1 className="text-[#1a2e1a] font-black text-3xl sm:text-4xl mb-2 tracking-tight">
+              About Kiddos Foods
+            </h1>
+
+            <p className="text-zinc-500 text-sm font-medium mb-5">
+              Tasty &bull; Healthy &bull; Homemade
+            </p>
+
+            <p className="text-zinc-500 text-sm leading-relaxed mb-4">
+              Kiddos Foods was started with a simple mission – to bring homemade taste
+              and nutrition to every home. We prepare fresh batters, spice blends, oils,
+              pickles and more using traditional recipes and premium quality ingredients.
+            </p>
+
+            <p className="text-zinc-500 text-sm leading-relaxed">
+              Every product is made with love, care and hygiene, just like it is made
+              in our own kitchen.
+            </p>
           </div>
 
-          {/* Sub-right column — right.svg poster (full height) */}
-          <div className="relative w-[56%] rounded-2xl overflow-hidden shadow-sm">
+          {/* ── Right: image ── */}
+          <div className="w-full lg:w-[50%] rounded-2xl overflow-hidden">
             <Image
-              src="/images/about/left.svg"
-              alt="20 Varieties of Idli & Dosa Batter"
-              fill
-              className="object-cover"
+              src="/images/about/abouthero.svg"
+              alt="Kiddos Foods products"
+              width={640}
+              height={420}
+              className="w-full h-auto object-cover rounded-2xl"
             />
           </div>
 
         </div>
 
-        {/* ── Right: text content ── */}
-        <div className="w-full lg:w-[45%] max-w-lg">
-          <p className="text-gray-400 text-sm mb-3 tracking-wide">
-            About Us
-          </p>
-
-          <h2 className="text-gray-900 font-extrabold text-2xl lg:text-3xl leading-snug mb-5">
-            At Kiddos Foods, Our Mantra Is Simple Make Healthy Posterity.
-          </h2>
-
-          <p className="text-gray-500 text-sm leading-relaxed mb-7 text-justify">
-            We believe that the actions we take today decide the health and
-            well-being of the next generation. Every product we make is created
-            with this responsibility in mind especially for the little ones who
-            deserve pure, honest and safe food.
-          </p>
-
-          <h3 className="text-[#1e4620] font-bold text-base mb-3">
-            Why Kiddos Foods?
-          </h3>
-
-          <p className="text-gray-500 text-sm leading-relaxed mb-4 text-justify">
-            Because we cook like home with love, honesty and tradition, not
-            like a factory.
-          </p>
-
-          <p className="text-gray-500 text-sm leading-relaxed text-justify">
-            All products are made the way a mother would make at home with
-            care, patience, and zero shortcuts.
-          </p>
+        {/* Bottom: stats full width */}
+        <div className="border-t border-gray-100 pt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex flex-col items-center">
+              <span className="text-[#1e4620] font-black text-2xl sm:text-3xl leading-none">
+                {stat.value}
+              </span>
+              <span className="text-zinc-400 text-xs mt-1.5">{stat.label}</span>
+            </div>
+          ))}
         </div>
 
       </div>

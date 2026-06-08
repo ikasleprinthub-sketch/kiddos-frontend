@@ -31,10 +31,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="bg-[#fafafa] dark:bg-zinc-950 py-16 md:py-24 border-t border-zinc-200 dark:border-zinc-800">
-        <FAQSection />
-      </section>
 
       {/* Locations Section */}
       <section className="bg-white dark:bg-zinc-900 py-16 md:py-24 border-t border-zinc-200 dark:border-zinc-800">

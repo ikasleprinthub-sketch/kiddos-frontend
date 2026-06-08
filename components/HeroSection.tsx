@@ -275,7 +275,10 @@ export default function HeroSection() {
 
   useEffect(() => {
     fetch("/api/banners?position=HOME")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("API error");
+        return r.json();
+      })
       .then((data: ApiBanner[] | { banners: ApiBanner[] }) => {
         // Public route returns array directly; handle both shapes defensively
         const list: ApiBanner[] = Array.isArray(data)

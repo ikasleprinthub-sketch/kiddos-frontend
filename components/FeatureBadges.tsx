@@ -27,7 +27,7 @@ const FEATURES = [
 
 export default function FeatureBadges() {
   return (
-    <section className="bg-white dark:bg-zinc-950 py-10 px-4">
+    <section className="bg-[#f5f9f5] dark:bg-zinc-950 py-10 px-4">
       <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
         {FEATURES.map(({ icon: Icon, title, sub }) => (
           <div

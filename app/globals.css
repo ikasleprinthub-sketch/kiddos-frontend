@@ -115,6 +115,39 @@ body {
   animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+@keyframes bubble {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1) rotate(0deg); }
+  30%       { transform: translateY(-18px) translateX(15px) scale(1.06) rotate(4deg); }
+  60%       { transform: translateY(-8px) translateX(-15px) scale(0.96) rotate(-3deg); }
+}
+@keyframes bubble2 {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1) rotate(0deg); }
+  40%       { transform: translateY(-14px) translateX(-18px) scale(1.08) rotate(-5deg); }
+  70%       { transform: translateY(-4px) translateX(12px) scale(0.95) rotate(3deg); }
+}
+@keyframes bubble3 {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1) rotate(0deg); }
+  50%       { transform: translateY(-20px) translateX(20px) scale(1.05) rotate(6deg); }
+}
+@keyframes sway-lr {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1) rotate(0deg); }
+  33%       { transform: translateY(-16px) translateX(22px) scale(1.04) rotate(5deg); }
+  66%       { transform: translateY(-8px) translateX(-12px) scale(0.97) rotate(-4deg); }
+}
+@keyframes sway-rl {
+  0%, 100% { transform: translateY(0px) translateX(0px) scale(1) rotate(0deg); }
+  33%       { transform: translateY(-16px) translateX(-22px) scale(1.04) rotate(-5deg); }
+  66%       { transform: translateY(-8px) translateX(12px) scale(0.97) rotate(4deg); }
+}
+
+.animate-bubble   { animation: bubble  5s  ease-in-out infinite; }
+.animate-bubble2  { animation: bubble2 6.5s ease-in-out infinite; }
+.animate-bubble3  { animation: bubble3 4.2s ease-in-out infinite; }
+.animate-sway-lr  { animation: sway-lr 6s ease-in-out infinite; }
+.animate-sway-rl  { animation: sway-rl 6.5s ease-in-out infinite; }
+.animate-sway-lr-fast { animation: sway-lr 4.5s ease-in-out infinite; }
+.animate-sway-rl-fast { animation: sway-rl 4.8s ease-in-out infinite; }
+
 /* Glassmorphism/Plastic Sheen effect */
 .plastic-sheen {
   background: linear-gradient(

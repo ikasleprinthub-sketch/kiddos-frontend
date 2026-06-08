@@ -2,6 +2,8 @@ import AboutIntro from "../../components/AboutIntro";
 import WhatWeDo from "../../components/WhatWeDo";
 import PageHeader from "@/components/common/PageHeader";
 import FeatureBadges from "@/components/FeatureBadges";
+import FAQPage from "../faqs/page";
+import Cta from "@/components/franchises/FranchiseCTA";
 
 export default function AboutPage() {
   return (
@@ -9,7 +11,9 @@ export default function AboutPage() {
       <PageHeader title="About Us" />
       <AboutIntro />
       <FeatureBadges />
+      <Cta/>
       <WhatWeDo />
+      <FAQPage />
     </main>
   );
 }

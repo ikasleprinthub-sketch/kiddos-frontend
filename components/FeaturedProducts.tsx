@@ -22,14 +22,20 @@ export default function FeaturedProducts() {
 
   useEffect(() => {
     fetch("/api/products?featured=true&limit=20")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("API error");
+        return r.json();
+      })
       .then((data) => {
         const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
         const active = list.filter((p) => p.isActive);
         // If no featured products, fall back to first 20 active products
         if (active.length === 0) {
           return fetch("/api/products?limit=20")
-            .then((r) => r.json())
+            .then((r) => {
+              if (!r.ok) throw new Error("API error");
+              return r.json();
+            })
             .then((d) => {
               const all: ApiProduct[] = Array.isArray(d) ? d : (d.products ?? []);
               setProducts(all.filter((p) => p.isActive));

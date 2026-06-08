@@ -62,7 +62,10 @@ export default function PromoBanners() {
 
   useEffect(() => {
     fetch("/api/banners?position=PROMO&limit=4")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("API error");
+        return r.json();
+      })
       .then((data: ApiBanner[]) => {
         // The public route returns the array directly
         const list = Array.isArray(data) ? data : [];

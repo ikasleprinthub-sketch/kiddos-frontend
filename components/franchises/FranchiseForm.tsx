@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Send } from "lucide-react";
+import { Check, Send, Upload, X } from "lucide-react";
 
 type FormState = {
   name: string;
@@ -19,6 +19,7 @@ type FormState = {
   package: string;
   readyToStart: string;
   message: string;
+  image: string;
 };
 
 const EMPTY: FormState = {
@@ -37,6 +38,7 @@ const EMPTY: FormState = {
   package: "",
   readyToStart: "",
   message: "",
+  image: "",
 };
 
 const inputCls =
@@ -49,6 +51,9 @@ export default function FranchiseForm() {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [error, setError] = useState("");
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -60,17 +65,52 @@ export default function FranchiseForm() {
     setForm((prev) => ({ ...prev, [e.target.name]: value }));
   }
 
-  const [error, setError] = useState("");
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "franchises");
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.message || `Upload failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      setForm((prev) => ({ ...prev, image: data.url }));
+    } catch (err: any) {
+      setUploadError(err.message || "Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
     try {
+      // Map pincode to zipcode for backend compatibility
+      const payload = {
+        ...form,
+        zipcode: form.pincode,
+      };
+
       const res = await fetch("/api/franchise-inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -87,22 +127,22 @@ export default function FranchiseForm() {
   return (
     <section
       id="inquiry-form"
-      className="bg-gray-50 dark:bg-zinc-950 py-16 px-4 scroll-mt-24"
+      className="bg-[#faf8f5] dark:bg-[#081814]/40 py-20 px-4 scroll-mt-24 border-t border-zinc-150/40 dark:border-zinc-900"
     >
       {/* Heading */}
       <div className="text-center mb-10">
         <h2 className="text-2xl sm:text-3xl font-extrabold">
           <span className="text-gray-900 dark:text-zinc-100">Start Your </span>
-          <span className="text-[#f05252]">Franchise Journey</span>
+          <span className="text-[#1e4620] dark:text-[#ca8a04]">Franchise Journey</span>
         </h2>
-        <p className="text-gray-400 dark:text-zinc-500 text-sm mt-2">
+        <p className="text-gray-450 dark:text-zinc-400 text-sm mt-2">
           Fill out the form below, and our team will get in touch with you
           shortly to guide you through the next steps.
         </p>
       </div>
 
       {/* Form card */}
-      <div className="max-w-5xl mx-auto bg-white dark:bg-zinc-900 rounded-2xl p-8 sm:p-10 shadow-sm">
+      <div className="max-w-5xl mx-auto bg-white dark:bg-zinc-900 rounded-[32px] p-8 sm:p-10 border border-zinc-150/50 dark:border-zinc-800/80 shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
 
         {isSubmitted ? (
           <div className="text-center py-12">
@@ -124,7 +164,7 @@ export default function FranchiseForm() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Row 1: Name | Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -190,7 +230,50 @@ export default function FranchiseForm() {
               </div>
             </div>
 
-            {/* Row 7: Message */}
+            {/* Row 7: Storefront Image Upload */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400">
+                Storefront / Preferred Location Photos (Optional)
+              </label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 px-5 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-sm font-bold text-zinc-750 dark:text-zinc-200 cursor-pointer border border-dashed border-gray-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-550 transition-all select-none">
+                  <Upload className="w-4 h-4 text-zinc-500" />
+                  {uploading ? "Uploading..." : form.image ? "Change Photo" : "Upload Photo"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </label>
+
+                {form.image && (
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-850 group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={form.image}
+                      alt="Storefront photo preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, image: "" }))}
+                      className="absolute inset-0 bg-black/60 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      <X className="w-4 h-4 stroke-[2.5px]" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              {uploadError && (
+                <p className="text-xs text-red-500 font-medium mt-1">
+                  {uploadError}
+                </p>
+              )}
+            </div>
+
+            {/* Row 8: Message */}
             <textarea
               name="message"
               rows={5}
@@ -202,7 +285,7 @@ export default function FranchiseForm() {
 
             {/* Error */}
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+              <p className="text-sm text-red-650 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-lg px-4 py-3">
                 {error}
               </p>
             )}
@@ -212,7 +295,7 @@ export default function FranchiseForm() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex items-center gap-2 px-8 py-3 rounded-lg bg-[#f05252] hover:bg-[#e53e3e] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-8 py-3 rounded-lg bg-[#1e4620] hover:bg-[#134e15] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
