@@ -1,4 +1,20 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
 export default function FranchiseCTA() {
+  const router = useRouter();
+
+  const handleEnquireClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById("inquiry-form");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      router.push("/franchises#inquiry-form");
+    }
+  };
+
   return (
     <section className="relative bg-[#1e4620] py-12 px-6 sm:px-12 lg:px-20 overflow-hidden">
 
@@ -37,6 +53,7 @@ export default function FranchiseCTA() {
         {/* Button */}
         <a
           href="#inquiry-form"
+          onClick={handleEnquireClick}
           className="shrink-0 px-8 py-3.5 bg-[#f5c518] hover:bg-[#e6b800] text-[#1e4620] font-black text-sm rounded-xl shadow-md hover:-translate-y-0.5 transition-all duration-200 active:scale-95 whitespace-nowrap"
         >
           Enquire Now

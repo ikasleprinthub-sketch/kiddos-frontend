@@ -176,7 +176,7 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={loading}
-            className="group relative inline-flex items-center gap-4 py-2.5 pl-6 pr-2 rounded-full bg-[#f88636] hover:bg-[#e77525] text-white font-bold text-[13px] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="group relative inline-flex items-center gap-4 py-2.5 pl-6 pr-2 rounded-full bg-[#f88636] hover:bg-[#e77525] text-white font-bold text-[13px] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? (
               <span className="py-1 pr-4">Sending...</span>

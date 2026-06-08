@@ -17,7 +17,7 @@ const resources = [
     desc: "Learn about our brand values, market potential, investment slabs, store layouts, and full support systems.",
     resourceType: "BROCHURE" as const,
     btnLabel: "Download Brochure",
-    btnStyle: "bg-[#f05252] hover:bg-[#e53e3e] text-white",
+    btnStyle: "bg-[#f05252] hover:bg-[#e53e3e] text-white cursor-pointer",
   },
   {
     icon: <FileText className="w-8 h-8 text-[#4285F4]" />,
@@ -28,7 +28,7 @@ const resources = [
     desc: "Prefer offline? Download the official form, fill the required details, and send it back to our franchise team.",
     resourceType: "APPLICATION_FORM" as const,
     btnLabel: "Download Form",
-    btnStyle: "bg-[#1e4620] hover:bg-[#2c5e2f] text-white",
+    btnStyle: "bg-[#1e4620] hover:bg-[#2c5e2f] text-white cursor-pointer",
   },
 ];
 

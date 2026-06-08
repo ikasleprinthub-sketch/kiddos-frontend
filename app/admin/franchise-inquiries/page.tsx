@@ -22,6 +22,7 @@ interface Inquiry {
   package?: string;
   readyToStart?: string;
   message?: string;
+  image?: string;
   createdAt: string;
 }
 
@@ -33,6 +34,7 @@ export default function FranchiseInquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Inquiry | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,6 +53,40 @@ export default function FranchiseInquiriesPage() {
   }, [page, search]);
 
   useEffect(() => { load(); }, [load]);
+
+  const handleDelete = async () => {
+    if (!selected) return;
+    const ok = confirm(`Are you sure you want to delete the franchise inquiry from ${selected.name}?`);
+    if (!ok) return;
+
+    setDeleting(true);
+    try {
+      await adminApi.delete(`/admin/franchise-inquiries/${selected.id}`);
+      setSelected(null);
+      load();
+    } catch (err) {
+      alert("Failed to delete inquiry");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const downloadImage = async (url: string, filename: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
 
   const PACKAGE_LABEL: Record<string, string> = {
     kiosk: "Kiosk Model",
@@ -180,32 +216,75 @@ export default function FranchiseInquiriesPage() {
                 <X size={18} />
               </button>
             </div>
-            <div className="p-6 space-y-4 text-sm flex-1">
-              {[
-                ["Name", selected.name],
-                ["Email", selected.email],
-                ["Mobile", selected.mobile],
-                ["Alternate", selected.alternate],
-                ["Preferred Location", selected.preferredLocation],
-                ["Heard About Us", selected.hearAboutUs],
-                ["Country", selected.country],
-                ["State", selected.state],
-                ["City", selected.city],
-                ["Zipcode", selected.zipcode],
-                ["Profession", selected.profession],
-                ["About Business", selected.aboutBusiness],
-                ["Package", PACKAGE_LABEL[selected.package ?? ""] || selected.package],
-                ["Ready To Start", READY_LABEL[selected.readyToStart ?? ""] || selected.readyToStart],
-                ["Message", selected.message],
-                ["Submitted", new Date(selected.createdAt).toLocaleString("en-IN")],
-              ].map(([label, value]) =>
-                value ? (
-                  <div key={label} className="grid grid-cols-[140px_1fr] gap-2">
-                    <span className="font-semibold text-gray-500">{label}</span>
-                    <span className="text-gray-800 break-words">{value}</span>
+            <div className="p-6 space-y-4 text-sm flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
+                {[
+                  ["Name", selected.name],
+                  ["Email", selected.email],
+                  ["Mobile", selected.mobile],
+                  ["Alternate", selected.alternate],
+                  ["Preferred Location", selected.preferredLocation],
+                  ["Heard About Us", selected.hearAboutUs],
+                  ["Country", selected.country],
+                  ["State", selected.state],
+                  ["City", selected.city],
+                  ["Zipcode", selected.zipcode],
+                  ["Profession", selected.profession],
+                  ["About Business", selected.aboutBusiness],
+                  ["Package", PACKAGE_LABEL[selected.package ?? ""] || selected.package],
+                  ["Ready To Start", READY_LABEL[selected.readyToStart ?? ""] || selected.readyToStart],
+                  ["Message", selected.message],
+                  ["Submitted", new Date(selected.createdAt).toLocaleString("en-IN")],
+                ].map(([label, value]) =>
+                  value ? (
+                    <div key={label} className="grid grid-cols-[140px_1fr] gap-2">
+                      <span className="font-semibold text-gray-500">{label}</span>
+                      <span className="text-gray-800 break-words">{value}</span>
+                    </div>
+                  ) : null
+                )}
+
+                {selected.image && (
+                  <div className="pt-4 border-t border-gray-150 space-y-2">
+                    <p className="font-semibold text-gray-550">Storefront / Location Photo</p>
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-gray-200 bg-gray-50 group">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={selected.image}
+                        alt="Storefront photo preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity duration-200">
+                        <a
+                          href={selected.image}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-white hover:bg-gray-100 text-gray-800 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition"
+                        >
+                          View Full Size
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => downloadImage(selected.image!, `storefront_${selected.name.replace(/\s+/g, "_")}.jpg`)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition"
+                        >
+                          Download
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                ) : null
-              )}
+                )}
+              </div>
+
+              <div className="border-t border-gray-100 pt-4 mt-auto">
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50"
+                >
+                  {deleting ? "Deleting..." : "Delete Inquiry"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -16,9 +16,11 @@ import {
   Plus,
   ChevronDown,
   Share2,
+  Heart,
 } from "lucide-react";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   batters: "🫙", batter: "🫙",
@@ -79,6 +81,7 @@ export default function ProductDetailPage() {
   const slug = params?.slug as string;
 
   const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const [product, setProduct] = useState<ApiProduct | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,6 +90,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [chutneyBooks, setChutneyBooks] = useState<ApiProduct[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<ApiProduct[]>([]);
 
   useEffect(() => {
     if (!slug) return;
@@ -118,6 +122,20 @@ export default function ProductDetailPage() {
       .then((data) => {
         const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
         setChutneyBooks(list);
+      })
+      .catch(() => {/* ignore */});
+  }, [product]);
+
+  // Fetch related products from the same category
+  useEffect(() => {
+    if (!product) return;
+    const catSlug = product.category?.slug ?? "";
+    if (!catSlug) return;
+    fetch(`/api/products?category=${catSlug}&limit=10`)
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
+        setRelatedProducts(list.filter((p) => p.id !== product.id));
       })
       .catch(() => {/* ignore */});
   }, [product]);
@@ -354,7 +372,7 @@ export default function ProductDetailPage() {
             )}
 
             {/* Quantity + Add to Cart — hidden for recipe pages */}
-            {!isRecipe && <div className="flex items-center gap-3 pt-1">
+            {!isRecipe && <div className="flex items-center gap-3 pt-1 flex-wrap">
               <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200/40 dark:border-zinc-700/40">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -390,6 +408,49 @@ export default function ProductDetailPage() {
                 ) : (
                   <><ShoppingBag className="w-4 h-4" /><span>Add {qty > 1 ? `${qty}×` : ""} to Cart</span></>
                 )}
+              </button>
+
+              {/* Wishlist toggle */}
+              <button
+                onClick={() => {
+                  if (isInWishlist(product.id)) {
+                    removeFromWishlist(product.id);
+                  } else {
+                    addToWishlist({
+                      id: product.id,
+                      name: product.name,
+                      category: catSlug,
+                      categoryLabel: product.category?.name ?? "",
+                      description: product.description ?? "",
+                      price,
+                      originalPrice,
+                      rating: 0,
+                      reviewsCount: 0,
+                      emoji,
+                      image: activeImage ?? undefined,
+                      gradient,
+                      isVeg: true,
+                      weightOrQty: weight,
+                      tags: product.tags ?? [],
+                      slug: product.slug,
+                      stock: product.stock,
+                    });
+                  }
+                }}
+                title={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+                className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${
+                  isInWishlist(product.id)
+                    ? "bg-red-50 border-red-300 dark:bg-red-950/30 dark:border-red-700"
+                    : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-red-300 dark:hover:border-red-700"
+                }`}
+              >
+                <Heart
+                  className={`w-5 h-5 transition-all duration-200 ${
+                    isInWishlist(product.id)
+                      ? "fill-red-500 text-red-500 scale-110"
+                      : "text-zinc-400 dark:text-zinc-500"
+                  }`}
+                />
               </button>
             </div>}
 
@@ -490,6 +551,64 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Related Products ── */}
+      {relatedProducts.length > 0 && (
+        <section className="mt-16 max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-black text-zinc-800 dark:text-zinc-100 relative inline-block">
+              Related Products
+              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-brand-green dark:bg-brand-gold rounded-full" />
+            </h2>
+            <Link
+              href={`/products?category=${catSlug}`}
+              className="text-xs font-semibold text-brand-green dark:text-brand-gold hover:underline"
+            >
+              View All →
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {relatedProducts.map((rp) => {
+              const rpCatSlug = rp.category?.slug ?? "";
+              const rpEmoji = CATEGORY_EMOJIS[rpCatSlug] ?? FALLBACK_EMOJIS[0];
+              const rpGradient = CATEGORY_GRADIENTS[rpCatSlug] ?? FALLBACK_GRADIENTS[0];
+              const rpImg = rp.images?.find((i) => i.isPrimary)?.url ?? rp.images?.[0]?.url;
+              const rpHasSale = rp.salePrice != null && Number(rp.salePrice) < Number(rp.price);
+              const rpPrice = rpHasSale ? Number(rp.salePrice) : Number(rp.price);
+              const rpOriginal = rpHasSale ? Number(rp.price) : undefined;
+              return (
+                <Link
+                  key={rp.id}
+                  href={`/products/${rp.slug}`}
+                  className="flex-none w-44 snap-start bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden flex flex-col group"
+                >
+                  {/* Image */}
+                  <div className={`w-full aspect-square bg-gradient-to-br ${rpGradient} flex items-center justify-center overflow-hidden`}>
+                    {rpImg ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={rpImg} alt={rp.name} className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform duration-200" />
+                    ) : (
+                      <span className="text-5xl select-none">{rpEmoji}</span>
+                    )}
+                  </div>
+                  {/* Info */}
+                  <div className="p-3 flex flex-col gap-1 flex-1">
+                    <p className="text-xs font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors">
+                      {rp.name}
+                    </p>
+                    <div className="mt-auto pt-1 flex items-baseline gap-1.5">
+                      <span className="text-sm font-black text-brand-green dark:text-brand-gold">₹{rpPrice}</span>
+                      {rpOriginal && (
+                        <span className="text-[11px] text-zinc-400 line-through">₹{rpOriginal}</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── Recommended Chutney Book (batter products only) ── */}
       {chutneyBooks.length > 0 && (

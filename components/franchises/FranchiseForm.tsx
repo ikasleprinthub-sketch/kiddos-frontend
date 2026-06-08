@@ -187,14 +187,14 @@ export default function FranchiseForm() {
             {/* Row 4: Country | State | City */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <input name="country" type="text" value={form.country} onChange={handleChange} placeholder="Country" className={inputCls} />
-              <input name="state" type="text" required value={form.state} onChange={handleChange} placeholder="State" className={inputCls} />
-              <input name="city" type="text" required value={form.city} onChange={handleChange} placeholder="City" className={inputCls} />
+              <input name="state" type="text" required value={form.state} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s]/g, ""); setForm((prev) => ({ ...prev, state: v })); }} placeholder="State" className={inputCls} />
+              <input name="city" type="text" required value={form.city} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s]/g, ""); setForm((prev) => ({ ...prev, city: v })); }} placeholder="City" className={inputCls} />
             </div>
 
             {/* Row 5: Pincode | Profession | About business */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input name="pincode" type="text" value={form.pincode} onChange={handleChange} placeholder="Pin Code" className={inputCls} />
-              <input name="profession" type="text" value={form.profession} onChange={handleChange} placeholder="Profession" className={inputCls} />
+              <input name="pincode" type="text" inputMode="numeric" maxLength={6} value={form.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 6); setForm((prev) => ({ ...prev, pincode: v })); }} placeholder="Pin Code" className={inputCls} />
+              <input name="profession" type="text" value={form.profession} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s]/g, ""); setForm((prev) => ({ ...prev, profession: v })); }} placeholder="Profession" className={inputCls} />
               <input name="aboutBusiness" type="text" value={form.aboutBusiness} onChange={handleChange} placeholder="About your business" className={inputCls} />
             </div>
 
@@ -203,10 +203,9 @@ export default function FranchiseForm() {
               <div className="relative">
                 <select name="package" required value={form.package} onChange={handleChange} className={selectCls}>
                   <option value="" disabled>Select Package</option>
-                  <option value="kiosk">Kiosk Model</option>
+                  <option value="standard">Standard Package</option>
+                  <option value="premium">Premium Package</option>
                   <option value="express">Express Outlet</option>
-                  <option value="full">Full Store</option>
-                  <option value="master">Master Franchise</option>
                 </select>
                 <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -232,11 +231,11 @@ export default function FranchiseForm() {
 
             {/* Row 7: Storefront Image Upload */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-600 dark:text-zinc-400">
+              <label className="block text-sm font-bold text-gray-600 dark:text-zinc-400">
                 Storefront / Preferred Location Photos (Optional)
               </label>
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 px-5 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-sm font-bold text-zinc-750 dark:text-zinc-200 cursor-pointer border border-dashed border-gray-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-550 transition-all select-none">
+                <label className="flex items-center gap-2 px-6 py-4 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-base font-bold text-zinc-750 dark:text-zinc-200 cursor-pointer border border-dashed border-gray-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-550 transition-all select-none">
                   <Upload className="w-4 h-4 text-zinc-500" />
                   {uploading ? "Uploading..." : form.image ? "Change Photo" : "Upload Photo"}
                   <input
@@ -276,7 +275,7 @@ export default function FranchiseForm() {
             {/* Row 8: Message */}
             <textarea
               name="message"
-              rows={5}
+              rows={6}
               value={form.message}
               onChange={handleChange}
               placeholder="Message"

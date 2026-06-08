@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Tag, Package, ShoppingCart, Users,
   Image, Settings, LogOut, ChevronLeft, Upload, X,
-  BookOpen, Store, MessageSquare,
+  BookOpen, Store, MessageSquare, Download,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ const NAV = [
   { href: "/admin/banners", label: "Banners", icon: Image },
   { href: "/admin/chutney-book", label: "Chutney Book", icon: BookOpen },
   { href: "/admin/franchise-inquiries", label: "Franchise Leads", icon: Store },
+  { href: "/admin/franchise-downloads", label: "Franchise Downloads", icon: Download },
   { href: "/admin/contact-inquiries", label: "Contact Messages", icon: MessageSquare },
   // { href: "/admin/reports", label: "Reports", icon: BarChart2 },
   { href: "/admin/import", label: "Import", icon: Upload },

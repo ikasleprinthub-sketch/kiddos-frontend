@@ -12,9 +12,9 @@ export default function FranchisesPage() {
     <div className="w-full bg-[#faf8f5] dark:bg-[#061410] min-h-screen">
       <PageHeader title="Franchises" />
       <FranchiseHero />
-      <FranchiseProcess />
       <FranchiseBenefits />
       <FranchiseCTA />
+      <FranchiseProcess />
       <FranchiseExcellence />
       <FranchiseDownloads />
       <FranchiseForm />
