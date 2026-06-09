@@ -134,11 +134,20 @@ export default function ProductDetailPage() {
     if (!product) return;
     const catSlug = product.category?.slug ?? "";
     if (!["chutney-book", "chutney-books"].includes(catSlug)) return;
-    fetch("/api/products?popularBatter=true&limit=10")
+    fetch("/api/products?category=batter&limit=10")
       .then((r) => r.json())
       .then((data) => {
-        const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
-        setRecommendedBatters(list);
+        let list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
+        if (list.length === 0) {
+          fetch("/api/products?category=batters&limit=10")
+            .then((r2) => r2.json())
+            .then((data2) => {
+              setRecommendedBatters(Array.isArray(data2) ? data2 : (data2.products ?? []));
+            })
+            .catch(() => {/* ignore */});
+        } else {
+          setRecommendedBatters(list);
+        }
       })
       .catch(() => {/* ignore */});
   }, [product]);
