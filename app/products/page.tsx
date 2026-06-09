@@ -27,22 +27,9 @@ import type { ApiCategory, ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import Link from "next/link";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
-// Map API product → local Product UI shape
-const CATEGORY_EMOJIS: Record<string, string> = {
-  batters: "🫙", batter: "🫙",
-  "spice-blends": "🌶️", "organic-spices": "🌶️", spices: "🌶️",
-  "raw-spices": "🌿",
-  oils: "🫒",
-  pickles: "🥒",
-  "chutney-book": "📖", "chutney-books": "📖",
-  millets: "🌾",
-  rice: "🍚",
-  ghee: "🧈",
-  honey: "🍯",
-  "healthy-snacks": "🥜", snacks: "🥜",
-  masala: "✨",
-};
+
 const CATEGORY_GRADIENTS: Record<string, string> = {
   batters: "from-amber-100 to-orange-200", batter: "from-amber-100 to-orange-200",
   "spice-blends": "from-red-100 to-rose-200", "organic-spices": "from-red-100 to-rose-200", spices: "from-red-100 to-rose-200",
@@ -58,7 +45,6 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   masala: "from-purple-100 to-pink-200",
 };
 const FALLBACK_GRADIENTS = ["from-amber-100 to-orange-200","from-red-100 to-rose-200","from-green-100 to-emerald-200","from-yellow-100 to-lime-200"];
-const FALLBACK_EMOJIS = ["🫙","🌶️","🌿","🫒","🥒","📖","🌾","🍚","🧈","🍯","🥜","✨"];
 
 function apiProductToProduct(p: ApiProduct, idx: number): Product {
   const slug = p.category?.slug ?? "";
@@ -76,7 +62,7 @@ function apiProductToProduct(p: ApiProduct, idx: number): Product {
     originalPrice,
     rating: 4.5,
     reviewsCount: 0,
-    emoji: CATEGORY_EMOJIS[slug] ?? FALLBACK_EMOJIS[idx % FALLBACK_EMOJIS.length],
+    emoji: "",
     image: p.images?.find((i) => i.isPrimary)?.url ?? p.images?.[0]?.url,
     image2: p.images && p.images.length > 1
       ? (p.images.find((i) => !i.isPrimary)?.url ?? p.images[1]?.url)
@@ -717,7 +703,7 @@ function ProductsPageContent() {
                             ) : (
                               <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} flex items-center justify-center`}>
                                 <span className="text-6xl select-none group-hover:scale-110 transition-transform duration-500">
-                                  {product.emoji}
+                                  <CategoryIcon slug={product.category} className="w-16 h-16 text-zinc-600/50" />
                                 </span>
                               </div>
                             )}
@@ -917,7 +903,7 @@ function ProductsPageContent() {
                   <img src={quickViewProduct.image} alt={quickViewProduct.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className={`absolute inset-0 bg-gradient-to-br ${quickViewProduct.gradient} flex items-center justify-center`}>
-                    <span className="text-8xl">{quickViewProduct.emoji}</span>
+                    <CategoryIcon slug={quickViewProduct.category} className="w-24 h-24 text-zinc-600/50" />
                   </div>
                 )}
                 {quickViewProduct.isBestSeller && (
@@ -943,7 +929,7 @@ function ProductsPageContent() {
                 
                 {["chutney-book", "chutney-books"].includes(quickViewProduct.category) ? (
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 mb-6">
-                    <span className="text-xl">📖</span>
+                    <CategoryIcon slug={quickViewProduct.category} className="w-6 h-6 text-emerald-600" />
                     <div>
                       <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Free Recipe</p>
                       <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale. View and enjoy for free</p>

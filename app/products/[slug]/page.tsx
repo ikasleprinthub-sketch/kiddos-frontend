@@ -21,21 +21,8 @@ import {
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
-const CATEGORY_EMOJIS: Record<string, string> = {
-  batters: "🫙", batter: "🫙",
-  "spice-blends": "🌶️", "organic-spices": "🌶️", spices: "🌶️",
-  "raw-spices": "🌿",
-  oils: "🫒",
-  pickles: "🥒",
-  "chutney-book": "📖", "chutney-books": "📖",
-  millets: "🌾",
-  rice: "🍚",
-  ghee: "🧈",
-  honey: "🍯",
-  "healthy-snacks": "🥜", snacks: "🥜",
-  masala: "✨",
-};
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   batters: "from-amber-100 to-orange-200", batter: "from-amber-100 to-orange-200",
@@ -52,7 +39,6 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   masala: "from-purple-100 to-pink-200",
 };
 
-const FALLBACK_EMOJIS = ["🫙", "🌶️", "🌿", "🫒", "🥒", "📖", "🌾", "🍚", "🧈", "🍯", "🥜", "✨"];
 const FALLBACK_GRADIENTS = ["from-amber-100 to-orange-200", "from-red-100 to-rose-200", "from-green-100 to-emerald-200", "from-yellow-100 to-lime-200"];
 
 function Accordion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
@@ -174,7 +160,6 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product) return;
     const catSlug = product.category?.slug ?? "";
-    const emoji = CATEGORY_EMOJIS[catSlug] ?? FALLBACK_EMOJIS[0];
     const gradient = CATEGORY_GRADIENTS[catSlug] ?? FALLBACK_GRADIENTS[0];
     const hasSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);
     const price = hasSale ? Number(product.salePrice) : Number(product.price);
@@ -196,7 +181,7 @@ export default function ProductDetailPage() {
         price: finalPrice,
         originalPrice: finalOriginalPrice,
         image: activeImage ?? undefined,
-        emoji,
+        emoji: "",
         gradient,
         weightOrQty: finalWeight,
         slug: product.slug,
@@ -254,7 +239,6 @@ export default function ProductDetailPage() {
 
   const catSlug = product.category?.slug ?? "";
   const isRecipe = ["chutney-book", "chutney-books"].includes(catSlug);
-  const emoji = CATEGORY_EMOJIS[catSlug] ?? FALLBACK_EMOJIS[0];
   const gradient = CATEGORY_GRADIENTS[catSlug] ?? FALLBACK_GRADIENTS[0];
   const hasSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);
   const price = hasSale ? Number(product.salePrice) : Number(product.price);
@@ -300,8 +284,8 @@ export default function ProductDetailPage() {
                   className="w-[92%] h-[92%] object-contain relative z-10 drop-shadow-xl rounded-2xl"
                 />
               ) : (
-                <span className="text-[120px] select-none relative z-10 drop-shadow-lg animate-float-slow">
-                  {emoji}
+                <span className="text-[120px] select-none relative z-10 drop-shadow-lg animate-float-slow flex items-center justify-center w-full h-full">
+                  <CategoryIcon slug={catSlug} className="w-32 h-32 text-zinc-600/50" />
                 </span>
               )}
 
@@ -412,7 +396,7 @@ export default function ProductDetailPage() {
             {/* Free Recipe badge — shown only for chutney-book */}
             {isRecipe && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-                <span className="text-xl">📖</span>
+                <CategoryIcon slug={catSlug} className="w-6 h-6 text-emerald-600" />
                 <div>
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Free Recipe</p>
                   <p className="text-[11px] text-emerald-600 dark:text-emerald-500">Not for sale. View and enjoy for free</p>
@@ -507,7 +491,7 @@ export default function ProductDetailPage() {
                       originalPrice: displayOriginalPrice,
                       rating: 0,
                       reviewsCount: 0,
-                      emoji,
+                      emoji: "",
                       image: activeImage ?? undefined,
                       gradient,
                       isVeg: true,
@@ -651,7 +635,33 @@ export default function ProductDetailPage() {
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
             {relatedProducts.map((rp) => {
               const rpCatSlug = rp.category?.slug ?? "";
-              const rpEmoji = CATEGORY_EMOJIS[rpCatSlug] ?? FALLBACK_EMOJIS[0];
+              const isRpRecipe = ["chutney-book", "chutney-books"].includes(rpCatSlug);
+              
+              if (isRpRecipe) {
+                const img = rp.images?.find((i) => i.isPrimary)?.url ?? rp.images?.[0]?.url;
+                return (
+                  <div key={rp.id} className="flex-none w-52 snap-start bg-white dark:bg-zinc-900 rounded-2xl shadow-md border border-zinc-100 dark:border-zinc-800 overflow-hidden flex flex-col">
+                    <div className="w-full aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                      {img ? (
+                        <img src={img} alt={rp.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl"><CategoryIcon slug={rpCatSlug} className="w-12 h-12 text-zinc-400" /></div>
+                      )}
+                    </div>
+                    <div className="p-3 flex flex-col flex-1 gap-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Kiddos Foods</p>
+                      <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2">{rp.name}</p>
+                      <div className="mt-auto pt-2">
+                        <Link href={`/products/${rp.slug}`} className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-brand-green dark:bg-brand-gold text-white dark:text-brand-green text-xs font-bold hover:opacity-90 transition-opacity">
+                          View Recipes
+                          <span className="text-base leading-none">›</span>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               const rpGradient = CATEGORY_GRADIENTS[rpCatSlug] ?? FALLBACK_GRADIENTS[0];
               const rpImg = rp.images?.find((i) => i.isPrimary)?.url ?? rp.images?.[0]?.url;
               const rpHasSale = rp.salePrice != null && Number(rp.salePrice) < Number(rp.price);
@@ -669,7 +679,7 @@ export default function ProductDetailPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={rpImg} alt={rp.name} className="w-[85%] h-[85%] object-contain group-hover:scale-105 transition-transform duration-200 rounded-xl shadow-sm" />
                     ) : (
-                      <span className="text-5xl select-none">{rpEmoji}</span>
+                      <CategoryIcon slug={rpCatSlug} className="w-12 h-12 text-zinc-600/50" />
                     )}
                   </div>
                   {/* Info */}
@@ -701,7 +711,6 @@ export default function ProductDetailPage() {
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
             {recommendedBatters.map((batter) => {
               const rpCatSlug = batter.category?.slug ?? "";
-              const rpEmoji = CATEGORY_EMOJIS[rpCatSlug] ?? FALLBACK_EMOJIS[0];
               const rpGradient = CATEGORY_GRADIENTS[rpCatSlug] ?? FALLBACK_GRADIENTS[0];
               const rpImg = batter.images?.find((i) => i.isPrimary)?.url ?? batter.images?.[0]?.url;
               const rpHasSale = batter.salePrice != null && Number(batter.salePrice) < Number(batter.price);
@@ -719,7 +728,7 @@ export default function ProductDetailPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={rpImg} alt={batter.name} className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform duration-200" />
                     ) : (
-                      <span className="text-5xl select-none">{rpEmoji}</span>
+                      <CategoryIcon slug={rpCatSlug} className="w-12 h-12 text-zinc-600/50" />
                     )}
                   </div>
                   {/* Info */}
@@ -766,7 +775,7 @@ export default function ProductDetailPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">📖</div>
+                      <div className="w-full h-full flex items-center justify-center text-4xl"><CategoryIcon slug="chutney-book" className="w-12 h-12 text-zinc-400" /></div>
                     )}
                   </div>
 
