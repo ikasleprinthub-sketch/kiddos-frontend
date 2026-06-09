@@ -118,6 +118,7 @@ export default function ProductsPage() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
 
@@ -197,52 +198,61 @@ export default function ProductsPage() {
     setError("");
     parseNutrientFacts("");
   };
-  const openEdit = (p: Product) => {
-    setForm({
-      name: p.name,
-      description: p.description || "",
-      price: p.price,
-      salePrice: p.salePrice || "",
-      stock: p.stock,
-      sku: p.sku || "",
-      categoryId: p.category.id,
-      isActive: p.isActive,
-      isFeatured: p.isFeatured,
-      isPopularBatter: p.isPopularBatter || false,
-      isSpiceOil: p.isSpiceOil || false,
-      weight: p.weight !== null && p.weight !== undefined ? String(p.weight) : "",
-      unit: p.unit || "",
-      tags: p.tags ? p.tags.join(", ") : "",
-      images: p.images.map((i) => i.url),
-      ingredients: p.ingredients || "",
-      healthBenefits: p.healthBenefits || "",
-      usageInstructions: p.usageInstructions || "",
-      nutrientFacts: p.nutrientFacts ? JSON.stringify(p.nutrientFacts) : "",
-      shelfLife: p.shelfLife || "",
-      storageInstructions: p.storageInstructions || "",
-      variants: p.variants && p.variants.length > 0 ? p.variants.map(v => ({
-        id: v.id,
-        price: v.price,
-        salePrice: v.salePrice || "",
-        stock: v.stock,
-        sku: v.sku || "",
-        weight: v.weight !== null && v.weight !== undefined ? String(v.weight) : "",
-        unit: v.unit || "",
-        isActive: v.isActive,
-      })) : [{
-        price: p.price,
-        salePrice: p.salePrice || "",
-        stock: p.stock,
-        sku: p.sku || "",
-        weight: p.weight !== null && p.weight !== undefined ? String(p.weight) : "",
-        unit: p.unit || "",
-        isActive: p.isActive,
-      }],
-    });
-    setEditing(p);
-    setModal("edit");
+  const openEdit = async (p: Product) => {
     setError("");
-    parseNutrientFacts(p.nutrientFacts ? JSON.stringify(p.nutrientFacts) : "");
+    setModal("edit");
+    setLoadingEdit(true);
+    setEditing(p);
+    try {
+      const fullProduct = await adminApi.get<Product>(`/admin/products/${p.id}`);
+      setForm({
+        name: fullProduct.name,
+        description: fullProduct.description || "",
+        price: fullProduct.price,
+        salePrice: fullProduct.salePrice || "",
+        stock: fullProduct.stock,
+        sku: fullProduct.sku || "",
+        categoryId: fullProduct.category.id,
+        isActive: fullProduct.isActive,
+        isFeatured: fullProduct.isFeatured,
+        isPopularBatter: fullProduct.isPopularBatter || false,
+        isSpiceOil: fullProduct.isSpiceOil || false,
+        weight: fullProduct.weight !== null && fullProduct.weight !== undefined ? String(fullProduct.weight) : "",
+        unit: fullProduct.unit || "",
+        tags: fullProduct.tags ? fullProduct.tags.join(", ") : "",
+        images: fullProduct.images.map((i) => i.url),
+        ingredients: fullProduct.ingredients || "",
+        healthBenefits: fullProduct.healthBenefits || "",
+        usageInstructions: fullProduct.usageInstructions || "",
+        nutrientFacts: fullProduct.nutrientFacts ? JSON.stringify(fullProduct.nutrientFacts) : "",
+        shelfLife: fullProduct.shelfLife || "",
+        storageInstructions: fullProduct.storageInstructions || "",
+        variants: fullProduct.variants && fullProduct.variants.length > 0 ? fullProduct.variants.map(v => ({
+          id: v.id,
+          price: v.price,
+          salePrice: v.salePrice || "",
+          stock: v.stock,
+          sku: v.sku || "",
+          weight: v.weight !== null && v.weight !== undefined ? String(v.weight) : "",
+          unit: v.unit || "",
+          isActive: v.isActive,
+        })) : [{
+          price: fullProduct.price,
+          salePrice: fullProduct.salePrice || "",
+          stock: fullProduct.stock,
+          sku: fullProduct.sku || "",
+          weight: fullProduct.weight !== null && fullProduct.weight !== undefined ? String(fullProduct.weight) : "",
+          unit: fullProduct.unit || "",
+          isActive: fullProduct.isActive,
+        }],
+      });
+      setEditing(fullProduct);
+      parseNutrientFacts(fullProduct.nutrientFacts ? JSON.stringify(fullProduct.nutrientFacts) : "");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to load product details");
+    } finally {
+      setLoadingEdit(false);
+    }
   };
 
 
@@ -389,8 +399,16 @@ export default function ProductsPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">{modal === "add" ? "Add Product" : "Edit Product"}</h2>
             {error && <p className="text-sm text-red-600 bg-red-50 rounded px-3 py-2">{error}</p>}
+            {loadingEdit && (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="inline-block w-6 h-6 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin mb-2" />
+                  <p className="text-sm text-gray-500">Loading product details...</p>
+                </div>
+              </div>
+            )}
 
-            <div className="grid grid-cols-2 gap-3">
+            {!loadingEdit && <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -716,6 +734,7 @@ export default function ProductsPage() {
                 </label>
               </div>
             </div>
+            }
 
             <div className="flex justify-end gap-3 pt-2">
               <button onClick={() => setModal(null)} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
