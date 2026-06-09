@@ -22,6 +22,16 @@ const DEFAULT_NUTRIENTS: NutrientRow[] = [
 
 interface Category { id: string; name: string }
 interface ProductImage { url: string; isPrimary: boolean }
+interface ProductVariant {
+  id: string;
+  weight: string | number | null;
+  unit: string | null;
+  price: string;
+  salePrice: string | null;
+  stock: number;
+  sku: string | null;
+  isActive: boolean;
+}
 interface Product {
   id: string;
   name: string;
@@ -46,6 +56,18 @@ interface Product {
   nutrientFacts: Record<string, string | number> | null;
   shelfLife: string | null;
   storageInstructions: string | null;
+  variants?: ProductVariant[];
+}
+
+interface FormVariant {
+  id?: string;
+  weight: string;
+  unit: string;
+  price: string;
+  salePrice: string;
+  stock: number;
+  sku: string;
+  isActive: boolean;
 }
 
 interface FormState {
@@ -70,6 +92,7 @@ interface FormState {
   nutrientFacts: string;
   shelfLife: string;
   storageInstructions: string;
+  variants: FormVariant[];
 }
 
 const EMPTY_FORM: FormState = {
@@ -78,6 +101,7 @@ const EMPTY_FORM: FormState = {
   weight: "", unit: "", tags: "", images: [],
   ingredients: "", healthBenefits: "", usageInstructions: "", nutrientFacts: "",
   shelfLife: "", storageInstructions: "",
+  variants: [{ price: "", salePrice: "", stock: 0, sku: "", weight: "", unit: "g", isActive: true }],
 };
 
 const PRESET_UNITS = ["g", "kg", "ml", "L", "pcs", "packet", "box"];
@@ -196,6 +220,24 @@ export default function ProductsPage() {
       nutrientFacts: p.nutrientFacts ? JSON.stringify(p.nutrientFacts) : "",
       shelfLife: p.shelfLife || "",
       storageInstructions: p.storageInstructions || "",
+      variants: p.variants && p.variants.length > 0 ? p.variants.map(v => ({
+        id: v.id,
+        price: v.price,
+        salePrice: v.salePrice || "",
+        stock: v.stock,
+        sku: v.sku || "",
+        weight: v.weight !== null && v.weight !== undefined ? String(v.weight) : "",
+        unit: v.unit || "",
+        isActive: v.isActive,
+      })) : [{
+        price: p.price,
+        salePrice: p.salePrice || "",
+        stock: p.stock,
+        sku: p.sku || "",
+        weight: p.weight !== null && p.weight !== undefined ? String(p.weight) : "",
+        unit: p.unit || "",
+        isActive: p.isActive,
+      }],
     });
     setEditing(p);
     setModal("edit");
@@ -216,12 +258,15 @@ export default function ProductsPage() {
     }
     setSaving(true);
     try {
+      const firstVar = form.variants[0] || { price: "0", salePrice: "", weight: "", unit: "", stock: 0, sku: "", isActive: true };
       const payload = {
         ...form,
-        price: Number(form.price),
-        salePrice: form.salePrice ? Number(form.salePrice) : null,
-        weight: form.weight ? Number(form.weight) : null,
-        unit: form.unit === "custom_temp" ? "" : form.unit,
+        price: Number(firstVar.price),
+        salePrice: firstVar.salePrice ? Number(firstVar.salePrice) : null,
+        weight: firstVar.weight ? Number(firstVar.weight) : null,
+        unit: firstVar.unit === "custom_temp" ? "" : firstVar.unit,
+        stock: firstVar.stock,
+        sku: firstVar.sku,
         tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
         nutrientFacts: parsedNutrientFacts,
       };
@@ -356,67 +401,88 @@ export default function ProductsPage() {
                 <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   rows={3} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 resize-none" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-                <input type="number" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sale Price (₹)</label>
-                <input type="number" value={form.salePrice} onChange={(e) => setForm((f) => ({ ...f, salePrice: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                <input type="number" value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                <input value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                <div className="flex gap-2">
-                  <select
-                    value={PRESET_UNITS.includes(form.unit) || form.unit === "" ? form.unit : "custom"}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "custom") {
-                        setForm((f) => ({ ...f, unit: "custom_temp" }));
-                      } else {
-                        setForm((f) => ({ ...f, unit: val }));
-                      }
-                    }}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-white"
+
+              {/* ── Variants Section ── */}
+              <div className="col-span-2 border-t border-gray-100 pt-3">
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Product Variants (Sizes/Weights)</p>
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, variants: [...f.variants, { price: "", salePrice: "", stock: 0, sku: "", weight: "", unit: "g", isActive: true }] }))}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                   >
-                    <option value="">None</option>
-                    <option value="g">g (Grams)</option>
-                    <option value="kg">kg (Kilograms)</option>
-                    <option value="ml">ml (Milliliters)</option>
-                    <option value="L">L (Liters)</option>
-                    <option value="pcs">pcs (Pieces)</option>
-                    <option value="packet">packet (Packets)</option>
-                    <option value="box">box (Boxes)</option>
-                    <option value="custom">Custom...</option>
-                  </select>
-                  {(!PRESET_UNITS.includes(form.unit) && form.unit !== "") && (
-                    <input
-                      value={form.unit === "custom_temp" ? "" : form.unit}
-                      onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-                      placeholder="Enter unit (e.g. jar)"
-                      className="w-1/2 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                    />
-                  )}
+                    <Plus size={13} /> Add Variant
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {form.variants.map((variant, vIdx) => (
+                    <div key={vIdx} className="grid grid-cols-[1fr_1fr_1fr_1fr_0.5fr_0.5fr_auto] gap-2 items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">Weight/Qty</label>
+                        <input type="number" value={variant.weight} onChange={(e) => {
+                          const newV = [...form.variants];
+                          newV[vIdx] = { ...variant, weight: e.target.value };
+                          setForm({ ...form, variants: newV });
+                        }} className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300" placeholder="e.g. 500" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">Unit</label>
+                        <select value={variant.unit} onChange={(e) => {
+                          const newV = [...form.variants];
+                          newV[vIdx] = { ...variant, unit: e.target.value };
+                          setForm({ ...form, variants: newV });
+                        }} className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300 bg-white">
+                          <option value="">None</option>
+                          {PRESET_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">Price (₹)</label>
+                        <input type="number" value={variant.price} onChange={(e) => {
+                          const newV = [...form.variants];
+                          newV[vIdx] = { ...variant, price: e.target.value };
+                          setForm({ ...form, variants: newV });
+                        }} className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">Sale Price (₹)</label>
+                        <input type="number" value={variant.salePrice} onChange={(e) => {
+                          const newV = [...form.variants];
+                          newV[vIdx] = { ...variant, salePrice: e.target.value };
+                          setForm({ ...form, variants: newV });
+                        }} className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">Stock</label>
+                        <input type="number" value={variant.stock} onChange={(e) => {
+                          const newV = [...form.variants];
+                          newV[vIdx] = { ...variant, stock: Number(e.target.value) };
+                          setForm({ ...form, variants: newV });
+                        }} className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 mb-1">SKU</label>
+                        <input value={variant.sku} onChange={(e) => {
+                          const newV = [...form.variants];
+                          newV[vIdx] = { ...variant, sku: e.target.value };
+                          setForm({ ...form, variants: newV });
+                        }} className="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300" />
+                      </div>
+                      <div className="flex flex-col items-center justify-end h-full pb-1.5 px-1">
+                        <button type="button" onClick={() => {
+                          if (form.variants.length > 1) {
+                            setForm({ ...form, variants: form.variants.filter((_, i) => i !== vIdx) });
+                          }
+                        }} className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-50" disabled={form.variants.length === 1}>
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Weight {cleanUnit ? `(${cleanUnit})` : "(value)"}</label>
-                <input type="number" value={form.weight} onChange={(e) => setForm((f) => ({ ...f, weight: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                  placeholder={cleanUnit ? `e.g. 250 for 250 ${cleanUnit}` : "e.g. 1"} />
-              </div>
+
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}

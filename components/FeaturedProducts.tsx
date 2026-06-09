@@ -49,17 +49,20 @@ export default function FeaturedProducts() {
 
   const handleAddToCart = (p: ApiProduct, idx: number) => {
     setAddingId(p.id);
-    const price = Number(p.salePrice ?? p.price);
-    const originalPrice = p.salePrice ? Number(p.price) : undefined;
+    const variant = p.variants?.[0];
+    const price = variant ? Number(variant.salePrice ?? variant.price) : Number(p.salePrice ?? p.price);
+    const originalPrice = variant ? (variant.salePrice ? Number(variant.price) : undefined) : (p.salePrice ? Number(p.price) : undefined);
     addItem({
-      id: p.id,
+      id: variant?.id || p.id,
+      productId: p.id,
+      variantId: variant?.id,
       name: p.name,
       price,
       originalPrice,
       image: p.images?.[0]?.url,
       emoji: "🛒",
       gradient: FALLBACK_GRADIENTS[idx % FALLBACK_GRADIENTS.length],
-      weightOrQty: p.weight ? `${Number(p.weight)} ${p.unit ?? "kg"}` : (p.unit ?? ""),
+      weightOrQty: variant ? (variant.weight ? `${Number(variant.weight)} ${variant.unit ?? "kg"}` : (variant.unit ?? "")) : (p.weight ? `${Number(p.weight)} ${p.unit ?? "kg"}` : (p.unit ?? "")),
       slug: p.slug,
     });
     setTimeout(() => setAddingId(null), 1500);
@@ -96,16 +99,19 @@ export default function FeaturedProducts() {
         {/* Scrollable product cards row */}
         <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none sm:justify-center snap-x snap-mandatory scroll-pl-4">
           {products.map((p, idx) => {
-            const price = Number(p.salePrice ?? p.price);
-            const originalPrice = p.salePrice ? Number(p.price) : null;
+            const variant = p.variants?.[0];
+            const price = variant ? Number(variant.salePrice ?? variant.price) : Number(p.salePrice ?? p.price);
+            const originalPrice = variant ? (variant.salePrice ? Number(variant.price) : null) : (p.salePrice ? Number(p.price) : null);
             const discount = originalPrice
               ? Math.round(((originalPrice - price) / originalPrice) * 100)
               : null;
             const image = p.images?.[0]?.url;
             const isAdding = addingId === p.id;
-            const weightLabel = p.weight
-              ? `${Number(p.weight)} ${p.unit ?? "kg"}`
-              : p.unit ?? null;
+            const activeWeight = variant ? variant.weight : p.weight;
+            const activeUnit = variant ? variant.unit : p.unit;
+            const weightLabel = activeWeight
+              ? `${Number(activeWeight)} ${activeUnit ?? "kg"}`
+              : activeUnit ?? null;
 
             return (
               <div

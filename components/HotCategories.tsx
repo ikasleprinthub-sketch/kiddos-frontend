@@ -31,6 +31,7 @@ export default function HotCategories() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [animated, setAnimated] = useState(true);
   const [visibleCount, setVisibleCount] = useState(6);
   const [cardWidth, setCardWidth] = useState(130);
   const [gap, setGap] = useState(24);
@@ -87,24 +88,32 @@ export default function HotCategories() {
     if (currentIndex > maxIndex) setCurrentIndex(maxIndex);
   }, [maxIndex, currentIndex]);
 
-  const handlePrev = () => {
+  // Advance forward; when at end, snap instantly to start (no animation)
+  const goNext = () => {
+    if (currentIndex >= maxIndex) {
+      setAnimated(false);
+      setCurrentIndex(0);
+      setTimeout(() => setAnimated(true), 50);
+    } else {
+      setAnimated(true);
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
+
+  const goPrev = () => {
+    setAnimated(true);
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  };
-
-  // Auto-scroll every 3 seconds, pauses on hover (left-to-right)
+  // Auto-scroll left → right only, snaps back to start at end
   useEffect(() => {
     if (maxIndex <= 0) return;
     const id = setInterval(() => {
-      if (!isHovered.current) {
-        setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-      }
+      if (!isHovered.current) goNext();
     }, 3000);
     return () => clearInterval(id);
-  }, [maxIndex]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maxIndex, currentIndex]);
 
   if (loading) {
     return (
@@ -157,10 +166,33 @@ export default function HotCategories() {
 
         {/* Carousel wrapper */}
         <div className="relative px-1">
+
+          {/* Left arrow */}
+          {maxIndex > 0 && (
+            <button
+              onClick={goPrev}
+              className="absolute left-[-20px] sm:left-[-28px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-md flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-[#1e4620] hover:text-white hover:border-[#1e4620] transition-all duration-200"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+
+          {/* Right arrow */}
+          {maxIndex > 0 && (
+            <button
+              onClick={goNext}
+              className="absolute right-[-20px] sm:right-[-28px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-md flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-[#1e4620] hover:text-white hover:border-[#1e4620] transition-all duration-200"
+              aria-label="Next"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
+
           {/* Sliding track */}
           <div className="overflow-hidden py-4 px-2 -mx-2">
             <div
-              className={`flex transition-transform duration-500 ease-in-out ${
+              className={`flex ${animated ? "transition-transform duration-500 ease-in-out" : ""} ${
                 maxIndex === 0 ? "justify-center" : ""
               }`}
               style={{
@@ -170,7 +202,6 @@ export default function HotCategories() {
             >
               {displayCategories.map((cat, idx) => {
                 const color = COLOR_CLASSES[idx % COLOR_CLASSES.length];
-                const count = cat._count?.products ?? 0;
 
                 return (
                   <Link
@@ -202,11 +233,6 @@ export default function HotCategories() {
                     <p className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-[#2a7a2a] transition-colors duration-200 px-1 min-h-[44px] flex items-center justify-center">
                       {cat.name}
                     </p>
-                    {/* {count > 0 && (
-                      <p className="text-xs text-zinc-450 dark:text-zinc-500 mt-2 font-medium">
-                        {count} {count === 1 ? "product" : "products"}
-                      </p>
-                    )} */}
                   </Link>
                 );
               })}
@@ -220,7 +246,7 @@ export default function HotCategories() {
             {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => setCurrentIndex(idx)}
+                onClick={() => { setAnimated(true); setCurrentIndex(idx); }}
                 className={`h-2.5 rounded-full transition-all duration-300 ${
                   currentIndex === idx
                     ? "w-6 bg-[#2a7a2a]"

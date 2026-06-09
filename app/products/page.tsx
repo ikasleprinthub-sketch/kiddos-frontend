@@ -287,6 +287,7 @@ function ProductsPageContent() {
     setAddingToCartId(product.id);
     addItem({
       id: product.id,
+      productId: product.id,
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice,
@@ -678,10 +679,24 @@ function ProductsPageContent() {
                     const isRecipe = product.category === "chutney-book";
                     
                     return (
-                      <article
-                        key={product.id}
-                        className="group bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden border border-zinc-200/50 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col p-4"
-                      >
+                      <div key={product.id} className="relative">
+                        {/* Bestseller ribbon — on card corner, clipped to card's border-radius */}
+                        {product.isBestSeller && (
+                          <div className="absolute top-0 left-0 w-[90px] h-[90px] overflow-hidden rounded-tl-[20px] z-30 pointer-events-none select-none">
+                            <div
+                              className="absolute top-[19px] left-[-27px] w-[112px] text-center bg-[#f97316] text-white text-[9px] font-black uppercase tracking-wider py-[5px] -rotate-45"
+                              style={{
+                                clipPath: 'polygon(9px 0%, calc(100% - 9px) 0%, 100% 50%, calc(100% - 9px) 100%, 9px 100%, 0% 50%)',
+                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.28))',
+                              }}
+                            >
+                              Best Seller
+                            </div>
+                          </div>
+                        )}
+                        <article
+                          className="group bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden border border-zinc-200/50 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col p-4"
+                        >
                         {/* ── IMAGE AREA ── */}
                         <div className="relative block overflow-hidden shrink-0 rounded-2xl bg-zinc-100 dark:bg-zinc-800" style={{ aspectRatio: "4/5" }}>
 
@@ -713,21 +728,18 @@ function ProductsPageContent() {
                             )}
                           </Link>
 
+                          {/* Discount badge — bottom right of image */}
+                          {!isRecipe && product.originalPrice && product.originalPrice > product.price && (
+                            <span className="absolute bottom-3 right-3 z-20 pointer-events-none bg-[#2C4A3B] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm">
+                              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
+                            </span>
+                          )}
+
                           {/* Top Left Badges */}
                           <div className="absolute top-3 left-3 flex flex-col gap-2 z-20 pointer-events-none">
-                            {!isRecipe && product.originalPrice && product.originalPrice > product.price && (
-                              <span className="bg-[#2C4A3B] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm">
-                                {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
-                              </span>
-                            )}
                             {isRecipe && (
                               <span className="bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm w-fit">
                                 Free Recipe
-                              </span>
-                            )}
-                            {product.isBestSeller && (
-                              <span className="bg-brand-gold text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm w-fit">
-                                Best Seller
                               </span>
                             )}
                             {product.isNew && (
@@ -810,7 +822,8 @@ function ProductsPageContent() {
                           )}
 
                         </div>
-                      </article>
+                        </article>
+                      </div>
                     );
                   })}
                 </div>
@@ -903,9 +916,15 @@ function ProductsPageContent() {
                   </div>
                 )}
                 {quickViewProduct.isBestSeller && (
-                  <span className="absolute top-4 left-4 bg-brand-gold text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
+                  <div
+                    className="absolute top-[22px] left-[-34px] w-[130px] text-center bg-[#f97316] text-white text-[10px] font-black uppercase tracking-wider py-2 -rotate-45 z-20 pointer-events-none select-none"
+                    style={{
+                      clipPath: 'polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.30))',
+                    }}
+                  >
                     Best Seller
-                  </span>
+                  </div>
                 )}
               </div>
               <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto">

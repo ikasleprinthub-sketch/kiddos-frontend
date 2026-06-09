@@ -38,6 +38,7 @@ export default function PopularBatters() {
     const originalPrice = p.salePrice ? Number(p.price) : undefined;
     addItem({
       id: p.id,
+      productId: p.id,
       name: p.name,
       price,
       originalPrice,

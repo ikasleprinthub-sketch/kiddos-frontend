@@ -90,7 +90,15 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [chutneyBooks, setChutneyBooks] = useState<ApiProduct[]>([]);
+  const [recommendedBatters, setRecommendedBatters] = useState<ApiProduct[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<ApiProduct[]>([]);
+  const [activeVariantId, setActiveVariantId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (product?.variants && product.variants.length > 0) {
+      setActiveVariantId(product.variants[0].id);
+    }
+  }, [product]);
 
   useEffect(() => {
     if (!slug) return;
@@ -126,6 +134,20 @@ export default function ProductDetailPage() {
       .catch(() => {/* ignore */});
   }, [product]);
 
+  // Fetch batters when viewing a chutney product
+  useEffect(() => {
+    if (!product) return;
+    const catSlug = product.category?.slug ?? "";
+    if (catSlug !== "chutney-book") return;
+    fetch("/api/products?category=batter&limit=10")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
+        setRecommendedBatters(list);
+      })
+      .catch(() => {/* ignore */});
+  }, [product]);
+
   // Fetch related products from the same category
   useEffect(() => {
     if (!product) return;
@@ -150,16 +172,24 @@ export default function ProductDetailPage() {
     const originalPrice = hasSale ? Number(product.price) : undefined;
     const weight = product.weight ? `${Number(product.weight)} ${product.unit ?? "kg"}` : (product.unit ?? "");
 
+    const activeVariant = product.variants?.find((v) => v.id === activeVariantId) || null;
+    
+    const finalPrice = activeVariant ? (activeVariant.salePrice ? Number(activeVariant.salePrice) : Number(activeVariant.price)) : price;
+    const finalOriginalPrice = activeVariant ? (activeVariant.salePrice ? Number(activeVariant.price) : undefined) : originalPrice;
+    const finalWeight = activeVariant ? (activeVariant.weight ? `${Number(activeVariant.weight)} ${activeVariant.unit ?? "kg"}` : (activeVariant.unit ?? "")) : weight;
+
     for (let i = 0; i < qty; i++) {
       addItem({
-        id: product.id,
+        id: activeVariant?.id || product.id,
+        productId: product.id,
+        variantId: activeVariant?.id || undefined,
         name: product.name,
-        price,
-        originalPrice,
+        price: finalPrice,
+        originalPrice: finalOriginalPrice,
         image: activeImage ?? undefined,
         emoji,
         gradient,
-        weightOrQty: weight,
+        weightOrQty: finalWeight,
         slug: product.slug,
       });
     }
@@ -223,6 +253,14 @@ export default function ProductDetailPage() {
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
   const weight = product.weight ? `${Number(product.weight)} ${product.unit ?? "kg"}` : product.unit ?? "";
 
+  const activeVariant = product.variants?.find((v) => v.id === activeVariantId) || null;
+  const displayPrice = activeVariant ? (activeVariant.salePrice ? Number(activeVariant.salePrice) : Number(activeVariant.price)) : price;
+  const displayOriginalPrice = activeVariant ? (activeVariant.salePrice ? Number(activeVariant.price) : undefined) : originalPrice;
+  const displayDiscount = displayOriginalPrice ? Math.round(((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100) : 0;
+  const displayWeight = activeVariant ? (activeVariant.weight ? `${Number(activeVariant.weight)} ${activeVariant.unit ?? "kg"}` : (activeVariant.unit ?? "")) : weight;
+  const currentStock = activeVariant ? activeVariant.stock : product.stock;
+  const isActiveState = activeVariant ? activeVariant.isActive : product.isActive;
+
   return (
     <div className="min-h-screen bg-[#faf8f5] dark:bg-[#061410] py-10 px-4">
       <div className="max-w-5xl mx-auto">
@@ -250,7 +288,7 @@ export default function ProductDetailPage() {
                 <img
                   src={activeImage}
                   alt={product.name}
-                  className="w-3/4 h-3/4 object-contain relative z-10 drop-shadow-xl"
+                  className="w-[92%] h-[92%] object-contain relative z-10 drop-shadow-xl rounded-2xl"
                 />
               ) : (
                 <span className="text-[120px] select-none relative z-10 drop-shadow-lg animate-float-slow">
@@ -258,19 +296,27 @@ export default function ProductDetailPage() {
                 </span>
               )}
 
-              {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
-                {product.isFeatured && (
-                  <span className="bg-brand-gold text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
-                    Best Seller
-                  </span>
-                )}
-                {discount > 0 && (
+              {/* Bestseller ribbon — diagonal corner with folded ends */}
+              {product.isFeatured && (
+                <div
+                  className="absolute top-[22px] left-[-34px] w-[130px] text-center bg-[#f97316] text-white text-[10px] font-black uppercase tracking-wider py-2 -rotate-45 z-20 pointer-events-none select-none"
+                  style={{
+                    clipPath: 'polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.30))',
+                  }}
+                >
+                  Best Seller
+                </div>
+              )}
+
+              {/* Discount badge — bottom right */}
+              {displayDiscount > 0 && (
+                <div className="absolute bottom-4 right-4 z-20">
                   <span className="bg-brand-green text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
-                    {discount}% OFF
+                    {displayDiscount}% OFF
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Thumbnail row */}
@@ -316,15 +362,41 @@ export default function ProductDetailPage() {
             {/* Price — hidden for recipe pages */}
             {!isRecipe && (
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-zinc-800 dark:text-zinc-100">₹{price}</span>
-                {originalPrice && (
+                <span className="text-3xl font-black text-zinc-800 dark:text-zinc-100">₹{displayPrice}</span>
+                {displayOriginalPrice && (
                   <>
-                    <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">₹{originalPrice}</span>
+                    <span className="text-base text-zinc-400 dark:text-zinc-500 line-through font-medium">₹{displayOriginalPrice}</span>
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                      ({discount}% off, save ₹{originalPrice - price})
+                      ({displayDiscount}% off, save ₹{displayOriginalPrice - displayPrice})
                     </span>
                   </>
                 )}
+              </div>
+            )}
+
+            {/* Variant Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="py-2">
+                <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Select Size</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((v) => {
+                    const vWeight = v.weight ? `${Number(v.weight)} ${v.unit ?? "kg"}` : v.unit ?? "";
+                    const isSelected = activeVariantId === v.id;
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => setActiveVariantId(v.id)}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${
+                          isSelected
+                            ? "bg-brand-green border-brand-green text-white dark:bg-brand-gold dark:border-brand-gold dark:text-brand-green"
+                            : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:border-brand-green dark:bg-zinc-800/50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-brand-gold"
+                        }`}
+                      >
+                        {vWeight}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -340,12 +412,12 @@ export default function ProductDetailPage() {
             )}
 
             {/* Net Weight chip — hidden for recipe pages */}
-            {!isRecipe && weight && (
+            {!isRecipe && displayWeight && (
               <div>
                 <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Net Weight</p>
                 <span className="inline-flex items-center gap-1.5 bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
                   <Package className="w-3.5 h-3.5" />
-                  {weight}
+                  {displayWeight}
                 </span>
               </div>
             )}
@@ -392,18 +464,18 @@ export default function ProductDetailPage() {
               <button
                 id="product-add-to-cart-btn"
                 onClick={handleAddToCart}
-                disabled={!product.isActive || product.stock === 0}
+                disabled={!isActiveState || currentStock === 0}
                 className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-all duration-200 shadow-md ${
                   added
                     ? "bg-emerald-600 text-white scale-95"
-                    : product.stock === 0
+                    : currentStock === 0
                     ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
                     : "bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                 }`}
               >
                 {added ? (
                   <><Check className="w-4 h-4 stroke-[3px]" /><span>Added to Cart!</span></>
-                ) : product.stock === 0 ? (
+                ) : currentStock === 0 ? (
                   <span>Out of Stock</span>
                 ) : (
                   <><ShoppingBag className="w-4 h-4" /><span>Add {qty > 1 ? `${qty}×` : ""} to Cart</span></>
@@ -422,18 +494,18 @@ export default function ProductDetailPage() {
                       category: catSlug,
                       categoryLabel: product.category?.name ?? "",
                       description: product.description ?? "",
-                      price,
-                      originalPrice,
+                      price: displayPrice,
+                      originalPrice: displayOriginalPrice,
                       rating: 0,
                       reviewsCount: 0,
                       emoji,
                       image: activeImage ?? undefined,
                       gradient,
                       isVeg: true,
-                      weightOrQty: weight,
+                      weightOrQty: displayWeight,
                       tags: product.tags ?? [],
                       slug: product.slug,
-                      stock: product.stock,
+                      stock: currentStock,
                     });
                   }
                 }}
@@ -586,7 +658,7 @@ export default function ProductDetailPage() {
                   <div className={`w-full aspect-square bg-gradient-to-br ${rpGradient} flex items-center justify-center overflow-hidden`}>
                     {rpImg ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={rpImg} alt={rp.name} className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform duration-200" />
+                      <img src={rpImg} alt={rp.name} className="w-[85%] h-[85%] object-contain group-hover:scale-105 transition-transform duration-200 rounded-xl shadow-sm" />
                     ) : (
                       <span className="text-5xl select-none">{rpEmoji}</span>
                     )}
@@ -595,6 +667,56 @@ export default function ProductDetailPage() {
                   <div className="p-3 flex flex-col gap-1 flex-1">
                     <p className="text-xs font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors">
                       {rp.name}
+                    </p>
+                    <div className="mt-auto pt-1 flex items-baseline gap-1.5">
+                      <span className="text-sm font-black text-brand-green dark:text-brand-gold">₹{rpPrice}</span>
+                      {rpOriginal && (
+                        <span className="text-[11px] text-zinc-400 line-through">₹{rpOriginal}</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── Recommended Batters (chutney products only) ── */}
+      {recommendedBatters.length > 0 && (
+        <section className="mt-16 max-w-5xl mx-auto">
+          <h2 className="text-xl font-black text-zinc-800 dark:text-zinc-100 mb-6 relative inline-block">
+            Recommended Batters
+            <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-brand-green dark:bg-brand-gold rounded-full" />
+          </h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {recommendedBatters.map((batter) => {
+              const rpCatSlug = batter.category?.slug ?? "";
+              const rpEmoji = CATEGORY_EMOJIS[rpCatSlug] ?? FALLBACK_EMOJIS[0];
+              const rpGradient = CATEGORY_GRADIENTS[rpCatSlug] ?? FALLBACK_GRADIENTS[0];
+              const rpImg = batter.images?.find((i) => i.isPrimary)?.url ?? batter.images?.[0]?.url;
+              const rpHasSale = batter.salePrice != null && Number(batter.salePrice) < Number(batter.price);
+              const rpPrice = rpHasSale ? Number(batter.salePrice) : Number(batter.price);
+              const rpOriginal = rpHasSale ? Number(batter.price) : undefined;
+              return (
+                <Link
+                  key={batter.id}
+                  href={`/products/${batter.slug}`}
+                  className="flex-none w-44 snap-start bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden flex flex-col group"
+                >
+                  {/* Image */}
+                  <div className={`w-full aspect-square bg-gradient-to-br ${rpGradient} flex items-center justify-center overflow-hidden`}>
+                    {rpImg ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={rpImg} alt={batter.name} className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform duration-200" />
+                    ) : (
+                      <span className="text-5xl select-none">{rpEmoji}</span>
+                    )}
+                  </div>
+                  {/* Info */}
+                  <div className="p-3 flex flex-col gap-1 flex-1">
+                    <p className="text-xs font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors">
+                      {batter.name}
                     </p>
                     <div className="mt-auto pt-1 flex items-baseline gap-1.5">
                       <span className="text-sm font-black text-brand-green dark:text-brand-gold">₹{rpPrice}</span>
