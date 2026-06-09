@@ -219,36 +219,37 @@ export default function ProductsPage() {
         isSpiceOil: fullProduct.isSpiceOil || false,
         weight: fullProduct.weight !== null && fullProduct.weight !== undefined ? String(fullProduct.weight) : "",
         unit: fullProduct.unit || "",
-        tags: fullProduct.tags ? fullProduct.tags.join(", ") : "",
-        images: fullProduct.images.map((i) => i.url),
+        tags: Array.isArray(fullProduct.tags) ? fullProduct.tags.join(", ") : "",
+        images: Array.isArray(fullProduct.images) ? fullProduct.images.map((i) => i.url) : [],
         ingredients: fullProduct.ingredients || "",
         healthBenefits: fullProduct.healthBenefits || "",
         usageInstructions: fullProduct.usageInstructions || "",
         nutrientFacts: fullProduct.nutrientFacts ? JSON.stringify(fullProduct.nutrientFacts) : "",
         shelfLife: fullProduct.shelfLife || "",
         storageInstructions: fullProduct.storageInstructions || "",
-        variants: fullProduct.variants && fullProduct.variants.length > 0 ? fullProduct.variants.map(v => ({
-          id: v.id,
-          price: v.price,
-          salePrice: v.salePrice || "",
-          stock: v.stock,
-          sku: v.sku || "",
-          weight: v.weight !== null && v.weight !== undefined ? String(v.weight) : "",
-          unit: v.unit || "",
-          isActive: v.isActive,
+        variants: Array.isArray(fullProduct.variants) && fullProduct.variants.length > 0 ? fullProduct.variants.map(v => ({
+          id: v?.id,
+          price: String(v?.price || ""),
+          salePrice: v?.salePrice ? String(v.salePrice) : "",
+          stock: Number(v?.stock || 0),
+          sku: v?.sku || "",
+          weight: v?.weight !== null && v?.weight !== undefined ? String(v.weight) : "",
+          unit: v?.unit || "",
+          isActive: v?.isActive ?? true,
         })) : [{
-          price: fullProduct.price,
-          salePrice: fullProduct.salePrice || "",
-          stock: fullProduct.stock,
+          price: String(fullProduct.price || ""),
+          salePrice: fullProduct.salePrice ? String(fullProduct.salePrice) : "",
+          stock: Number(fullProduct.stock || 0),
           sku: fullProduct.sku || "",
           weight: fullProduct.weight !== null && fullProduct.weight !== undefined ? String(fullProduct.weight) : "",
           unit: fullProduct.unit || "",
-          isActive: fullProduct.isActive,
+          isActive: fullProduct.isActive ?? true,
         }],
       });
       setEditing(fullProduct);
       parseNutrientFacts(fullProduct.nutrientFacts ? JSON.stringify(fullProduct.nutrientFacts) : "");
     } catch (e: unknown) {
+      console.error("Error loading product:", e);
       setError(e instanceof Error ? e.message : "Failed to load product details");
     } finally {
       setLoadingEdit(false);
@@ -506,7 +507,7 @@ export default function ProductsPage() {
                 <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300">
                   <option value="">Select category</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {Array.isArray(categories) && categories.map((c) => <option key={c?.id} value={c?.id || ""}>{c?.name || "Unknown"}</option>)}
                 </select>
               </div>
               <div className="col-span-2">
