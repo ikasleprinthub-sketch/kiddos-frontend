@@ -212,7 +212,7 @@ export default function ProductsPage() {
         salePrice: fullProduct.salePrice || "",
         stock: fullProduct.stock,
         sku: fullProduct.sku || "",
-        categoryId: fullProduct.category.id,
+        categoryId: fullProduct.category?.id || "",
         isActive: fullProduct.isActive,
         isFeatured: fullProduct.isFeatured,
         isPopularBatter: fullProduct.isPopularBatter || false,
