@@ -3,7 +3,9 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 export interface CartItem {
-  id: string;
+  id: string; // Unique cart item ID (productId + variantId)
+  productId: string;
+  variantId?: string;
   name: string;
   price: number;
   originalPrice?: number;

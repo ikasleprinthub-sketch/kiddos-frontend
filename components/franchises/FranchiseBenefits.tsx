@@ -1,3 +1,5 @@
+"use client";
+
 import { Heart, TrendingUp, Truck } from "lucide-react";
 
 const benefits = [

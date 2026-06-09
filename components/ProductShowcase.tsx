@@ -118,17 +118,21 @@ export default function ProductShowcase() {
 
   const handleAddToCart = (p: ApiProduct, idx: number) => {
     setAddingId(p.id);
-    const price = Number(p.salePrice ?? p.price);
-    const originalPrice = p.salePrice ? Number(p.price) : undefined;
+    const variant = p.variants?.[0];
+    const price = variant ? Number(variant.salePrice ?? variant.price) : Number(p.salePrice ?? p.price);
+    const originalPrice = variant ? (variant.salePrice ? Number(variant.price) : undefined) : (p.salePrice ? Number(p.price) : undefined);
+    
     addItem({
-      id: p.id,
+      id: variant?.id || p.id,
+      productId: p.id,
+      variantId: variant?.id,
       name: p.name,
       price,
       originalPrice,
       image: p.images?.[0]?.url,
       emoji: "🛒",
       gradient: FALLBACK_GRADIENTS[idx % FALLBACK_GRADIENTS.length],
-      weightOrQty: p.weight ? `${Number(p.weight)} ${p.unit ?? "kg"}` : (p.unit ?? ""),
+      weightOrQty: variant ? (variant.weight ? `${Number(variant.weight)} ${variant.unit ?? "kg"}` : (variant.unit ?? "")) : (p.weight ? `${Number(p.weight)} ${p.unit ?? "kg"}` : (p.unit ?? "")),
       slug: p.slug,
     });
     setTimeout(() => setAddingId(null), 1500);
@@ -215,8 +219,9 @@ export default function ProductShowcase() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {products.map((p, idx) => {
-              const finalPrice = p.salePrice ? Number(p.salePrice) : Number(p.price);
-              const crossedPrice = p.salePrice ? Number(p.price) : null;
+              const variant = p.variants?.[0];
+              const finalPrice = variant ? (variant.salePrice ? Number(variant.salePrice) : Number(variant.price)) : (p.salePrice ? Number(p.salePrice) : Number(p.price));
+              const crossedPrice = variant ? (variant.salePrice ? Number(variant.price) : null) : (p.salePrice ? Number(p.price) : null);
 
               const discount = crossedPrice
                 ? Math.round(((crossedPrice - finalPrice) / crossedPrice) * 100)
@@ -320,9 +325,9 @@ export default function ProductShowcase() {
                   </Link>
 
                   {/* Weight label */}
-                  {p.weight && (
+                  {(variant ? variant.weight : p.weight) && (
                     <span className="text-[11px] text-zinc-400 mt-1 block font-medium">
-                      Pack: {Number(p.weight)} {p.unit ?? "kg"}
+                      Pack: {Number(variant ? variant.weight : p.weight)} {variant ? (variant.unit ?? "kg") : (p.unit ?? "kg")}
                     </span>
                   )}
 

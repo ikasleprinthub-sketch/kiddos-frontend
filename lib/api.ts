@@ -59,6 +59,16 @@ export interface ApiProduct {
     slug: string;
   };
   images: { id: string; url: string; isPrimary: boolean }[];
+  variants?: {
+    id: string;
+    weight: string | number | null;
+    unit: string | null;
+    price: string | number;
+    salePrice: string | number | null;
+    stock: number;
+    sku: string | null;
+    isActive: boolean;
+  }[];
   /** Extended detail fields (present on single-product fetch) */
   ingredients?: string | null;
   healthBenefits?: string | null;

@@ -141,6 +141,7 @@ export default function WishlistPage() {
                         gradient: product.gradient,
                         weightOrQty: product.weightOrQty,
                         slug: product.slug || product.id,
+                        productId: ""
                       });
                       removeFromWishlist(product.id);
                     }}
