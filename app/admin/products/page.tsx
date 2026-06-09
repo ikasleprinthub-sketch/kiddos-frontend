@@ -643,6 +643,40 @@ export default function ProductsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Images <span className="text-gray-400 font-normal">(max 2)</span>
                 </label>
+
+                {/* Hover Preview */}
+                {form.images.length > 0 && (
+                  <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3">Preview (Hover Effect)</p>
+                    <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-white border border-gray-200 group cursor-pointer">
+                      {/* Primary Image */}
+                      {form.images[0] && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={form.images[0]}
+                          alt="Primary"
+                          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                        />
+                      )}
+                      {/* Hover Image */}
+                      {form.images[1] && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={form.images[1]}
+                          alt="Hover"
+                          className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        />
+                      )}
+                      {form.images.length === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400">
+                          No images
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-2">Hover over the preview to see the effect</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   {[0, 1].map((slot) => {
                     const url = form.images[slot];
