@@ -28,7 +28,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "raw-spices": "🌿",
   oils: "🫒",
   pickles: "🥒",
-  "chutney-book": "📖",
+  "chutney-book": "📖", "chutney-books": "📖",
   millets: "🌾",
   rice: "🍚",
   ghee: "🧈",
@@ -43,7 +43,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   "raw-spices": "from-green-100 to-emerald-200",
   oils: "from-yellow-100 to-lime-200",
   pickles: "from-teal-100 to-green-200",
-  "chutney-book": "from-orange-100 to-amber-200",
+  "chutney-book": "from-orange-100 to-amber-200", "chutney-books": "from-orange-100 to-amber-200",
   millets: "from-yellow-50 to-yellow-200",
   rice: "from-sky-100 to-blue-200",
   ghee: "from-amber-50 to-yellow-200",
@@ -138,7 +138,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!product) return;
     const catSlug = product.category?.slug ?? "";
-    if (catSlug !== "chutney-book") return;
+    if (!["chutney-book", "chutney-books"].includes(catSlug)) return;
     fetch("/api/products?category=batter&limit=10")
       .then((r) => r.json())
       .then((data) => {
@@ -244,7 +244,7 @@ export default function ProductDetailPage() {
   }
 
   const catSlug = product.category?.slug ?? "";
-  const isRecipe = catSlug === "chutney-book";
+  const isRecipe = ["chutney-book", "chutney-books"].includes(catSlug);
   const emoji = CATEGORY_EMOJIS[catSlug] ?? FALLBACK_EMOJIS[0];
   const gradient = CATEGORY_GRADIENTS[catSlug] ?? FALLBACK_GRADIENTS[0];
   const hasSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);

@@ -35,7 +35,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "raw-spices": "🌿",
   oils: "🫒",
   pickles: "🥒",
-  "chutney-book": "📖",
+  "chutney-book": "📖", "chutney-books": "📖",
   millets: "🌾",
   rice: "🍚",
   ghee: "🧈",
@@ -49,7 +49,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   "raw-spices": "from-green-100 to-emerald-200",
   oils: "from-yellow-100 to-lime-200",
   pickles: "from-teal-100 to-green-200",
-  "chutney-book": "from-orange-100 to-amber-200",
+  "chutney-book": "from-orange-100 to-amber-200", "chutney-books": "from-orange-100 to-amber-200",
   millets: "from-yellow-50 to-yellow-200",
   rice: "from-sky-100 to-blue-200",
   ghee: "from-amber-50 to-yellow-200",
@@ -676,7 +676,7 @@ function ProductsPageContent() {
                     const isAdding = addingToCartId === product.id;
                     const hasHoverImg = !!product.image2;
                     const isOutOfStock = (product.stock ?? 1) <= 0;
-                    const isRecipe = product.category === "chutney-book";
+                    const isRecipe = ["chutney-book", "chutney-books"].includes(product.category);
                     
                     return (
                       <div key={product.id} className="relative">
@@ -936,7 +936,7 @@ function ProductsPageContent() {
                 </h2>
 
                 
-                {quickViewProduct.category === "chutney-book" ? (
+                {["chutney-book", "chutney-books"].includes(quickViewProduct.category) ? (
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 mb-6">
                     <span className="text-xl">📖</span>
                     <div>
@@ -962,7 +962,7 @@ function ProductsPageContent() {
                 </p>
 
                 <div className="flex flex-col gap-3 mt-auto">
-                  {quickViewProduct.category === "chutney-book" ? (
+                  {["chutney-book", "chutney-books"].includes(quickViewProduct.category) ? (
                     <Link
                       href={`/products/${quickViewProduct.slug || quickViewProduct.id}`}
                       onClick={() => setQuickViewProduct(null)}
