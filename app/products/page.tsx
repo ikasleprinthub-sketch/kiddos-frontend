@@ -250,7 +250,12 @@ function ProductsPageContent() {
   const filteredProducts = useMemo(() => {
     return allProducts.filter(product => {
       // Category Filter
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+      let matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+      
+      // Hide chutney books when viewing all products (no specific category or search)
+      if (selectedCategories.length === 0 && !searchQuery && ["chutney-book", "chutney-books"].includes(product.category)) {
+        matchesCategory = false;
+      }
       
       // Search Filter
       const matchesSearch = searchQuery
