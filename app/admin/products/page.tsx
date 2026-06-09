@@ -204,7 +204,8 @@ export default function ProductsPage() {
     setLoadingEdit(true);
     setEditing(p);
     try {
-      const fullProduct = await adminApi.get<Product>(`/admin/products/${p.id}`);
+      const response = await adminApi.get<{ product: Product } | Product>(`/admin/products/${p.id}`);
+      const fullProduct = ('product' in response) ? response.product : response;
       setForm({
         name: fullProduct.name,
         description: fullProduct.description || "",
@@ -249,8 +250,10 @@ export default function ProductsPage() {
       setEditing(fullProduct);
       parseNutrientFacts(fullProduct.nutrientFacts ? JSON.stringify(fullProduct.nutrientFacts) : "");
     } catch (e: unknown) {
-      console.error("Error loading product:", e);
-      setError(e instanceof Error ? e.message : "Failed to load product details");
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error("Error loading product:", errorMsg, e);
+      setError(`Failed: ${errorMsg}`);
+      setLoadingEdit(false);
     } finally {
       setLoadingEdit(false);
     }
