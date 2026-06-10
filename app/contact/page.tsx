@@ -39,13 +39,13 @@ export default function ContactPage() {
             <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-100">Our Location</h2>
             <p className="mt-4 text-[15px] font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 px-6 py-3 rounded-full inline-flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-green dark:text-brand-gold"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-              2/298, Bharathiyar Nagar, Pannimadai, Coimbatore-641017
+              No.380, Sreevari Gardens, KNG Pudhur Pirivu, Coimbatore 641025
             </p>
           </div>
           <div className="w-full rounded-3xl overflow-hidden border border-zinc-200/60 dark:border-zinc-800/60 shadow-lg">
             <iframe
               title="Kiddos Foods Location"
-              src="https://maps.google.com/maps?q=2/298,%20Bharathiyar%20Nagar,%20Pannimadai,%20Coimbatore-641017&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              src="https://maps.google.com/maps?q=No.380,%20Sreevari%20Gardens,%20KNG%20Pudhur%20Pirivu,%20Coimbatore%20641025&t=&z=15&ie=UTF8&iwloc=&output=embed"
               width="100%"
               height="450"
               style={{ border: 0 }}

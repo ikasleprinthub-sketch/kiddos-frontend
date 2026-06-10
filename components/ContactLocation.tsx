@@ -2,7 +2,7 @@
 
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 
-const ADDRESS = "2/298, Bharathiyar Nagar, Pannimadai, Coimbatore-641017";
+const ADDRESS = "No.380, Sreevari Gardens, KNG Pudhur Pirivu, Coimbatore 641025";
 const MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
 
 const INFO = [
