@@ -378,7 +378,17 @@ export default function HeroSection() {
                       <div className="absolute inset-0 bg-[#e3f9ff] bg-dot-grid" />
                     )}
                   </div>
-                  <div className="relative z-10 text-left w-full md:w-[50%] lg:w-[45%] flex flex-col items-start px-4 md:px-8">
+                  <div className="relative z-10 text-left w-full md:w-[50%] lg:w-[45%] flex flex-col items-start px-4 md:px-8 justify-center">
+                    {banner.title && (
+                      <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
+                        {banner.title}
+                      </h1>
+                    )}
+                    {banner.subtitle && (
+                      <p className="text-[#7e7e7e] text-sm sm:text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                        {banner.subtitle}
+                      </p>
+                    )}
                     {banner.link && (
                       <Link
                         href={banner.link}
