@@ -16,7 +16,7 @@ const faqs: FAQ[] = [
   },
   {
     question: "What types of products does Kiddos Foods sell?",
-    answer: "We primarily sell South Indian food essentials, including 20 types of Idli and Dosa Batter. We also offer other products like Raw Spices, Spice Blends, Pickles, and Cold Pressed Oils.",
+    answer: "We primarily sell South Indian food essentials, including 30+ types of Idli and Dosa Batter. We also offer other products like Raw Spices, Spice Blends, Pickles, and Cold Pressed Oils.",
   },
   {
     question: "Are your batters genuinely home-made and traditional?",
@@ -32,11 +32,11 @@ const faqs: FAQ[] = [
   },
   {
     question: "How can I purchase or contact Kiddos Foods?",
-    answer: "You can contact us at +91 78459 45455 or email care@kiddosfoods.com. Our location is at 2/298, Bharathiyar Nagar, Pannimadai, Coimbatore-641017. You can also find us on social media: @kiddosfoodskovai",
+    answer: "You can contact us at +91 78459 45455 or email care@kiddosfoods.com. Our locations are at No.380, Sreevari Gardens, KNG Pudhur Pirivu, Coimbatore 641025. You can also find us on social media: @kiddosfoodskovai",
   },
   {
     question: "How many varieties of batter do you offer?",
-    answer: "We offer 20 types of Idli and Dosa batter to provide a wide range of healthy meal options.",
+    answer: "We offer 30+ types of Idli and Dosa batter to provide a wide range of healthy meal options.",
   },
 ];
 

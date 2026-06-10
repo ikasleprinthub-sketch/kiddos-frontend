@@ -13,17 +13,20 @@ type TabType = "best-seller" | "popular-batters" | "spices-oils";
 const TAB_META = {
   "best-seller": {
     label: "Best Seller",
-    title: "Best Sellers",
+    headingPrefix: "Best Selling",
+    headingHighlight: "Products",
     subtitle: "Our most loved, high-quality products recommended for you",
   },
   "popular-batters": {
     label: "Popular Batters",
-    title: "Popular Batters",
+    headingPrefix: "Popular",
+    headingHighlight: "Batters",
     subtitle: "Freshly stone-ground, naturally fermented batters",
   },
   "spices-oils": {
     label: "Spices & Oils",
-    title: "Spices & Oils",
+    headingPrefix: "Spices &",
+    headingHighlight: "Oils",
     subtitle: "Aromatic home-style spice mixes and wood-pressed pure oils",
   },
 };
@@ -177,7 +180,7 @@ export default function ProductShowcase() {
             Our Products
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight leading-tight">
-            Our <span className="text-[#ca8a04]">{TAB_META[activeTab].title}</span> Products
+            {TAB_META[activeTab].headingPrefix} <span className="text-[#ca8a04]">{TAB_META[activeTab].headingHighlight}</span>
           </h2>
           <p className="text-xs text-zinc-500 mt-1 font-medium">
             {TAB_META[activeTab].subtitle}

@@ -127,11 +127,11 @@ export default function AboutSection() {
             {/* Stats card */}
             <div className="bg-[#1e4620] rounded-2xl px-6 py-5 grid grid-cols-3 gap-4 text-center mt-1">
               <div>
-                <p className="text-[#d4af37] font-black text-2xl sm:text-3xl leading-none">13+</p>
+                <p className="text-[#d4af37] font-black text-2xl sm:text-3xl leading-none">15+</p>
                 <p className="text-white/70 text-xs sm:text-sm mt-1 font-medium">Categories</p>
               </div>
               <div className="border-x border-white/10">
-                <p className="text-[#d4af37] font-black text-2xl sm:text-3xl leading-none">200+</p>
+                <p className="text-[#d4af37] font-black text-2xl sm:text-3xl leading-none">250+</p>
                 <p className="text-white/70 text-xs sm:text-sm mt-1 font-medium">Products</p>
               </div>
               <div>

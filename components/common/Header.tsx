@@ -56,6 +56,7 @@ export default function Header() {
     { name: "Products", href: "/products" },
     { name: "Franchises", href: "/franchises" },
     { name: "About", href: "/about" },
+    { name: "Download Catalogue", href: "/catalogue.pdf", download: true },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -110,11 +111,12 @@ export default function Header() {
           <nav className="hidden md:flex items-center flex-1 justify-center">
             <div className="flex items-center gap-1 p-1 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href && !link.download;
                 return (
-                  <Link
+                  <a
                     key={link.name}
                     href={link.href}
+                    download={link.download || undefined}
                     onClick={handleCloseAll}
                     className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
                       isActive
@@ -123,7 +125,7 @@ export default function Header() {
                     }`}
                   >
                     {link.name}
-                  </Link>
+                  </a>
                 );
               })}
             </div>
@@ -236,11 +238,12 @@ export default function Header() {
               </div>
               <nav className="flex flex-col gap-2">
                 {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
+                  const isActive = pathname === link.href && !link.download;
                   return (
-                    <Link
+                    <a
                       key={link.name}
                       href={link.href}
+                      download={link.download || undefined}
                       onClick={handleCloseAll}
                       className={`flex items-center justify-between px-4 py-3 rounded-2xl text-base font-medium transition-all duration-200 ${
                         isActive
@@ -250,7 +253,7 @@ export default function Header() {
                     >
                       <span>{link.name}</span>
                       <Compass className="w-4 h-4 opacity-40" />
-                    </Link>
+                    </a>
                   );
                 })}
               </nav>

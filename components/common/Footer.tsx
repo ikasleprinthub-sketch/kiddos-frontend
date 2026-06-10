@@ -60,7 +60,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-white/80 text-sm leading-relaxed">
-              Bringing Amma&apos;s love to your plate with <strong>20 unique dosa batters</strong>.
+              Bringing Amma&apos;s love to your plate with <strong>30+ unique dosa batters</strong>.
               Pure, traditional, and irresistibly delicious. That&apos;s Kiddos Foods.
             </p>
             {/* Social Icons */}
@@ -145,6 +145,15 @@ export default function Footer() {
                 </svg>
                 <span className="text-white/80 text-sm leading-relaxed">
                   2/298, Bharathiyar Nagar, Pannimadai, Coimbatore-641017
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <svg className="w-4 h-4 mt-0.5 shrink-0 fill-none stroke-white stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span className="text-white/80 text-sm leading-relaxed">
+                  No.380, Sreevari Gardens, KNG Pudhur Pirivu, Coimbatore 641025
                 </span>
               </li>
               <li className="flex items-center gap-3">

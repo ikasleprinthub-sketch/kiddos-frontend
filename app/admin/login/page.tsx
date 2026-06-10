@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Eye, EyeOff, ShieldAlert } from "lucide-react";
+import { Eye, EyeOff, ShieldAlert, ArrowLeft } from "lucide-react";
 
 export default function AdminLoginPage() {
   const { user, loading, login } = useAuth();
@@ -73,7 +74,18 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex items-center justify-center p-4">
+      {/* Back to Home Link */}
+      <Link 
+        href="/"
+        className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-emerald-100 hover:text-white transition-colors group z-10"
+      >
+        <div className="p-2 bg-white/5 rounded-full backdrop-blur-sm border border-white/10 group-hover:bg-white/10 transition-colors">
+          <ArrowLeft size={18} />
+        </div>
+        <span className="text-sm font-medium hidden sm:block">Back to Home</span>
+      </Link>
+
       <div className="w-full max-w-sm">
         {/* Brand */}
         <div className="text-center mb-8">
