@@ -15,10 +15,12 @@ import {
   Settings,
   Heart,
   Compass,
+  LayoutGrid,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { CATEGORIES } from "@/components/productsData";
 
 export default function Header() {
   const pathname = usePathname();
@@ -105,6 +107,39 @@ export default function Header() {
                 />
               </div>
             </Link>
+
+            {/* Shop by Categories Dropdown (Desktop) */}
+            <div className="hidden lg:block relative group ml-2 xl:ml-6">
+              <Link 
+                href="/products"
+                className="flex items-center gap-2 px-4 py-2 xl:px-5 xl:py-2.5 bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green rounded-full font-semibold text-xs xl:text-sm hover:bg-brand-green-light dark:hover:bg-brand-gold-light shadow-sm transition-all duration-200"
+              >
+                <LayoutGrid className="w-4 h-4 xl:w-5 xl:h-5" />
+                <span>Shop by Categories</span>
+                <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
+              </Link>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute top-full left-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="w-[300px] bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/50 border border-zinc-100 dark:border-zinc-800 p-2 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                  {CATEGORIES.map(cat => (
+                    <Link
+                      key={cat.slug}
+                      href={`/products?category=${cat.slug}`}
+                      className="flex items-center gap-3 p-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors group/item"
+                    >
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-lg shadow-sm group-hover/item:scale-110 transition-transform`}>
+                        {cat.emoji}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{cat.label}</span>
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1">{cat.description}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* ── Center: desktop nav pill ── */}

@@ -21,7 +21,7 @@ const cards = [
     title: "We Specialize in",
     image: "/images/whatwedo/what2.svg",
     items: [
-      "20+ varieties of idli & dosa batters",
+      "30+ varieties of idli & dosa batters",
       "Traditional spice powders & masala blends",
       "Homemade-style pickles & healthy condiments",
       "Millet-based food products & healthy mixes",

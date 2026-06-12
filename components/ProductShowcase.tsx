@@ -195,7 +195,7 @@ export default function ProductShowcase() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-2 px-5 text-sm font-semibold rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 ${
+                className={`py-1.5 px-3 sm:py-2 sm:px-5 text-xs sm:text-sm font-semibold rounded-full whitespace-nowrap cursor-pointer transition-all duration-200 ${
                   isActive
                     ? "bg-[#1e4620] text-white shadow-md"
                     : "bg-white text-zinc-600 border border-zinc-200 hover:border-zinc-400 hover:text-zinc-800"
@@ -242,7 +242,7 @@ export default function ProductShowcase() {
                   className="relative bg-white dark:bg-zinc-900 rounded-[24px] border border-zinc-100 dark:border-zinc-800/80 p-5 shadow-[0_4px_25px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:-translate-y-1.5 transition-all duration-300 group flex flex-col"
                 >
                   {/* Image container */}
-                  <div className="relative overflow-hidden rounded-[20px] bg-zinc-50 dark:bg-zinc-850 aspect-square flex items-center justify-center mb-5 border border-zinc-100/50 dark:border-zinc-800/50">
+                  <div className="relative overflow-hidden rounded-[20px] bg-zinc-50 dark:bg-zinc-850 aspect-4/5 max-h-[220px] sm:max-h-[280px] md:max-h-none flex items-center justify-center mb-5 border border-zinc-100/50 dark:border-zinc-800/50">
                     <Link href={`/products/${p.slug}`} className="w-full h-full flex items-center justify-center">
                       {image ? (
                         // eslint-disable-next-line @next/next/no-img-element

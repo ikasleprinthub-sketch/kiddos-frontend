@@ -2,14 +2,17 @@ import HeroSection from "@/components/HeroSection";
 import HotCategories from "@/components/HotCategories";
 import AboutSection from "@/components/AboutSection";
 import ProductShowcase from "@/components/ProductShowcase";
+import { FeaturesMarquee } from "@/components/common/FeaturesMarquee";
 
 export default function Home() {
   return (
     <div className="w-full flex flex-col min-h-screen">
       <HeroSection />
       <HotCategories />
+      <FeaturesMarquee />
       <AboutSection />
       <ProductShowcase />
+
     </div>
   );
 }

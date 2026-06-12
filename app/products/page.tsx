@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { 
   Search, 
@@ -139,6 +139,19 @@ function ProductsPageContent() {
     + (maxPrice !== DEFAULT_MAX_PRICE ? 1 : 0)
     + Object.values(promotions).filter(Boolean).length
     + Object.values(availability).filter(Boolean).length;
+
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (listRef.current) {
+        const offset = 120; // Offset for the sticky header + breathing room
+        const top = listRef.current.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: "auto" }); // 'auto' for instant jump
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, []);
 
   const { addItem } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
@@ -318,7 +331,7 @@ function ProductsPageContent() {
 
   return (
     <div className="w-full bg-[#faf8f5] dark:bg-[#061410] min-h-screen pb-20">
-      
+
       {/* ── HERO BANNER ── */}
       <section className="relative overflow-hidden bg-gradient-to-r from-brand-green to-[#2a5e2f] dark:from-zinc-950 dark:to-brand-green py-16 px-4 md:px-8 text-center text-white">
         {/* Background Patterns */}
@@ -343,7 +356,7 @@ function ProductsPageContent() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <div ref={listRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* ── LEFT COLUMN: SIDEBAR FILTERS ── */}
@@ -357,37 +370,59 @@ function ProductsPageContent() {
               <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">
                 By Categories
               </h3>
-              <div className="space-y-3.5">
+              <div className="space-y-2.5">
                 {catsLoading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-4 rounded bg-zinc-100 dark:bg-zinc-800 animate-pulse w-3/4" />
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
                   ))
                 ) : (
-                  apiCategories.map((cat) => {
+                  apiCategories.map((cat, idx) => {
                     const isChecked = selectedCategories.includes(cat.slug);
+                    const count = categoryCounts[cat.slug] || 0;
+                    const COLORS = [
+                      { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-300', selected: 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 dark:border-amber-700' },
+                      { bg: 'bg-green-50 dark:bg-green-950/30', border: 'border-green-200 dark:border-green-800', text: 'text-green-700 dark:text-green-300', selected: 'bg-green-100 dark:bg-green-900/50 border-green-400 dark:border-green-700' },
+                      { bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800', text: 'text-red-700 dark:text-red-300', selected: 'bg-red-100 dark:bg-red-900/50 border-red-400 dark:border-red-700' },
+                      { bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-300', selected: 'bg-blue-100 dark:bg-blue-900/50 border-blue-400 dark:border-blue-700' },
+                      { bg: 'bg-purple-50 dark:bg-purple-950/30', border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-700 dark:text-purple-300', selected: 'bg-purple-100 dark:bg-purple-900/50 border-purple-400 dark:border-purple-700' },
+                    ];
+                    const color = COLORS[idx % COLORS.length];
+
                     return (
-                      <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
-                        <div className={`w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${
-                          isChecked 
-                            ? 'bg-brand-green border-brand-green dark:bg-brand-gold dark:border-brand-gold text-white dark:text-brand-green' 
-                            : 'bg-white border-zinc-300 dark:bg-zinc-900 dark:border-zinc-700 group-hover:border-brand-green dark:group-hover:border-brand-gold'
-                        }`}>
-                          {isChecked && <Check className="w-3 h-3" />}
+                      <label
+                        key={cat.id}
+                        className={`flex items-center justify-between gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md ${
+                          isChecked
+                            ? `${color.selected} shadow-md`
+                            : `${color.bg} ${color.border} border-opacity-60 hover:border-opacity-100`
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                            isChecked
+                              ? 'bg-brand-green border-brand-green dark:bg-brand-gold dark:border-brand-gold text-white dark:text-brand-green'
+                              : `border-zinc-300 dark:border-zinc-600`
+                          }`}>
+                            {isChecked && <Check className="w-3.5 h-3.5" />}
+                          </div>
+                          <input
+                            type="checkbox"
+                            className="sr-only"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedCategories([...selectedCategories, cat.slug]);
+                              } else {
+                                setSelectedCategories(selectedCategories.filter(c => c !== cat.slug));
+                              }
+                            }}
+                          />
+                          <span className={`text-sm font-medium truncate ${isChecked ? 'text-zinc-900 dark:text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                            {cat.name}
+                          </span>
                         </div>
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={isChecked}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedCategories([...selectedCategories, cat.slug]);
-                            } else {
-                              setSelectedCategories(selectedCategories.filter(c => c !== cat.slug));
-                            }
-                          }}
-                        />
-                        <span className={`text-sm ${isChecked ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'}`}>
-                          {cat.name}
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${color.text} ${color.bg}`}>
+                          {count}
                         </span>
                       </label>
                     );
