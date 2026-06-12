@@ -857,7 +857,7 @@ function ProductsPageContent() {
                 {/* Pagination Controls */}
                 {filteredProducts.length > itemsPerPage && (
                   <div className="flex justify-center items-center gap-2 mt-8">
-                    <Stack spacing={2} alignItems="center">
+                    <Stack spacing={2} sx={{ alignItems: 'center' }}>
                       <Typography sx={{ color: 'text.secondary', fontWeight: 500 }}>
                         Page: {currentPage}
                       </Typography>
