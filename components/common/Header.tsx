@@ -73,7 +73,7 @@ export default function Header() {
           : "bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-900 py-4"
       }`}
     >
-      <div className="mx-auto max-w-full px-4 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-6 xl:px-12">
         {/*
          * Single unified flex row — works at all breakpoints.
          * Hamburger uses md:hidden so it's always in the DOM on mobile,
@@ -86,7 +86,7 @@ export default function Header() {
             {/* Hamburger — ALWAYS present in markup, hidden on md+ via md:hidden */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-full bg-zinc-100/60 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:text-brand-green dark:hover:text-brand-gold border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 focus:outline-none"
+              className="lg:hidden p-2 rounded-full bg-zinc-100/60 dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 hover:text-brand-green dark:hover:text-brand-gold border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -94,7 +94,7 @@ export default function Header() {
 
             {/* Logo — compact on mobile, full-size on desktop */}
             <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0">
-              <div className="relative h-12 w-28 md:h-20 md:w-64 overflow-hidden">
+              <div className="relative h-12 w-28 md:h-16 md:w-48 xl:h-20 xl:w-64 overflow-hidden">
                 <Image
                   src="/orglogo.svg"
                   alt="Kiddos Foods Logo"
@@ -108,8 +108,8 @@ export default function Header() {
           </div>
 
           {/* ── Center: desktop nav pill ── */}
-          <nav className="hidden md:flex items-center flex-1 justify-center">
-            <div className="flex items-center gap-1 p-1 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm">
+          <nav className="hidden lg:flex items-center flex-1 justify-center min-w-0 px-2">
+            <div className="flex items-center gap-0.5 lg:gap-0.5 xl:gap-1.5 p-1 lg:p-0.5 xl:p-2 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm overflow-x-auto max-w-full" style={{ scrollbarWidth: 'none' }}>
               {navLinks.map((link) => {
                 const isActive = pathname === link.href && !link.download;
                 return (
@@ -118,7 +118,7 @@ export default function Header() {
                     href={link.href}
                     download={link.download || undefined}
                     onClick={handleCloseAll}
-                    className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                    className={`relative px-2.5 lg:px-2.5 xl:px-6 py-2 lg:py-1.5 xl:py-3 text-xs lg:text-[11px] xl:text-sm 2xl:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${
                       isActive
                         ? "bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green font-semibold shadow-sm"
                         : "text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold hover:bg-zinc-200/40 dark:hover:bg-zinc-800/40"
@@ -164,7 +164,7 @@ export default function Header() {
             </Link>
 
             {/* Profile / Login — desktop only; mobile uses the drawer */}
-            <div className="relative hidden md:block">
+            <div className="relative hidden lg:block">
               {isLoggedIn && user ? (
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
@@ -173,7 +173,7 @@ export default function Header() {
                   <div className="w-8 h-8 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center shadow-sm text-sm">
                     {initials}
                   </div>
-                  <span className="hidden lg:inline-block max-w-[80px] truncate">{user.name}</span>
+                  <span className="hidden xl:inline-block max-w-[80px] truncate">{user.name}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
@@ -227,11 +227,11 @@ export default function Header() {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 top-[80px] bg-black/40 backdrop-blur-xs z-40 md:hidden"
+            className="fixed inset-0 top-[80px] bg-black/40 backdrop-blur-xs z-40 lg:hidden"
             onClick={handleCloseAll}
           />
           {/* Drawer */}
-          <div className="fixed left-0 top-[80px] h-[calc(100svh-80px)] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl md:hidden overflow-y-auto animate-in slide-in-from-left duration-250">
+          <div className="fixed left-0 top-[80px] h-[calc(100svh-80px)] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl lg:hidden overflow-y-auto animate-in slide-in-from-left duration-250">
             <div className="space-y-6">
               <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                 Navigation Menu

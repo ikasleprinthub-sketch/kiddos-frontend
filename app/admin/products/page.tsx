@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import DataTable, { Column } from "@/components/admin/DataTable";
 import { adminApi } from "@/lib/adminApi";
-import { Plus, Pencil, Trash2, Search, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, X, ImagePlus } from "lucide-react";
 
 interface NutrientRow { name: string; value: string }
 
@@ -555,93 +555,96 @@ export default function ProductsPage() {
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>
               {/* ── Nutrient Facts Visual Editor ── */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nutrient Facts</label>
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  {/* Amount Per + Calories header */}
-                  <div className="bg-gray-800 text-white px-4 py-3 grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Amount Per</p>
-                      <input
-                        value={nutrientAmountPer}
-                        onChange={(e) => { setNutrientAmountPer(e.target.value); syncNutrientFacts(e.target.value, nutrientCalories, nutrientRows); }}
-                        placeholder="100 gram"
-                        className="w-full bg-gray-700 text-white text-sm px-2.5 py-1.5 rounded-lg border border-gray-600 focus:outline-none focus:border-emerald-400"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Calories</p>
-                      <input
-                        value={nutrientCalories}
-                        onChange={(e) => { setNutrientCalories(e.target.value); syncNutrientFacts(nutrientAmountPer, e.target.value, nutrientRows); }}
-                        placeholder="133"
-                        className="w-full bg-gray-700 text-white text-sm px-2.5 py-1.5 rounded-lg border border-gray-600 focus:outline-none focus:border-emerald-400"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Column headers */}
-                  <div className="grid grid-cols-[1fr_120px_32px] gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Nutrient</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Value</span>
-                    <span />
-                  </div>
-
-                  {/* Nutrient rows */}
-                  <div className="divide-y divide-gray-100">
-                    {nutrientRows.map((row, idx) => (
-                      <div key={idx} className="grid grid-cols-[1fr_120px_32px] gap-2 items-center px-3 py-2">
+              {/* False comment is hide this */}
+              {false && (
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nutrient Facts</label>
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    {/* Amount Per + Calories header */}
+                    <div className="bg-gray-800 text-white px-4 py-3 grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Amount Per</p>
                         <input
-                          value={row.name}
-                          onChange={(e) => {
-                            const rows = nutrientRows.map((r, i) => i === idx ? { ...r, name: e.target.value } : r);
-                            setNutrientRows(rows);
-                            syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
-                          }}
-                          placeholder="Nutrient name"
-                          className="text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                          value={nutrientAmountPer}
+                          onChange={(e) => { setNutrientAmountPer(e.target.value); syncNutrientFacts(e.target.value, nutrientCalories, nutrientRows); }}
+                          placeholder="100 gram"
+                          className="w-full bg-gray-700 text-white text-sm px-2.5 py-1.5 rounded-lg border border-gray-600 focus:outline-none focus:border-emerald-400"
                         />
-                        <input
-                          value={row.value}
-                          onChange={(e) => {
-                            const rows = nutrientRows.map((r, i) => i === idx ? { ...r, value: e.target.value } : r);
-                            setNutrientRows(rows);
-                            syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
-                          }}
-                          placeholder="e.g. 0.3g"
-                          className="text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const rows = nutrientRows.filter((_, i) => i !== idx);
-                            setNutrientRows(rows);
-                            syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
-                          }}
-                          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <X size={14} />
-                        </button>
                       </div>
-                    ))}
-                  </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Calories</p>
+                        <input
+                          value={nutrientCalories}
+                          onChange={(e) => { setNutrientCalories(e.target.value); syncNutrientFacts(nutrientAmountPer, e.target.value, nutrientRows); }}
+                          placeholder="133"
+                          className="w-full bg-gray-700 text-white text-sm px-2.5 py-1.5 rounded-lg border border-gray-600 focus:outline-none focus:border-emerald-400"
+                        />
+                      </div>
+                    </div>
 
-                  {/* Add row button */}
-                  <div className="px-3 py-2 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const rows = [...nutrientRows, { name: "", value: "" }];
-                        setNutrientRows(rows);
-                      }}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-                    >
-                      <Plus size={13} /> Add Nutrient Row
-                    </button>
+                    {/* Column headers */}
+                    <div className="grid grid-cols-[1fr_120px_32px] gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Nutrient</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Value</span>
+                      <span />
+                    </div>
+
+                    {/* Nutrient rows */}
+                    <div className="divide-y divide-gray-100">
+                      {nutrientRows.map((row, idx) => (
+                        <div key={idx} className="grid grid-cols-[1fr_120px_32px] gap-2 items-center px-3 py-2">
+                          <input
+                            value={row.name}
+                            onChange={(e) => {
+                              const rows = nutrientRows.map((r, i) => i === idx ? { ...r, name: e.target.value } : r);
+                              setNutrientRows(rows);
+                              syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
+                            }}
+                            placeholder="Nutrient name"
+                            className="text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                          />
+                          <input
+                            value={row.value}
+                            onChange={(e) => {
+                              const rows = nutrientRows.map((r, i) => i === idx ? { ...r, value: e.target.value } : r);
+                              setNutrientRows(rows);
+                              syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
+                            }}
+                            placeholder="e.g. 0.3g"
+                            className="text-sm px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const rows = nutrientRows.filter((_, i) => i !== idx);
+                              setNutrientRows(rows);
+                              syncNutrientFacts(nutrientAmountPer, nutrientCalories, rows);
+                            }}
+                            className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add row button */}
+                    <div className="px-3 py-2 border-t border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const rows = [...nutrientRows, { name: "", value: "" }];
+                          setNutrientRows(rows);
+                        }}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                      >
+                        <Plus size={13} /> Add Nutrient Row
+                      </button>
+                    </div>
                   </div>
+                  <p className="text-[11px] text-gray-400 mt-1">Leave values empty to omit a nutrient from the label.</p>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-1">Leave values empty to omit a nutrient from the label.</p>
-              </div>
+              )}
 
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -703,7 +706,7 @@ export default function ProductsPage() {
                           </div>
                         ) : (
                           <label className={`flex flex-col items-center justify-center w-full aspect-square rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : "border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/40"}`}>
-                            <span className="text-2xl mb-1">📷</span>
+                            <ImagePlus className="w-6 h-6 mb-1 text-gray-400" />
                             <span className="text-xs font-medium text-gray-400">Upload</span>
                             <input
                               type="file"

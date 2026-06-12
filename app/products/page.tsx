@@ -127,6 +127,14 @@ function ProductsPageContent() {
 
   // Quick View Modal
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
+
+  const activeFilterCount = selectedCategories.length
+    + (minPrice > 0 ? 1 : 0)
+    + (maxPrice !== DEFAULT_MAX_PRICE ? 1 : 0)
+    + Object.values(promotions).filter(Boolean).length
+    + Object.values(availability).filter(Boolean).length;
 
   const { addItem } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
@@ -335,7 +343,7 @@ function ProductsPageContent() {
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* ── LEFT COLUMN: SIDEBAR FILTERS ── */}
-          <aside className="w-full lg:w-[260px] shrink-0 space-y-8 pr-4">
+          <aside className="hidden lg:block lg:w-[260px] shrink-0 space-y-8 pr-4">
             <h2 className="text-[17px] font-bold text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800 pb-4">
               Filter Options
             </h2>
@@ -546,6 +554,29 @@ function ProductsPageContent() {
                   <X className="w-4 h-4" />
                 </button>
               )}
+            </div>
+
+            {/* MOBILE FILTER & SORT BUTTONS */}
+            <div className="lg:hidden flex gap-2 mb-4">
+              <button
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span>Filter</span>
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 bg-brand-green text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setIsMobileSortOpen(true)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                <span>Sort</span>
+              </button>
             </div>
 
             {/* GRID CONTROLS / SORTING */}
@@ -989,6 +1020,214 @@ function ProductsPageContent() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MOBILE FILTER MODAL ── */}
+      {isMobileFilterOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-900 lg:hidden animate-in slide-in-from-bottom-full duration-300">
+          <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-lg font-black text-zinc-900 dark:text-zinc-100">Filters</h2>
+            <button
+              onClick={() => setIsMobileFilterOpen(false)}
+              className="p-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 pb-24 space-y-6">
+            {/* Search Box */}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products…"
+                className="w-full pl-11 pr-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
+              />
+            </div>
+
+            {/* Price Filter */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Price</h3>
+              <div className="text-xs text-zinc-500">₹{minPrice} to ₹{maxPrice === DEFAULT_MAX_PRICE ? `${maxSliderValue}+` : maxPrice}</div>
+              <div className="relative h-5 flex items-center">
+                <div className="absolute w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                <div
+                  className="absolute h-1.5 rounded-full bg-brand-green dark:bg-brand-gold"
+                  style={{
+                    left: `${(minPrice / maxSliderValue) * 100}%`,
+                    right: `${100 - (Math.min(maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice, maxSliderValue) / maxSliderValue) * 100}%`,
+                  }}
+                />
+                <input
+                  type="range"
+                  min={0}
+                  max={maxSliderValue}
+                  step={5}
+                  value={minPrice}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    const effectiveMax = maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice;
+                    if (val < effectiveMax - 5) setMinPrice(val);
+                  }}
+                  className="absolute w-full h-5 opacity-0 cursor-pointer z-20"
+                />
+                <input
+                  type="range"
+                  min={0}
+                  max={maxSliderValue}
+                  step={5}
+                  value={maxPrice === DEFAULT_MAX_PRICE ? maxSliderValue : maxPrice}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val > minPrice + 5) setMaxPrice(val === maxSliderValue ? DEFAULT_MAX_PRICE : val);
+                  }}
+                  className="absolute w-full h-5 opacity-0 cursor-pointer z-20"
+                />
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Categories</h3>
+              <div className="space-y-2">
+                {apiCategories.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat.slug)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedCategories([...selectedCategories, cat.slug]);
+                        } else {
+                          setSelectedCategories(selectedCategories.filter(c => c !== cat.slug));
+                        }
+                      }}
+                      className="w-4 h-4 rounded"
+                    />
+                    <span className="text-sm text-zinc-700 dark:text-zinc-300">{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Promotions */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Promotions</h3>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={promotions.newArrivals}
+                    onChange={(e) => setPromotions({ ...promotions, newArrivals: e.target.checked })}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm">New Arrivals</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={promotions.bestSellers}
+                    onChange={(e) => setPromotions({ ...promotions, bestSellers: e.target.checked })}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm">Best Sellers</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={promotions.onSale}
+                    onChange={(e) => setPromotions({ ...promotions, onSale: e.target.checked })}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm">On Sale</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Availability */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Availability</h3>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={availability.inStock}
+                    onChange={(e) => setAvailability({ ...availability, inStock: e.target.checked })}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm">In Stock</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={availability.outOfStock}
+                    onChange={(e) => setAvailability({ ...availability, outOfStock: e.target.checked })}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm">Out of Stock</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex gap-4">
+            <button
+              onClick={handleClearFilters}
+              className="flex-1 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-lg font-bold"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => setIsMobileFilterOpen(false)}
+              className="flex-1 py-3 bg-brand-green dark:bg-brand-gold text-white dark:text-brand-green rounded-lg font-bold"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── MOBILE SORT MODAL ── */}
+      {isMobileSortOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileSortOpen(false)} />
+          <div className="relative bg-white dark:bg-zinc-900 rounded-t-3xl p-6 animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100">Sort by</h2>
+              <button
+                onClick={() => setIsMobileSortOpen(false)}
+                className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {[
+                { id: "default", label: "Default Sorting" },
+                { id: "price-low-high", label: "Price: Low to High" },
+                { id: "price-high-low", label: "Price: High to Low" },
+                { id: "rating", label: "Top Rated" },
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => {
+                    setSortBy(option.id);
+                    setIsMobileSortOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between p-4 rounded-xl font-bold transition-colors ${
+                    sortBy === option.id
+                      ? "bg-brand-green/10 dark:bg-brand-gold/10 text-brand-green dark:text-brand-gold"
+                      : "text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  {option.label}
+                  {sortBy === option.id && <Check className="w-5 h-5" />}
+                </button>
+              ))}
             </div>
           </div>
         </div>

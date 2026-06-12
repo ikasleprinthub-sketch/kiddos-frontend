@@ -378,7 +378,7 @@ export default function HeroSection() {
                       <div className="absolute inset-0 bg-[#e3f9ff] bg-dot-grid" />
                     )}
                   </div>
-                  <div className="relative z-10 text-left w-full md:w-[50%] lg:w-[45%] flex flex-col items-start px-4 md:px-8 justify-center">
+                  <div className="relative z-10 text-left w-full md:w-[50%] lg:w-[45%] flex flex-col items-start px-0 md:px-4 justify-center">
                     {banner.title && (
                       <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
                         {banner.title}
@@ -405,13 +405,13 @@ export default function HeroSection() {
               <>
                 {/* SLIDE 1: MILLET PASTA (REDESIGNED) */}
                 <div
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-20 py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-3 sm:px-8 md:px-12 lg:px-20 py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
                     activeSlide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
                   {/* Left Side: Content */}
-                  <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative">
-                    <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
+                  <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative px-0 md:px-0">
+                    <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4 w-full">
                       Don&apos;t miss amazing<br />
                       <span className="font-playfair italic text-[#3bb77e] font-normal">grocery</span> deals
                     </h1>
@@ -480,13 +480,13 @@ export default function HeroSection() {
 
                 {/* SLIDE 2: FRESH BATTER SLIDER (REDESIGNED) */}
                 <div
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-20 py-8 md:py-0 bg-[#fffcf8] bg-dot-grid ${
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-3 sm:px-8 md:px-12 lg:px-20 py-8 md:py-0 bg-[#fffcf8] bg-dot-grid ${
                     activeSlide === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
                   {/* Left Side: Content */}
-                  <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative">
-                    <h2 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
+                  <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative px-0 md:px-0">
+                    <h2 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4 w-full">
                       Fresh & traditional<br />
                       <span className="font-playfair italic text-[#f97316] font-normal">organic</span> batters
                     </h2>

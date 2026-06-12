@@ -45,7 +45,7 @@ export default function ContactPage() {
           <div className="w-full rounded-3xl overflow-hidden border border-zinc-200/60 dark:border-zinc-800/60 shadow-lg">
             <iframe
               title="Kiddos Foods Location"
-              src="https://maps.google.com/maps?q=No.380,%20Sreevari%20Gardens,%20KNG%20Pudhur%20Pirivu,%20Coimbatore%20641025&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3915.789808592962!2d76.91589947440085!3d11.054379754006577!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8f71ce5392893%3A0x62001be3c71748fc!2sKIDDOS%20FOODS%20FACTORY!5e0!3m2!1sen!2sin!4v1781255283623!5m2!1sen!2sin"
               width="100%"
               height="450"
               style={{ border: 0 }}

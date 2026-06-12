@@ -84,7 +84,6 @@ export default function BannersPage() {
 
   const handleSave = async () => {
     setError("");
-    if (!form.title.trim()) { setError("Title is required"); return; }
     if (!form.image.trim()) { setError("Image is required"); return; }
     setSaving(true);
     try {
@@ -192,7 +191,7 @@ export default function BannersPage() {
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>

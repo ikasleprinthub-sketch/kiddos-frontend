@@ -6,16 +6,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ApiCategory } from "@/lib/api";
 
 const COLOR_CLASSES = [
-  { bg: "#fef3c7", text: "#d97706" },
-  { bg: "#f0fdf4", text: "#16a34a" },
-  { bg: "#fef2f2", text: "#dc2626" },
-  { bg: "#f5f3ff", text: "#7c3aed" },
-  { bg: "#f0fdfa", text: "#0d9488" },
-  { bg: "#fefce8", text: "#ca8a04" },
-  { bg: "#eff6ff", text: "#2563eb" },
-  { bg: "#fdf2f8", text: "#be185d" },
-  { bg: "#f7fee7", text: "#65a30d" },
-  { bg: "#fff7ed", text: "#ea580c" },
+  { bg: "#fcd34d", text: "#ffffff" },  // amber
+  { bg: "#86efac", text: "#ffffff" },  // green
+  { bg: "#f87171", text: "#ffffff" },  // red
+  { bg: "#c084fc", text: "#ffffff" },  // purple
+  { bg: "#67e8f9", text: "#ffffff" },  // cyan
+  { bg: "#fde047", text: "#ffffff" },  // yellow
+  { bg: "#60a5fa", text: "#ffffff" },  // blue
+  { bg: "#f472b6", text: "#ffffff" },  // pink
+  { bg: "#bef264", text: "#ffffff" },  // lime
+  { bg: "#fb923c", text: "#ffffff" },  // orange
 ];
 
 const FALLBACK_CATEGORIES: ApiCategory[] = [
@@ -211,7 +211,7 @@ export default function HotCategories() {
                     style={{ width: `${cardWidth}px` }}
                   >
                     <div
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-350 group-hover:scale-105 mb-4 shadow-sm"
+                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-350 group-hover:scale-105 mb-4 shadow-lg"
                       style={{ backgroundColor: color.bg }}
                     >
                       {cat.image ? (
@@ -219,7 +219,7 @@ export default function HotCategories() {
                         <img
                           src={cat.image}
                           alt={cat.name}
-                          className="w-[72%] h-[72%] object-contain"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
                         <span
