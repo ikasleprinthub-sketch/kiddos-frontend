@@ -904,7 +904,7 @@ function ProductsPageContent() {
                               if (searchQuery) params.set("search", searchQuery);
                               if (minPrice > 0) params.set("minPrice", minPrice.toString());
                               if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
-                              if (page > 1) params.set("page", page.toString());
+                              if (typeof page === 'number' && page > 1) params.set("page", page.toString());
                               const queryString = params.toString();
                               return queryString ? `/products?${queryString}` : "/products";
                             })()}
