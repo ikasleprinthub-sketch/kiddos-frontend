@@ -118,7 +118,7 @@ export default function Header() {
 
             {/* Logo — compact on mobile, full-size on desktop */}
             <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0">
-              <div className="relative h-12 w-28 md:h-16 md:w-48 xl:h-20 xl:w-64 overflow-hidden">
+              <div className="relative h-12 w-28 md:h-16 md:w-40 lg:h-12 lg:w-32 xl:h-16 xl:w-48 2xl:h-20 2xl:w-64 overflow-hidden">
                 <Image
                   src="/orglogo.svg"
                   alt="Kiddos Foods Logo"
@@ -134,18 +134,18 @@ export default function Header() {
             <div className="hidden lg:block relative group ml-2 xl:ml-6">
               <Link 
                 href="/products"
-                className="flex items-center gap-2 px-4 py-2 xl:px-5 xl:py-2.5 bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green rounded-full font-semibold text-xs xl:text-sm hover:bg-brand-green-light dark:hover:bg-brand-gold-light shadow-sm transition-all duration-200"
+                className="flex items-center gap-1.5 px-2.5 py-1 lg:py-1 xl:px-3.5 xl:py-1.5 bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green rounded-full font-medium text-[10px] lg:text-[11px] xl:text-xs hover:bg-brand-green-light dark:hover:bg-brand-gold-light shadow-sm transition-all duration-200"
               >
-                <LayoutGrid className="w-4 h-4 xl:w-5 xl:h-5" />
-                <span>Shop by Categories</span>
-                <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
+                <LayoutGrid className="w-3 h-3 xl:w-3.5 xl:h-3.5" />
+                <span>Categories</span>
+                <ChevronDown className="w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 group-hover:rotate-180" />
               </Link>
               
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="w-[300px] bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/50 border border-zinc-100 dark:border-zinc-800 p-2 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                <div className="w-[220px] bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/50 border border-zinc-100 dark:border-zinc-800 p-2 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
                   {catsLoading ? (
-                    <div className="p-4 text-center text-sm text-zinc-500">Loading categories...</div>
+                    <div className="p-4 text-center text-sm text-zinc-500">Loading...</div>
                   ) : catsError ? (
                     <div className="p-4 text-center text-sm text-red-500 dark:text-red-400">{catsError}</div>
                   ) : categories.length > 0 ? (
@@ -153,9 +153,9 @@ export default function Header() {
                       <Link
                         key={cat.id}
                         href={`/products?category=${cat.slug}`}
-                        className="flex items-center gap-3 p-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors group/item"
+                        className="flex items-center gap-2.5 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors group/item"
                       >
-                        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 shadow-sm group-hover/item:scale-110 transition-transform flex items-center justify-center">
+                        <div className="flex-shrink-0 w-9 h-9 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 shadow-sm group-hover/item:scale-110 transition-transform flex items-center justify-center">
                           {cat.image ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -164,12 +164,11 @@ export default function Header() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-2xl font-bold text-zinc-400">📦</span>
+                            <span className="text-xl font-bold text-zinc-400">📦</span>
                           )}
                         </div>
                         <div className="flex flex-col flex-1 min-w-0">
-                          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate">{cat.name}</span>
-                          <span className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1">{cat.slug}</span>
+                          <span className="text-[13px] font-bold text-zinc-800 dark:text-zinc-200 truncate">{cat.name}</span>
                         </div>
                       </Link>
                     ))
@@ -182,8 +181,8 @@ export default function Header() {
           </div>
 
           {/* ── Center: desktop nav pill ── */}
-          <nav className="hidden lg:flex items-center flex-1 justify-center min-w-0 px-2">
-            <div className="flex items-center gap-0.5 lg:gap-0.5 xl:gap-1.5 p-1 lg:p-0.5 xl:p-2 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm overflow-x-auto max-w-full" style={{ scrollbarWidth: 'none' }}>
+          <nav className="hidden lg:flex items-center flex-1 justify-center min-w-0 px-1 xl:px-2">
+            <div className="flex items-center gap-0 lg:gap-0.5 xl:gap-1 p-1 lg:p-0.5 xl:p-1.5 bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/40 dark:border-zinc-800/40 rounded-full shadow-inner backdrop-blur-sm overflow-x-auto max-w-full" style={{ scrollbarWidth: 'none' }}>
               {navLinks.map((link) => {
                 const isActive = pathname === link.href && !link.download;
                 return (
@@ -192,7 +191,7 @@ export default function Header() {
                     href={link.href}
                     download={link.download || undefined}
                     onClick={handleCloseAll}
-                    className={`relative px-2.5 lg:px-2.5 xl:px-6 py-2 lg:py-1.5 xl:py-3 text-xs lg:text-[11px] xl:text-sm 2xl:text-base font-medium rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${
+                    className={`relative px-2.5 lg:px-2 xl:px-4 2xl:px-5 py-2 lg:py-1.5 xl:py-2 text-xs lg:text-[11px] xl:text-[13px] 2xl:text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${
                       isActive
                         ? "bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green font-semibold shadow-sm"
                         : "text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold hover:bg-zinc-200/40 dark:hover:bg-zinc-800/40"
@@ -206,17 +205,17 @@ export default function Header() {
           </nav>
 
           {/* ── Right: wishlist, cart, login/profile ── */}
-          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-3 lg:gap-1.5 xl:gap-3 flex-shrink-0">
             {/* Wishlist */}
             <Link
               href="/wishlist"
               onClick={handleCloseAll}
-              className="relative p-2 md:p-2.5 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 dark:hover:bg-red-950/20 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
+              className="relative p-2 lg:p-1.5 xl:p-2.5 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 dark:hover:bg-red-950/20 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
               aria-label="View Wishlist"
             >
-              <Heart className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+              <Heart className="w-4 h-4 xl:w-5 xl:h-5 transition-transform duration-200 group-hover:scale-110" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-red-500 text-[9px] md:text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-red-500 text-[9px] xl:text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
                   {wishlistCount}
                 </span>
               )}
@@ -226,12 +225,12 @@ export default function Header() {
             <Link
               href="/cart"
               onClick={handleCloseAll}
-              className="relative p-2 md:p-2.5 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/80 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
+              className="relative p-2 lg:p-1.5 xl:p-2.5 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/80 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
               aria-label="View Cart"
             >
-              <ShoppingCart className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+              <ShoppingCart className="w-4 h-4 xl:w-5 xl:h-5 transition-transform duration-200 group-hover:scale-110" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 md:h-5 md:w-5 items-center justify-center rounded-full bg-brand-gold text-[9px] md:text-[10px] font-bold text-brand-green border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-brand-gold text-[9px] xl:text-[10px] font-bold text-brand-green border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
                   {cartCount}
                 </span>
               )}
@@ -242,21 +241,21 @@ export default function Header() {
               {isLoggedIn && user ? (
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 pr-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/80 dark:bg-zinc-900/50 rounded-full border border-zinc-200/30 dark:border-zinc-800/30 hover:shadow-md transition-all duration-200 focus:outline-none"
+                  className="flex items-center gap-2 p-1 xl:p-1.5 pr-2 xl:pr-3 text-xs xl:text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/80 dark:bg-zinc-900/50 rounded-full border border-zinc-200/30 dark:border-zinc-800/30 hover:shadow-md transition-all duration-200 focus:outline-none"
                 >
-                  <div className="w-8 h-8 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center shadow-sm text-sm">
+                  <div className="w-6 h-6 xl:w-8 xl:h-8 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center shadow-sm text-xs xl:text-sm">
                     {initials}
                   </div>
                   <span className="hidden xl:inline-block max-w-[80px] truncate">{user.name}</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-3 h-3 xl:w-4 xl:h-4 transition-transform duration-200 ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
                 <Link
                   href="/login"
                   onClick={handleCloseAll}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                  className="flex items-center gap-1.5 xl:gap-2 px-3 py-1.5 xl:px-5 xl:py-2 text-[11px] xl:text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
                   <span>Login</span>
                 </Link>
               )}
@@ -331,6 +330,47 @@ export default function Header() {
                   );
                 })}
               </nav>
+
+              {/* Categories Section */}
+              <div>
+                <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                  Shop by Categories
+                </div>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {catsLoading ? (
+                    <div className="p-4 text-center text-sm text-zinc-500">Loading...</div>
+                  ) : catsError ? (
+                    <div className="p-4 text-center text-sm text-red-500 dark:text-red-400">{catsError}</div>
+                  ) : categories.length > 0 ? (
+                    categories.map(cat => (
+                      <Link
+                        key={cat.id}
+                        href={`/products?category=${cat.slug}`}
+                        onClick={handleCloseAll}
+                        className="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-colors"
+                      >
+                        <div className="shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          {cat.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={cat.image}
+                              alt={cat.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-lg font-bold text-zinc-400">📦</span>
+                          )}
+                        </div>
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">
+                          {cat.name}
+                        </span>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-sm text-zinc-500">No categories</div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-zinc-100 dark:border-zinc-800 pt-6 mt-6">
