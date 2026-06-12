@@ -853,27 +853,40 @@ function ProductsPageContent() {
                 {/* Pagination Controls */}
                 {filteredProducts.length > itemsPerPage && (
                   <div className="flex justify-center items-center gap-2 mt-8">
-                    <button
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronRight className="w-5 h-5 rotate-180" />
-                    </button>
-                    
+                    {currentPage > 1 ? (
+                      <Link
+                        href={(() => {
+                          const params = new URLSearchParams();
+                          if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
+                          if (searchQuery) params.set("search", searchQuery);
+                          if (minPrice > 0) params.set("minPrice", minPrice.toString());
+                          if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
+                          if (currentPage - 1 > 1) params.set("page", (currentPage - 1).toString());
+                          const queryString = params.toString();
+                          return queryString ? `/products?${queryString}` : "/products";
+                        })()}
+                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green transition-colors"
+                      >
+                        <ChevronRight className="w-5 h-5 rotate-180" />
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-5 h-5 rotate-180" />
+                      </button>
+                    )}
+
                     {(() => {
                       const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
                       const pages: (number | string)[] = [];
 
-                      if (totalPages <= 5) {
-                        // Show all pages if 5 or less
+                      if (totalPages <= 6) {
                         for (let i = 1; i <= totalPages; i++) pages.push(i);
                       } else {
-                        // Show first 5 pages
-                        for (let i = 1; i <= 5; i++) pages.push(i);
-                        // Add ellipsis
+                        for (let i = 1; i <= 6; i++) pages.push(i);
                         pages.push('...');
-                        // Add last page
                         pages.push(totalPages);
                       }
 
@@ -883,9 +896,18 @@ function ProductsPageContent() {
                             ...
                           </span>
                         ) : (
-                          <button
+                          <Link
                             key={idx}
-                            onClick={() => setCurrentPage(page as number)}
+                            href={(() => {
+                              const params = new URLSearchParams();
+                              if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
+                              if (searchQuery) params.set("search", searchQuery);
+                              if (minPrice > 0) params.set("minPrice", minPrice.toString());
+                              if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
+                              if (page > 1) params.set("page", page.toString());
+                              const queryString = params.toString();
+                              return queryString ? `/products?${queryString}` : "/products";
+                            })()}
                             className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                               currentPage === page
                                 ? "bg-brand-green text-white"
@@ -893,18 +915,35 @@ function ProductsPageContent() {
                             }`}
                           >
                             {page}
-                          </button>
+                          </Link>
                         )
                       );
                     })()}
 
-                    <button
-                      onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1))}
-                      disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
+                    {currentPage < Math.ceil(filteredProducts.length / itemsPerPage) ? (
+                      <Link
+                        href={(() => {
+                          const params = new URLSearchParams();
+                          if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
+                          if (searchQuery) params.set("search", searchQuery);
+                          if (minPrice > 0) params.set("minPrice", minPrice.toString());
+                          if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
+                          if (currentPage + 1 > 1) params.set("page", (currentPage + 1).toString());
+                          const queryString = params.toString();
+                          return queryString ? `/products?${queryString}` : "/products";
+                        })()}
+                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green transition-colors"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </Link>
+                    ) : (
+                      <button
+                        disabled
+                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    )}
                   </div>
                 )}
               </>
