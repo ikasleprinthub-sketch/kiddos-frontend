@@ -17,10 +17,10 @@ import {
   Compass,
   LayoutGrid,
 } from "lucide-react";
+import type { ApiCategory } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { CATEGORIES } from "@/components/productsData";
 
 export default function Header() {
   const pathname = usePathname();
@@ -29,6 +29,9 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [catsLoading, setCatsLoading] = useState(true);
+  const [catsError, setCatsError] = useState<string | null>(null);
   const { count: cartCount } = useCart();
   const { count: wishlistCount } = useWishlist();
 
@@ -52,6 +55,25 @@ export default function Header() {
     }
     return () => { document.body.style.overflow = ""; };
   }, [isMobileMenuOpen]);
+
+  // Fetch categories from API
+  useEffect(() => {
+    setCatsLoading(true);
+    setCatsError(null);
+    fetch("/api/categories?limit=100")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiCategory[] = Array.isArray(data) ? data : (data.categories ?? []);
+        const active = list.filter((c) => c.isActive);
+        if (active.length === 0) {
+          setCatsError("No categories available");
+        } else {
+          setCategories(active);
+        }
+      })
+      .catch(() => setCatsError("Failed to load categories"))
+      .finally(() => setCatsLoading(false));
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -122,21 +144,29 @@ export default function Header() {
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="w-[300px] bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/50 border border-zinc-100 dark:border-zinc-800 p-2 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                  {CATEGORIES.map(cat => (
-                    <Link
-                      key={cat.slug}
-                      href={`/products?category=${cat.slug}`}
-                      className="flex items-center gap-3 p-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors group/item"
-                    >
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-lg shadow-sm group-hover/item:scale-110 transition-transform`}>
-                        {cat.emoji}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{cat.label}</span>
-                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1">{cat.description}</span>
-                      </div>
-                    </Link>
-                  ))}
+                  {catsLoading ? (
+                    <div className="p-4 text-center text-sm text-zinc-500">Loading categories...</div>
+                  ) : catsError ? (
+                    <div className="p-4 text-center text-sm text-red-500 dark:text-red-400">{catsError}</div>
+                  ) : categories.length > 0 ? (
+                    categories.map(cat => (
+                      <Link
+                        key={cat.id}
+                        href={`/products?category=${cat.slug}`}
+                        className="flex items-center gap-3 p-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors group/item"
+                      >
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-brand-green to-brand-green/60 flex items-center justify-center text-lg shadow-sm group-hover/item:scale-110 transition-transform">
+                          📦
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{cat.name}</span>
+                          <span className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1">{cat.slug}</span>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-sm text-zinc-500">No categories available</div>
+                  )}
                 </div>
               </div>
             </div>

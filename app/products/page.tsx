@@ -370,40 +370,30 @@ function ProductsPageContent() {
               <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">
                 By Categories
               </h3>
-              <div className="space-y-2.5">
+              <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 shadow-sm">
                 {catsLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                    <div key={i} className="h-12 border-b border-zinc-100 dark:border-zinc-800 last:border-0 bg-zinc-50/50 dark:bg-zinc-800/20 animate-pulse" />
                   ))
                 ) : (
-                  apiCategories.map((cat, idx) => {
+                  apiCategories.map((cat) => {
                     const isChecked = selectedCategories.includes(cat.slug);
                     const count = categoryCounts[cat.slug] || 0;
-                    const COLORS = [
-                      { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-300', selected: 'bg-amber-100 dark:bg-amber-900/50 border-amber-400 dark:border-amber-700' },
-                      { bg: 'bg-green-50 dark:bg-green-950/30', border: 'border-green-200 dark:border-green-800', text: 'text-green-700 dark:text-green-300', selected: 'bg-green-100 dark:bg-green-900/50 border-green-400 dark:border-green-700' },
-                      { bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800', text: 'text-red-700 dark:text-red-300', selected: 'bg-red-100 dark:bg-red-900/50 border-red-400 dark:border-red-700' },
-                      { bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-300', selected: 'bg-blue-100 dark:bg-blue-900/50 border-blue-400 dark:border-blue-700' },
-                      { bg: 'bg-purple-50 dark:bg-purple-950/30', border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-700 dark:text-purple-300', selected: 'bg-purple-100 dark:bg-purple-900/50 border-purple-400 dark:border-purple-700' },
-                    ];
-                    const color = COLORS[idx % COLORS.length];
 
                     return (
                       <label
                         key={cat.id}
-                        className={`flex items-center justify-between gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md ${
-                          isChecked
-                            ? `${color.selected} shadow-md`
-                            : `${color.bg} ${color.border} border-opacity-60 hover:border-opacity-100`
+                        className={`group flex items-center justify-between gap-3 p-3.5 cursor-pointer transition-all duration-200 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${
+                          isChecked ? 'bg-brand-green/5 dark:bg-brand-gold/5' : ''
                         }`}
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className={`flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                          <div className={`flex-shrink-0 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${
                             isChecked
                               ? 'bg-brand-green border-brand-green dark:bg-brand-gold dark:border-brand-gold text-white dark:text-brand-green'
-                              : `border-zinc-300 dark:border-zinc-600`
+                              : 'bg-white border-zinc-300 dark:bg-zinc-900 dark:border-zinc-700 group-hover:border-brand-green dark:group-hover:border-brand-gold'
                           }`}>
-                            {isChecked && <Check className="w-3.5 h-3.5" />}
+                            {isChecked && <Check className="w-3 h-3" />}
                           </div>
                           <input
                             type="checkbox"
@@ -417,11 +407,11 @@ function ProductsPageContent() {
                               }
                             }}
                           />
-                          <span className={`text-sm font-medium truncate ${isChecked ? 'text-zinc-900 dark:text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                          <span className={`text-[13px] sm:text-sm font-medium truncate ${isChecked ? 'text-brand-green dark:text-brand-gold font-bold' : 'text-zinc-700 dark:text-zinc-300'}`}>
                             {cat.name}
                           </span>
                         </div>
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${color.text} ${color.bg}`}>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 transition-colors ${isChecked ? 'bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700'}`}>
                           {count}
                         </span>
                       </label>
