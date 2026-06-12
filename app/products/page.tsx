@@ -91,10 +91,11 @@ function ProductsPageContent() {
   const initialCategories = initialCategory ? initialCategory.split(',') : [];
   const initialSearch = searchParams.get("search") || "";
   const DEFAULT_MAX_PRICE = 1000000;
-  const initialMaxPrice = searchParams.get("maxPrice") 
-    ? parseInt(searchParams.get("maxPrice")!) 
+  const initialMaxPrice = searchParams.get("maxPrice")
+    ? parseInt(searchParams.get("maxPrice")!)
     : DEFAULT_MAX_PRICE;
   const initialMinPrice = searchParams.get("minPrice") ? parseInt(searchParams.get("minPrice")!) : 0;
+  const initialPage = searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1;
 
   // State Management
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
@@ -114,7 +115,7 @@ function ProductsPageContent() {
     outOfStock: false
   });
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(initialPage);
   const itemsPerPage = 9;
 
   // Live categories from backend
@@ -853,30 +854,13 @@ function ProductsPageContent() {
                 {/* Pagination Controls */}
                 {filteredProducts.length > itemsPerPage && (
                   <div className="flex justify-center items-center gap-2 mt-8">
-                    {currentPage > 1 ? (
-                      <Link
-                        href={(() => {
-                          const params = new URLSearchParams();
-                          if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
-                          if (searchQuery) params.set("search", searchQuery);
-                          if (minPrice > 0) params.set("minPrice", minPrice.toString());
-                          if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
-                          if (currentPage - 1 > 1) params.set("page", (currentPage - 1).toString());
-                          const queryString = params.toString();
-                          return queryString ? `/products?${queryString}` : "/products";
-                        })()}
-                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green transition-colors"
-                      >
-                        <ChevronRight className="w-5 h-5 rotate-180" />
-                      </Link>
-                    ) : (
-                      <button
-                        disabled
-                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronRight className="w-5 h-5 rotate-180" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5 rotate-180" />
+                    </button>
 
                     {(() => {
                       const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -896,18 +880,9 @@ function ProductsPageContent() {
                             ...
                           </span>
                         ) : (
-                          <Link
+                          <button
                             key={idx}
-                            href={(() => {
-                              const params = new URLSearchParams();
-                              if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
-                              if (searchQuery) params.set("search", searchQuery);
-                              if (minPrice > 0) params.set("minPrice", minPrice.toString());
-                              if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
-                              if (typeof page === 'number' && page > 1) params.set("page", page.toString());
-                              const queryString = params.toString();
-                              return queryString ? `/products?${queryString}` : "/products";
-                            })()}
+                            onClick={() => setCurrentPage(page as number)}
                             className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                               currentPage === page
                                 ? "bg-brand-green text-white"
@@ -915,35 +890,18 @@ function ProductsPageContent() {
                             }`}
                           >
                             {page}
-                          </Link>
+                          </button>
                         )
                       );
                     })()}
 
-                    {currentPage < Math.ceil(filteredProducts.length / itemsPerPage) ? (
-                      <Link
-                        href={(() => {
-                          const params = new URLSearchParams();
-                          if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
-                          if (searchQuery) params.set("search", searchQuery);
-                          if (minPrice > 0) params.set("minPrice", minPrice.toString());
-                          if (maxPrice !== DEFAULT_MAX_PRICE) params.set("maxPrice", maxPrice.toString());
-                          if (currentPage + 1 > 1) params.set("page", (currentPage + 1).toString());
-                          const queryString = params.toString();
-                          return queryString ? `/products?${queryString}` : "/products";
-                        })()}
-                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green transition-colors"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </Link>
-                    ) : (
-                      <button
-                        disabled
-                        className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1))}
+                      disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-brand-green hover:text-brand-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
                   </div>
                 )}
               </>
