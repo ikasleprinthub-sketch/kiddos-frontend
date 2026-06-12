@@ -2,25 +2,26 @@
 
 import { useState, useMemo, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { 
-  Search, 
-  ChevronDown, 
-  Check, 
-  X, 
-  Filter, 
-  SlidersHorizontal, 
-  ArrowLeft, 
-  ArrowRight, 
-  Heart, 
-  Eye, 
-  ShoppingCart, 
-  ShoppingBag, 
-  AlertCircle, 
+import {
+  Search,
+  ChevronDown,
+  Check,
+  X,
+  Filter,
+  SlidersHorizontal,
+  ArrowLeft,
+  ArrowRight,
+  Heart,
+  Eye,
+  ShoppingCart,
+  ShoppingBag,
+  AlertCircle,
   ChevronRight,
-  Home, 
-  ArrowUpDown, 
-  Sparkles, 
-  RefreshCcw 
+  Home,
+  ArrowUpDown,
+  Sparkles,
+  RefreshCcw,
+  BookOpen
 } from "lucide-react";
 import { PRODUCTS, Product } from "@/components/productsData";
 import Pagination from '@mui/material/Pagination';
@@ -854,9 +855,10 @@ function ProductsPageContent() {
                           </Link>
 
                           {isRecipe ? (
-                            <div className="mt-2">
+                            <div className="mt-2 flex items-center gap-2">
+                              <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                               <span className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
-                                📖 View Recipe →
+                                View Recipe →
                               </span>
                             </div>
                           ) : (
@@ -1014,7 +1016,7 @@ function ProductsPageContent() {
                       onClick={() => setQuickViewProduct(null)}
                       className="w-full py-4 rounded-2xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green"
                     >
-                      <span>📖</span> View Recipe
+                      <BookOpen className="w-5 h-5" /> View Recipe
                     </Link>
                   ) : (
                     <button
