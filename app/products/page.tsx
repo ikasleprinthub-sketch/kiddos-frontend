@@ -865,12 +865,12 @@ function ProductsPageContent() {
                       const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
                       const pages: (number | string)[] = [];
 
-                      if (totalPages <= 6) {
-                        // Show all pages if 6 or less
+                      if (totalPages <= 5) {
+                        // Show all pages if 5 or less
                         for (let i = 1; i <= totalPages; i++) pages.push(i);
                       } else {
-                        // Show first 6 pages
-                        for (let i = 1; i <= 6; i++) pages.push(i);
+                        // Show first 5 pages
+                        for (let i = 1; i <= 5; i++) pages.push(i);
                         // Add ellipsis
                         pages.push('...');
                         // Add last page
