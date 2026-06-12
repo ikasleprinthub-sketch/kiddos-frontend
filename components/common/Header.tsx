@@ -155,11 +155,20 @@ export default function Header() {
                         href={`/products?category=${cat.slug}`}
                         className="flex items-center gap-3 p-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors group/item"
                       >
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-brand-green to-brand-green/60 flex items-center justify-center text-lg shadow-sm group-hover/item:scale-110 transition-transform">
-                          📦
+                        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 shadow-sm group-hover/item:scale-110 transition-transform flex items-center justify-center">
+                          {cat.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={cat.image}
+                              alt={cat.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-2xl font-bold text-zinc-400">📦</span>
+                          )}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{cat.name}</span>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200 truncate">{cat.name}</span>
                           <span className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1">{cat.slug}</span>
                         </div>
                       </Link>
