@@ -861,19 +861,42 @@ function ProductsPageContent() {
                       <ChevronRight className="w-5 h-5 rotate-180" />
                     </button>
                     
-                    {Array.from({ length: Math.ceil(filteredProducts.length / itemsPerPage) }).map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                          currentPage === i + 1 
-                            ? "bg-brand-green text-white" 
-                            : "bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
+                    {(() => {
+                      const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+                      const pages: (number | string)[] = [];
+
+                      if (totalPages <= 6) {
+                        // Show all pages if 6 or less
+                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                      } else {
+                        // Show first 6 pages
+                        for (let i = 1; i <= 6; i++) pages.push(i);
+                        // Add ellipsis
+                        pages.push('...');
+                        // Add last page
+                        pages.push(totalPages);
+                      }
+
+                      return pages.map((page, idx) =>
+                        page === '...' ? (
+                          <span key={idx} className="w-10 h-10 flex items-center justify-center text-zinc-400">
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentPage(page as number)}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                              currentPage === page
+                                ? "bg-brand-green text-white"
+                                : "bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      );
+                    })()}
 
                     <button
                       onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredProducts.length / itemsPerPage), p + 1))}
