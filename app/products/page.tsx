@@ -868,9 +868,17 @@ function ProductsPageContent() {
                           setCurrentPage(value);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }} 
-                        color="primary"
                         shape="rounded"
                         size="large"
+                        sx={{
+                          '& .Mui-selected': {
+                            backgroundColor: '#2C4A3B !important',
+                            color: '#ffffff !important',
+                            '&:hover': {
+                              backgroundColor: '#1f352a !important',
+                            }
+                          }
+                        }}
                       />
                     </Stack>
                   </div>
