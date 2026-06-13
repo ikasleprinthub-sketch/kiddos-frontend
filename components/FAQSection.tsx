@@ -12,19 +12,19 @@ interface FAQ {
 const faqs: FAQ[] = [
   {
     question: "What is Kiddos Foods?",
-    answer: "Kiddos Foods is a company dedicated to making healthy, traditional, and authentic food products, with a core mission to \"Make healthy posterity\" by ensuring the health and well-being of future generations.",
+    answer: "Kiddos Foods is a company dedicated to making healthy, traditional, and authentic food products, with a core mission to \"Make healthy posterity\" by ensuring the health and well being of future generations.",
   },
   {
     question: "What types of products does Kiddos Foods sell?",
     answer: "We primarily sell South Indian food essentials, including 30+ types of Idli and Dosa Batter. We also offer other products like Raw Spices, Spice Blends, Pickles, and Cold Pressed Oils.",
   },
   {
-    question: "Are your batters genuinely home-made and traditional?",
-    answer: "Yes, our products are 100% Home-Made and follow \"Amma's Receipe\" (recipe) for an authentic, traditional taste, just like a mother's touch. They are made with love and ensure premium quality.",
+    question: "Are your batters genuinely home made and traditional?",
+    answer: "Yes, our products are 100% Home Made and follow \"Amma's Receipe\" (recipe) for an authentic, traditional taste, just like a mother's touch. They are made with love and ensure premium quality.",
   },
   {
     question: "What makes Kiddos Foods products healthy for my family and kids?",
-    answer: "Our products are made with Pure Ingredients, are Protein-Rich, Healthy & Nutritious, and are Easily Digestible. We also strictly follow the policy of: No Preservatives, No Added Colors, No Artificial Flavors, Zero Additives, and No Sugar/Rising Agents.",
+    answer: "Our products are made with Pure Ingredients, are Protein Rich, Healthy & Nutritious, and are Easily Digestible. We also strictly follow the policy of: No Preservatives, No Added Colors, No Artificial Flavors, Zero Additives, and No Sugar/Rising Agents.",
   },
   {
     question: "Do you use any artificial additives or preservatives?",

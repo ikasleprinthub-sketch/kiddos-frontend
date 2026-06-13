@@ -7,13 +7,13 @@ const benefits = [
     num: "01",
     icon: <Heart className="w-7 h-7 text-[#f97316]" />,
     title: "Trusted Brand",
-    desc: "Built on clean-label principles, trusted by modern families seeking healthier traditional food choices without preservatives or artificial additives.",
+    desc: "Built on clean label principles, trusted by modern families seeking healthier traditional food choices without preservatives or artificial additives.",
   },
   {
     num: "02",
     icon: <TrendingUp className="w-7 h-7 text-[#f97316]" />,
     title: "High Profit Margin",
-    desc: "A scalable model with strong product demand, recurring purchases, and healthy operational margins designed for long-term growth.",
+    desc: "A scalable model with strong product demand, recurring purchases, and healthy operational margins designed for long term growth.",
   },
   {
     num: "03",
@@ -46,8 +46,10 @@ export default function FranchiseBenefits() {
               className="bg-white dark:bg-zinc-900 rounded-2xl p-7 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
             >
               {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl bg-[#f97316]/10 border border-[#f97316]/20 flex items-center justify-center group-hover:bg-[#f97316]/20 transition-colors shrink-0">
-                {b.icon}
+              <div className="w-14 h-14 rounded-2xl bg-[#f97316]/10 border border-[#f97316]/20 flex items-center justify-center group-hover:bg-[#f97316]/30 group-hover:border-[#f97316] group-hover:shadow-lg group-hover:scale-110 transition-all duration-300 shrink-0">
+                <div className="group-hover:scale-125 transition-transform duration-300">
+                  {b.icon}
+                </div>
               </div>
 
               {/* Number

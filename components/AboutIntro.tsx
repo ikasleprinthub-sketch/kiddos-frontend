@@ -26,7 +26,7 @@ export default function AboutIntro() {
             </p>
 
             <p className="text-zinc-500 text-sm leading-relaxed mb-4">
-              Kiddos Foods was started with a simple mission – to bring homemade taste
+              Kiddos Foods was started with a simple mission to bring homemade taste
               and nutrition to every home. We prepare fresh batters, spice blends, oils,
               pickles and more using traditional recipes and premium quality ingredients.
             </p>

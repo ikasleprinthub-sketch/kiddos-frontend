@@ -68,7 +68,7 @@ export default function FranchiseHero() {
             </h1>
 
             <p className="text-zinc-400 text-sm font-normal leading-relaxed max-w-md">
-              Become part of one of India&apos;s fastest-growing healthy food
+              Become part of one of India&apos;s fastest growing healthy food
               networks, where tradition, nutrition, and innovation come
               together in every meal.
             </p>
