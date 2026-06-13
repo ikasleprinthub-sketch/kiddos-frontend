@@ -332,8 +332,8 @@ export default function HeroSection() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="group/hero relative w-full h-[400px] sm:h-[460px] md:h-[500px] lg:h-[530px] rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="group/hero relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
           {/* SVG definitions for patterns */}
           <svg width="0" height="0" className="absolute pointer-events-none">
             <defs>
