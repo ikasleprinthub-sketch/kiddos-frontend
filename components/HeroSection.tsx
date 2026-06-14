@@ -333,7 +333,7 @@ export default function HeroSection() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="group/hero relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
+        <div className="group/hero relative w-full h-[420px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
           {/* SVG definitions for patterns */}
           <svg width="0" height="0" className="absolute pointer-events-none">
             <defs>
@@ -358,7 +358,7 @@ export default function HeroSection() {
               banners.map((banner, idx) => (
                 <div
                   key={banner.id}
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-24 py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-16 lg:px-24 py-6 sm:py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
                     activeSlide === idx ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
@@ -380,19 +380,19 @@ export default function HeroSection() {
                   </div>
                   <div className="relative z-10 text-left w-full md:w-[50%] lg:w-[45%] flex flex-col items-start px-0 md:px-4 justify-center">
                     {banner.title && (
-                      <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
+                      <h1 className="text-[#253d4e] text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-2 sm:mb-4">
                         {banner.title}
                       </h1>
                     )}
                     {banner.subtitle && (
-                      <p className="text-[#7e7e7e] text-sm sm:text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                      <p className="text-[#7e7e7e] text-xs sm:text-base md:text-lg mb-4 sm:mb-6 max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none">
                         {banner.subtitle}
                       </p>
                     )}
                     {banner.link && (
                       <Link
                         href={banner.link}
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#3bb77e] hover:bg-[#2aa36c] text-white font-bold text-sm sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-emerald-700/10 cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3.5 bg-[#3bb77e] hover:bg-[#2aa36c] text-white font-bold text-xs sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-emerald-700/10 cursor-pointer"
                       >
                         Shop Now
                         <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -405,22 +405,22 @@ export default function HeroSection() {
               <>
                 {/* SLIDE 1: MILLET PASTA (REDESIGNED) */}
                 <div
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-3 sm:px-8 md:px-12 lg:px-20 py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20 py-5 sm:py-8 md:py-0 bg-[#e3f9ff] bg-dot-grid ${
                     activeSlide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
                   {/* Left Side: Content */}
                   <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative px-0 md:px-0">
-                    <h1 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4 w-full">
+                    <h1 className="text-[#253d4e] text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-2 sm:mb-4 w-full">
                       Don&apos;t miss amazing<br />
                       <span className="font-playfair italic text-[#3bb77e] font-normal">grocery</span> deals
                     </h1>
-                    <p className="text-[#7e7e7e] text-sm sm:text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                    <p className="text-[#7e7e7e] text-xs sm:text-base md:text-lg mb-4 sm:mb-8 max-w-md leading-relaxed">
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit, eiusmod tempor incididunt ut aliquip.
                     </p>
                     <Link
                       href="/category/millet-based"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#3bb77e] hover:bg-[#2aa36c] text-white font-bold text-sm sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-emerald-700/10 cursor-pointer"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3.5 bg-[#3bb77e] hover:bg-[#2aa36c] text-white font-bold text-xs sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-emerald-700/10 cursor-pointer"
                     >
                       Shop Now
                       <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -428,17 +428,17 @@ export default function HeroSection() {
                   </div>
 
                   {/* Right Side: Visuals */}
-                  <div className="w-full md:w-[50%] lg:w-[55%] h-full flex items-center justify-center relative mt-6 md:mt-0 z-10 select-none">
-                    <div className="relative flex items-center justify-center w-[260px] sm:w-[300px] md:w-[360px] lg:w-[400px] aspect-[1.2/1]">
+                  <div className="w-full md:w-[50%] lg:w-[55%] h-[160px] md:h-full flex items-center justify-center relative mt-4 md:mt-0 z-10 select-none">
+                    <div className="relative flex items-center justify-center w-[180px] sm:w-[300px] md:w-[360px] lg:w-[400px] aspect-[1.2/1]">
                       {/* Left Package */}
                       <PastaPacket
                         {...pastaPackages[1]}
-                        className="w-[110px] sm:w-[130px] md:w-[150px] lg:w-[170px] rotate-[-12deg] -translate-x-[15%] translate-y-[5%] hover:rotate-[-6deg] hover:scale-105 transition-all duration-500 z-10"
+                        className="w-[80px] sm:w-[130px] md:w-[150px] lg:w-[170px] rotate-[-12deg] -translate-x-[15%] translate-y-[5%] hover:rotate-[-6deg] hover:scale-105 transition-all duration-500 z-10"
                       />
                       {/* Right Package */}
                       <PastaPacket
                         {...pastaPackages[3]}
-                        className="w-[110px] sm:w-[130px] md:w-[150px] lg:w-[170px] rotate-[12deg] translate-x-[15%] -translate-y-[5%] hover:rotate-[6deg] hover:scale-105 transition-all duration-500 z-20"
+                        className="w-[80px] sm:w-[130px] md:w-[150px] lg:w-[170px] rotate-[12deg] translate-x-[15%] -translate-y-[5%] hover:rotate-[6deg] hover:scale-105 transition-all duration-500 z-20"
                       />
                     </div>
                   </div>
@@ -480,22 +480,22 @@ export default function HeroSection() {
 
                 {/* SLIDE 2: FRESH BATTER SLIDER (REDESIGNED) */}
                 <div
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-3 sm:px-8 md:px-12 lg:px-20 py-8 md:py-0 bg-[#fffcf8] bg-dot-grid ${
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out flex flex-col md:flex-row items-center justify-between px-4 sm:px-8 md:px-12 lg:px-20 py-5 sm:py-8 md:py-0 bg-[#fffcf8] bg-dot-grid ${
                     activeSlide === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
                   {/* Left Side: Content */}
                   <div className="w-full md:w-[50%] lg:w-[45%] flex flex-col justify-center text-left items-start z-10 relative px-0 md:px-0">
-                    <h2 className="text-[#253d4e] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4 w-full">
+                    <h2 className="text-[#253d4e] text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-2 sm:mb-4 w-full">
                       Fresh & traditional<br />
                       <span className="font-playfair italic text-[#f97316] font-normal">organic</span> batters
                     </h2>
-                    <p className="text-[#7e7e7e] text-sm sm:text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                    <p className="text-[#7e7e7e] text-xs sm:text-base md:text-lg mb-4 sm:mb-8 max-w-md leading-relaxed">
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit, eiusmod tempor incididunt ut aliquip.
                     </p>
                     <Link
                       href="/category/batter"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#f97316] hover:bg-[#e05e00] text-white font-bold text-sm sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-orange-700/10 cursor-pointer"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3.5 bg-[#f97316] hover:bg-[#e05e00] text-white font-bold text-xs sm:text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-md shadow-orange-700/10 cursor-pointer"
                     >
                       Shop Now
                       <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -503,17 +503,17 @@ export default function HeroSection() {
                   </div>
 
                   {/* Right Side: Visuals */}
-                  <div className="w-full md:w-[50%] lg:w-[55%] h-full flex items-center justify-center relative mt-6 md:mt-0 z-10 select-none">
-                    <div className="relative flex items-center justify-center w-[260px] sm:w-[300px] md:w-[360px] lg:w-[400px] aspect-[1.2/1]">
+                  <div className="w-full md:w-[50%] lg:w-[55%] h-[160px] md:h-full flex items-center justify-center relative mt-4 md:mt-0 z-10 select-none">
+                    <div className="relative flex items-center justify-center w-[180px] sm:w-[300px] md:w-[360px] lg:w-[400px] aspect-[1.2/1]">
                       {/* Left Batter Pouch */}
                       <BatterPacket
                         {...batterPackages[0]}
-                        className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] rotate-[-10deg] -translate-x-[15%] translate-y-[5%] hover:rotate-[-5deg] hover:scale-105 transition-all duration-500 z-10"
+                        className="w-[85px] sm:w-[140px] md:w-[160px] lg:w-[180px] rotate-[-10deg] -translate-x-[15%] translate-y-[5%] hover:rotate-[-5deg] hover:scale-105 transition-all duration-500 z-10"
                       />
                       {/* Right Batter Pouch */}
                       <BatterPacket
                         {...batterPackages[1]}
-                        className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] rotate-[10deg] translate-x-[15%] -translate-y-[5%] hover:rotate-[5deg] hover:scale-105 transition-all duration-500 z-20"
+                        className="w-[85px] sm:w-[140px] md:w-[160px] lg:w-[180px] rotate-[10deg] translate-x-[15%] -translate-y-[5%] hover:rotate-[5deg] hover:scale-105 transition-all duration-500 z-20"
                       />
                     </div>
                   </div>

@@ -6,16 +6,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ApiCategory } from "@/lib/api";
 
 const COLOR_CLASSES = [
-  { bg: "#fcd34d", text: "#ffffff" },  // amber
-  { bg: "#86efac", text: "#ffffff" },  // green
-  { bg: "#f87171", text: "#ffffff" },  // red
-  { bg: "#c084fc", text: "#ffffff" },  // purple
-  { bg: "#67e8f9", text: "#ffffff" },  // cyan
-  { bg: "#fde047", text: "#ffffff" },  // yellow
-  { bg: "#60a5fa", text: "#ffffff" },  // blue
-  { bg: "#f472b6", text: "#ffffff" },  // pink
-  { bg: "#bef264", text: "#ffffff" },  // lime
-  { bg: "#fb923c", text: "#ffffff" },  // orange
+  { bg: "#fcd34d", text: "#ffffff", hoverBg: "#fef3c7", darkHoverBg: "#451a03" },  // amber
+  { bg: "#86efac", text: "#ffffff", hoverBg: "#dcfce7", darkHoverBg: "#064e3b" },  // green
+  { bg: "#f87171", text: "#ffffff", hoverBg: "#fee2e2", darkHoverBg: "#7f1d1d" },  // red
+  { bg: "#c084fc", text: "#ffffff", hoverBg: "#f3e8ff", darkHoverBg: "#581c87" },  // purple
+  { bg: "#67e8f9", text: "#ffffff", hoverBg: "#ecfeff", darkHoverBg: "#164e63" },  // cyan
+  { bg: "#fde047", text: "#ffffff", hoverBg: "#fef9c3", darkHoverBg: "#713f12" },  // yellow
+  { bg: "#60a5fa", text: "#ffffff", hoverBg: "#dbeafe", darkHoverBg: "#1e3a8a" },  // blue
+  { bg: "#f472b6", text: "#ffffff", hoverBg: "#fce7f3", darkHoverBg: "#831843" },  // pink
+  { bg: "#bef264", text: "#ffffff", hoverBg: "#f7fee7", darkHoverBg: "#3f6212" },  // lime
+  { bg: "#fb923c", text: "#ffffff", hoverBg: "#ffedd5", darkHoverBg: "#7c2d12" },  // orange
 ];
 
 const FALLBACK_CATEGORIES: ApiCategory[] = [
@@ -112,7 +112,7 @@ export default function HotCategories() {
       if (!isHovered.current) goNext();
     }, 3000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxIndex, currentIndex]);
 
   if (loading) {
@@ -152,7 +152,7 @@ export default function HotCategories() {
         {/* Heading */}
         <div className="flex flex-col items-center mb-10">
           <h2 className="text-[#1a2e1a] dark:text-zinc-100 font-bold text-2xl sm:text-3xl tracking-tight">
-            Hot categories
+            Hot Categories
           </h2>
           <svg viewBox="0 0 80 14" className="mt-1.5 w-16 h-3" fill="none">
             <path
@@ -192,9 +192,8 @@ export default function HotCategories() {
           {/* Sliding track */}
           <div className="overflow-hidden py-4 px-2 -mx-2">
             <div
-              className={`flex ${animated ? "transition-transform duration-500 ease-in-out" : ""} ${
-                maxIndex === 0 ? "justify-center" : ""
-              }`}
+              className={`flex ${animated ? "transition-transform duration-500 ease-in-out" : ""} ${maxIndex === 0 ? "justify-center" : ""
+                }`}
               style={{
                 gap: `${gap}px`,
                 transform: `translateX(-${currentIndex * (cardWidth + gap)}px)`,
@@ -207,11 +206,15 @@ export default function HotCategories() {
                   <Link
                     key={cat.id}
                     href={`/products?category=${cat.slug}`}
-                    className="flex flex-col items-center shrink-0 group text-center bg-white dark:bg-zinc-900 border border-zinc-100/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:border-zinc-200/60 dark:hover:border-zinc-750 hover:-translate-y-1.5 transition-all duration-300"
-                    style={{ width: `${cardWidth}px` }}
+                    className="flex flex-col items-center shrink-0 group text-center bg-white dark:bg-zinc-900 border border-zinc-100/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:border-transparent dark:hover:border-transparent hover:bg-[var(--hover-bg)] dark:hover:bg-[var(--dark-hover-bg)] hover:-translate-y-1.5 transition-all duration-300"
+                    style={{ 
+                      width: `${cardWidth}px`,
+                      "--hover-bg": color.hoverBg,
+                      "--dark-hover-bg": color.darkHoverBg
+                    } as React.CSSProperties}
                   >
                     <div
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden transition-transform duration-350 group-hover:scale-105 mb-4 shadow-lg"
+                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:scale-110 mb-4 shadow-lg group-hover:shadow-xl"
                       style={{ backgroundColor: color.bg }}
                     >
                       {cat.image ? (
@@ -247,11 +250,10 @@ export default function HotCategories() {
               <button
                 key={idx}
                 onClick={() => { setAnimated(true); setCurrentIndex(idx); }}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  currentIndex === idx
+                className={`h-2.5 rounded-full transition-all duration-300 ${currentIndex === idx
                     ? "w-6 bg-[#2a7a2a]"
                     : "w-2.5 bg-zinc-200 hover:bg-zinc-300"
-                }`}
+                  }`}
                 aria-label={`Go to ${idx + 1}`}
               />
             ))}
