@@ -8,7 +8,7 @@ import { adminApi } from "@/lib/adminApi";
 // Import icons from lucide-react (icon library)
 import {
   ShoppingCart, Users, Package, DollarSign,
-  AlertTriangle, TrendingUp, Download,
+  AlertTriangle, TrendingUp,
 } from "lucide-react";
 
 // TypeScript interface defining the structure of dashboard data returned from API
@@ -73,10 +73,6 @@ export default function AdminDashboard() {
   // State for error message when fetching dashboard data
   const [error, setError] = useState("");
 
-  // State for image download operation
-  const [downloadLoading, setDownloadLoading] = useState(false);
-  const [downloadError, setDownloadError] = useState("");
-  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   // Fetch dashboard data when component mounts (empty dependency array)
   useEffect(() => {
@@ -87,66 +83,6 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  /**
-   * Handle image download request
-   * Fetches all images as ZIP from backend API and triggers browser download
-   */
-  const handleDownloadImages = async () => {
-    try {
-      // Set loading state to show spinner in UI
-      setDownloadLoading(true);
-      // Clear any previous error/success messages
-      setDownloadError("");
-      setDownloadSuccess(false);
-
-      // Make API call to download endpoint
-      // Pass JWT token from localStorage in Authorization header
-      const response = await fetch("/api/admin/downloads/images", {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
-        },
-      });
-
-      // Check if response status is successful (200-299 range)
-      if (!response.ok) {
-        // Attempt to parse error message from response
-        const data = await response.json().catch(() => ({}));
-        // Throw error which will be caught in catch block below
-        throw new Error(data.message || "Failed to download images");
-      }
-
-      // Convert response to blob (binary data for ZIP file)
-      const blob = await response.blob();
-      // Create a temporary URL for the blob
-      const url = window.URL.createObjectURL(blob);
-      // Create an invisible anchor element to trigger download
-      const a = document.createElement("a");
-      a.href = url;
-      // Set filename with today's date (e.g., "images-2026-06-17.zip")
-      a.download = `images-${new Date().toISOString().split("T")[0]}.zip`;
-      // Add anchor to document so click() will work
-      document.body.appendChild(a);
-      // Programmatically click the anchor to start download
-      a.click();
-      // Clean up: revoke the temporary blob URL
-      window.URL.revokeObjectURL(url);
-      // Remove the temporary anchor element from DOM
-      document.body.removeChild(a);
-
-      // Show success message
-      setDownloadSuccess(true);
-      // Auto-hide success message after 3 seconds
-      setTimeout(() => setDownloadSuccess(false), 3000);
-    } catch (err: any) {
-      // Show error message to user
-      setDownloadError(err.message || "Failed to download images");
-    } finally {
-      // Clear loading state regardless of success/failure
-      setDownloadLoading(false);
-    }
-  };
-
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <AdminHeader title="Dashboard" />
@@ -156,45 +92,6 @@ export default function AdminDashboard() {
             {error}
           </div>
         )}
-
-        {/* Download Images Section - Card to display download functionality */}
-        <div className="bg-white rounded-xl border border-gray-200">
-          {/* Header section with title and download button */}
-          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            {/* Left side: Icon and title */}
-            <div className="flex items-center gap-2">
-              <Download size={18} className="text-emerald-600" />
-              <h2 className="font-semibold text-gray-800">Export Images</h2>
-            </div>
-            {/* Right side: Download button */}
-            <button
-              onClick={handleDownloadImages}
-              disabled={downloadLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg font-medium text-sm transition-colors"
-            >
-              <Download size={16} />
-              {/* Show different text based on loading state */}
-              {downloadLoading ? "Downloading..." : "Download All Images"}
-            </button>
-          </div>
-          {/* Description text */}
-          <div className="px-5 py-3 text-sm text-gray-600">
-            Download all uploaded images from products, categories, and banners as a ZIP file organized by type.
-          </div>
-          {/* Error message display (shown if download fails) */}
-          {downloadError && (
-            <div className="mx-5 mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {downloadError}
-            </div>
-          )}
-          {/* Success message display (shown for 3 seconds after successful download) */}
-          {downloadSuccess && (
-            <div className="mx-5 mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
-              <span>✓</span>
-              Images downloaded successfully!
-            </div>
-          )}
-        </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
