@@ -6,7 +6,7 @@ import StatsCard from "@/components/admin/StatsCard";
 import { adminApi } from "@/lib/adminApi";
 import {
   ShoppingCart, Users, Package, DollarSign,
-  AlertTriangle, TrendingUp,
+  AlertTriangle, TrendingUp, Download,
 } from "lucide-react";
 
 interface DashboardData {
@@ -55,6 +55,9 @@ export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   useEffect(() => {
     adminApi
@@ -63,6 +66,43 @@ export default function AdminDashboard() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDownloadImages = async () => {
+    try {
+      setDownloadLoading(true);
+      setDownloadError("");
+      setDownloadSuccess(false);
+
+      const response = await fetch("/api/admin/downloads/images", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to download images");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `images-${new Date().toISOString().split("T")[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 3000);
+    } catch (err: any) {
+      setDownloadError(err.message || "Failed to download images");
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
@@ -73,6 +113,38 @@ export default function AdminDashboard() {
             {error}
           </div>
         )}
+
+        {/* Download Images Section */}
+        <div className="bg-white rounded-xl border border-gray-200">
+          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Download size={18} className="text-emerald-600" />
+              <h2 className="font-semibold text-gray-800">Export Images</h2>
+            </div>
+            <button
+              onClick={handleDownloadImages}
+              disabled={downloadLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg font-medium text-sm transition-colors"
+            >
+              <Download size={16} />
+              {downloadLoading ? "Downloading..." : "Download All Images"}
+            </button>
+          </div>
+          <div className="px-5 py-3 text-sm text-gray-600">
+            Download all uploaded images from products, categories, and banners as a ZIP file organized by type.
+          </div>
+          {downloadError && (
+            <div className="mx-5 mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {downloadError}
+            </div>
+          )}
+          {downloadSuccess && (
+            <div className="mx-5 mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
+              <span>✓</span>
+              Images downloaded successfully!
+            </div>
+          )}
+        </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
