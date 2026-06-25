@@ -80,7 +80,7 @@ export default function Header() {
     { name: "Products", href: "/products" },
     { name: "Franchises", href: "/franchises" },
     { name: "About", href: "/about" },
-    { name: "Download Catalogue", href: "/catalogue.pdf", download: true },
+    { name: "Download Catalogue", href: "/Catalogue/KiddosFoods-Catalog.pdf", download: true },
     { name: "Contact", href: "/contact" },
   ];
 
