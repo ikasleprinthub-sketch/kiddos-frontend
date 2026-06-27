@@ -7,7 +7,7 @@ import StatsCard from "@/components/admin/StatsCard";
 import { adminApi } from "@/lib/adminApi";
 // Import icons from lucide-react (icon library)
 import {
-  ShoppingCart, Users, Package, DollarSign,
+  ShoppingCart, Users, Package, IndianRupee,
   AlertTriangle, TrendingUp,
 } from "lucide-react";
 
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
             title="Total Revenue"
             value={loading ? "—" : `₹${data?.stats.totalRevenue}`}
             sub={`₹${data?.stats.monthRevenue ?? "0"} this month`}
-            icon={DollarSign}
+            icon={IndianRupee}
             color="green"
             trend={data ? Number(data.stats.revenueGrowth) : undefined}
           />

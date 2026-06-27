@@ -24,7 +24,7 @@ const NAV = [
   { href: "/admin/franchise-downloads", label: "Franchise Downloads", icon: Download },
   { href: "/admin/contact-inquiries", label: "Contact Messages", icon: MessageSquare },
   // { href: "/admin/reports", label: "Reports", icon: BarChart2 },
-  { href: "/admin/import", label: "Import", icon: Upload },
+  // { href: "/admin/import", label: "Import", icon: Upload },
   // { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -55,13 +55,17 @@ export default function Sidebar() {
           collapsed ? "w-16" : "w-64"
         } shrink-0`}
       >
-        <div className="flex items-center justify-between px-4 py-5 border-b border-emerald-700">
+        <div className={`flex items-center px-4 py-4 border-b border-emerald-700 ${collapsed ? "justify-center" : "gap-2"}`}>
           {!collapsed && (
-            <span className="font-bold text-lg tracking-wide">Kiddos Admin</span>
+            <div className="bg-white p-1 rounded-md shadow-sm flex items-center justify-center shrink-0">
+              <div className="relative h-16 w-44">
+                <img src="/orglogo.svg" alt="Kiddos Admin" className="h-full w-full object-contain" />
+              </div>
+            </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded hover:bg-emerald-700 transition-colors ml-auto"
+            className="p-1 rounded hover:bg-emerald-700 transition-colors shrink-0"
             aria-label="Toggle sidebar"
           >
             <ChevronLeft
@@ -118,8 +122,12 @@ export default function Sidebar() {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-4 py-5 border-b border-emerald-700">
-          <span className="font-bold text-lg tracking-wide">Kiddos Admin</span>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-emerald-700">
+          <div className="bg-white p-1 rounded-md shadow-sm flex items-center justify-center">
+            <div className="relative h-16 w-48">
+              <img src="/orglogo.svg" alt="Kiddos Admin" className="h-full w-full object-contain" />
+            </div>
+          </div>
           <button
             onClick={close}
             className="p-1 rounded hover:bg-emerald-700 transition-colors"
