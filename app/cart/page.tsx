@@ -66,9 +66,11 @@ export default function CartPage() {
 
   // Stock map: productId → current stock from backend
   const [stockMap, setStockMap] = useState<Record<string, number>>({});
+  const [isStockLoading, setIsStockLoading] = useState(true);
 
   useEffect(() => {
     if (items.length === 0) return;
+    setIsStockLoading(true);
     fetch("/api/products?limit=200", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
@@ -77,7 +79,8 @@ export default function CartPage() {
         list.forEach((p) => { if (p.stock != null) map[p.id] = p.stock; });
         setStockMap(map);
       })
-      .catch(() => {/* keep stockMap empty — don't block UI */});
+      .catch(() => {/* keep stockMap empty — don't block UI */})
+      .finally(() => setIsStockLoading(false));
   }, [items.length]);
 
   const handlePlaceOrder = (e: React.FormEvent) => {
@@ -112,7 +115,8 @@ export default function CartPage() {
 
   const hasOutOfStock = items.some((item) => {
     const stock = stockMap[item.id];
-    return stock === 0 || (stock !== undefined && item.quantity > stock);
+    const isUnavailable = !isStockLoading && stock === undefined;
+    return isUnavailable || stock === 0 || (stock !== undefined && item.quantity > stock);
   });
 
   // Cart Calculations
@@ -419,7 +423,8 @@ export default function CartPage() {
             <div className="flex-1 w-full space-y-4">
               {items.map((item) => {
                 const stock = stockMap[item.id];
-                const outOfStock = stock === 0;
+                const isUnavailable = !isStockLoading && stock === undefined;
+                const outOfStock = stock === 0 || isUnavailable;
                 const lowStock = stock !== undefined && stock > 0 && stock < item.quantity;
                 return (
                 <article
@@ -469,7 +474,7 @@ export default function CartPage() {
                       {outOfStock ? (
                         <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400">
                           <AlertCircle className="w-3 h-3" />
-                          Out of Stock, please remove
+                          {isUnavailable ? "Unavailable, please remove" : "Out of Stock, please remove"}
                         </span>
                       ) : lowStock ? (
                         <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
