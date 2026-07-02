@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import FloatingWhatsApp from "@/components/common/FloatingWhatsApp";
+import FloatingCatalogue from "@/components/common/FloatingCatalogue";
 import ChutneyBookBadge from "@/components/ChutneyBookBadge";
 
 export default function PublicShell({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer />
       <FloatingWhatsApp />
+      <FloatingCatalogue />
       <ChutneyBookBadge />
     </>
   );

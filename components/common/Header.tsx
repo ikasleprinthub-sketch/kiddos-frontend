@@ -75,12 +75,11 @@ export default function Header() {
       .finally(() => setCatsLoading(false));
   }, []);
 
-  const navLinks = [
+  const navLinks: { name: string; href: string; download?: boolean }[] = [
     { name: "Home", href: "/" },
     { name: "Products", href: "/products" },
-    { name: "Franchises", href: "/franchises" },
     { name: "About", href: "/about" },
-    { name: "Download Catalogue", href: "/Catalogue/KiddosFoods-Catalog.pdf", download: true },
+    { name: "Franchises", href: "/franchises" },
     { name: "Contact", href: "/contact" },
   ];
 

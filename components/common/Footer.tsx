@@ -10,13 +10,23 @@ const quickLinks = [
   { label: "FAQs", href: "/faqs" },
 ];
 
+const policyLinks = [
+  { label: "Terms & Conditions", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Shipping Policy", href: "/shipping" },
+  { label: "Return Policy", href: "/returns" },
+];
+
 export default function Footer() {
   const [fetchedCategories, setFetchedCategories] = useState<{ label: string; href: string }[]>([]);
 
   useEffect(() => {
     fetch("/api/categories?limit=3")
       .then(res => {
-        if (!res.ok) throw new Error("API error");
+        if (!res.ok) {
+          console.warn(`Footer categories fetch failed with status: ${res.status}`);
+          return { categories: [] };
+        }
         return res.json();
       })
       .then(data => {
@@ -171,6 +181,17 @@ export default function Footer() {
       </div>
 
       {/* Divider */}
+      <div className="border-t border-white/15" />
+
+      {/* Policy Links */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-center gap-4 md:gap-8">
+        {policyLinks.map((link) => (
+          <Link key={link.href} href={link.href} className="text-white/70 text-xs hover:text-white transition-colors">
+            {link.label}
+          </Link>
+        ))}
+      </div>
+
       <div className="border-t border-white/15" />
 
       {/* Bottom bar — pb accounts for iOS home indicator safe area */}

@@ -59,18 +59,20 @@ export default function FranchiseHero() {
           <div className="pb-16 lg:pb-16 flex flex-col justify-center space-y-7">
             {/* Badge */}
             <span className="w-fit inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1e4620]/10 border border-[#1e4620]/20 text-[#1e4620] dark:bg-[#ca8a04]/10 dark:border-[#ca8a04]/20 dark:text-[#ca8a04] text-xs font-bold tracking-wide">
-              <Rocket className="w-4 h-4" /> India&apos;s Growing Healthy Food Franchise
+              <Rocket className="w-4 h-4" /> Build Your Business with Kiddos Foods
             </span>
 
-            <h1 className="text-3xl md:text-[2rem] xl:text-[2.6rem] font-bold text-[#1e4620] leading-tight tracking-tight">
-              Empower Your Future With<br />
-              <span className="text-[#f97316]">Kiddos Foods</span>
+            <h1 className="font-bold leading-tight tracking-tight flex flex-col gap-1">
+              <span className="text-2xl md:text-3xl xl:text-[2rem] text-[#1e4620]">
+                Join India&apos;s Growing Healthy Food
+              </span>
+              <span className="text-4xl md:text-[2.4rem] xl:text-[2.8rem] text-[#f97316]">
+                Franchise Network
+              </span>
             </h1>
 
             <p className="text-zinc-400 text-sm font-normal leading-relaxed max-w-md">
-              Become part of one of India&apos;s fastest growing healthy food
-              networks, where tradition, nutrition, and innovation come
-              together in every meal.
+              Turn your entrepreneurial dream into a successful business with Kiddos Foods. Be part of a trusted brand that combines traditional recipes, premium-quality products, and a growing customer base. We provide everything you need from product supply and training to marketing and operational support.
             </p>
 
             {/* CTAs */}
@@ -80,7 +82,7 @@ export default function FranchiseHero() {
                 onClick={handleEnquireClick}
                 className="px-8 py-3.5 bg-[#1e4620] hover:bg-[#134e15] dark:bg-[#ca8a04] dark:hover:bg-[#a16e03] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm hover:-translate-y-0.5"
               >
-                Enquire Now
+                Apply for Franchise
               </a>
             </div>
           </div>

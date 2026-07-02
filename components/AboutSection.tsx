@@ -139,14 +139,8 @@ export default function AboutSection() {
                 <p className="text-white/70 text-xs sm:text-sm mt-1 font-medium">Satisfied Customers</p>
               </div>
             </div>
+ 
 
-            {/* Signature */}
-            <p
-              className="text-[#1e4620] text-2xl mt-2"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" }}
-            >
-              Kiddos Foods
-            </p>
           </div>
 
         </div>
