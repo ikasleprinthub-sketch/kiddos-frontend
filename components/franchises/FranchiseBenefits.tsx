@@ -1,32 +1,38 @@
 "use client";
 
-import { Heart, TrendingUp, Truck } from "lucide-react";
+import { Heart, TrendingUp, Truck, Headset } from "lucide-react";
 
 const benefits = [
   {
     num: "01",
     icon: <Heart className="w-7 h-7 text-[#f97316]" />,
     title: "Trusted Brand",
-    desc: "Built on clean label principles, trusted by modern families seeking healthier traditional food choices without preservatives or artificial additives.",
+    desc: "Built on traditional recipes, premium-quality ingredients, and hygienic preparation, Kiddos Foods is trusted by families seeking healthier food choices.",
   },
   {
     num: "02",
     icon: <TrendingUp className="w-7 h-7 text-[#f97316]" />,
-    title: "High Profit Margin",
-    desc: "A scalable model with strong product demand, recurring purchases, and healthy operational margins designed for long term growth.",
+    title: "Profitable Business Model",
+    desc: "Benefit from a scalable franchise model with high-demand products, repeat customers, and excellent long-term growth potential.",
   },
   {
     num: "03",
     icon: <Truck className="w-7 h-7 text-[#f97316]" />,
     title: "Centralized Supply Chain",
-    desc: "Streamlined sourcing and standardized supply systems ensure consistent quality, reliable inventory, and efficiency across every outlet.",
+    desc: "Receive quality-assured products through our efficient procurement and distribution network, ensuring consistency across every outlet.",
+  },
+  {
+    num: "04",
+    icon: <Headset className="w-7 h-7 text-[#f97316]" />,
+    title: "Complete Business Support",
+    desc: "From outlet setup and staff training to marketing assistance and ongoing operational guidance, we support you at every stage of your business journey.",
   },
 ];
 
 export default function FranchiseBenefits() {
   return (
     <section className="bg-[#f7f9f7] dark:bg-zinc-950 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-8">
           <p className="text-[#f97316] text-xs font-bold tracking-widest uppercase mb-3">
@@ -38,8 +44,8 @@ export default function FranchiseBenefits() {
           {/* <div className="w-12 h-1 bg-[#f97316] rounded-full mt-4 mx-auto" /> */}
         </div>
 
-        {/* Three cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 ">
+        {/* Four cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
           {benefits.map((b) => (
             <div
               key={b.num}

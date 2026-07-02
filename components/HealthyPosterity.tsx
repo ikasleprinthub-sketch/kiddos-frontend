@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Playball } from "next/font/google";
-import { Leaf, Sparkles, Utensils, ShieldCheck, Users, Heart } from "lucide-react";
+import { Leaf, Globe, Sparkles, Heart, Users } from "lucide-react";
 
 const playball = Playball({
   weight: "400",
@@ -29,19 +29,19 @@ export default function HealthyPosterity() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
           {/* ── Left Column: Image ── */}
-          <div className="lg:col-span-5 relative w-full aspect-[4/5] sm:aspect-square lg:aspect-[4/5] xl:aspect-[3/4] rounded-3xl overflow-hidden shadow-lg border-4 border-white">
+          <div className="lg:col-span-6 relative w-full aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4] xl:aspect-[2/3] rounded-3xl overflow-hidden shadow-lg border-4 border-white">
             <Image
-              src="/images/about/healthy-posterity.png"
+              src="/images/about/healthy-posterity1.png"
               alt="Healthy family eating Kiddos Foods millet products"
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"
               priority
-              sizes="(max-width: 1024px) 100vw, 40vw"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
 
           {/* ── Right Column: Content ── */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
+          <div className="lg:col-span-6 flex flex-col justify-center">
 
             {/* Heading */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-1 mb-2">
@@ -66,7 +66,7 @@ export default function HealthyPosterity() {
 
             {/* Description */}
             <p className="text-zinc-600 text-sm sm:text-base leading-relaxed text-center lg:text-left mb-6 font-medium">
-              At Kiddos Foods, we believe that good health begins with good food. Our mission is to provide fresh, nutritious, and traditionally prepared food products that help families embrace healthier lifestyles while preserving the authentic taste of traditional recipes. Every product is crafted with care, quality ingredients, and a commitment to nourishing future generations.
+              At Kiddos Foods, we believe that good health begins with good food. Our mission is to create a healthier posterity by providing nutritious, natural, and traditional food products that support the well-being of families and future generations.
             </p>
 
             {/* Commitment Box */}
@@ -83,41 +83,31 @@ export default function HealthyPosterity() {
                     <Leaf className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:rotate-[15deg]" strokeWidth={2} />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-zinc-700 group-hover:text-[#1e4620] leading-snug transition-colors duration-300">
-                    Promote natural, nutritious, and wholesome foods
+                    Promote natural and nutritious foods
                   </p>
                 </div>
 
                 {/* Item 2 */}
                 <div className="flex items-start gap-3 group cursor-pointer">
                   <div className="w-8 h-8 rounded-lg bg-[#2a7a2a]/10 group-hover:bg-[#2a7a2a] flex items-center justify-center shrink-0 transition-all duration-300 ease-out group-hover:scale-110 shadow-sm group-hover:shadow-md group-hover:shadow-[#2a7a2a]/20">
-                    <Sparkles className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:scale-125 group-hover:rotate-12" strokeWidth={2} />
+                    <Globe className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:rotate-[180deg]" strokeWidth={2} />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-zinc-700 group-hover:text-[#1e4620] leading-snug transition-colors duration-300">
-                    Preserve traditional recipes and authentic flavours
+                    Encourage sustainable and responsible food practices
                   </p>
                 </div>
 
                 {/* Item 3 */}
                 <div className="flex items-start gap-3 group cursor-pointer">
                   <div className="w-8 h-8 rounded-lg bg-[#2a7a2a]/10 group-hover:bg-[#2a7a2a] flex items-center justify-center shrink-0 transition-all duration-300 ease-out group-hover:scale-110 shadow-sm group-hover:shadow-md group-hover:shadow-[#2a7a2a]/20">
-                    <Utensils className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:scale-110 group-hover:-rotate-12" strokeWidth={2} />
+                    <Sparkles className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:scale-125 group-hover:rotate-12" strokeWidth={2} />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-zinc-700 group-hover:text-[#1e4620] leading-snug transition-colors duration-300">
-                    Encourage healthier eating habits
+                    Preserve traditional food heritage
                   </p>
                 </div>
 
                 {/* Item 4 */}
-                <div className="flex items-start gap-3 group cursor-pointer">
-                  <div className="w-8 h-8 rounded-lg bg-[#2a7a2a]/10 group-hover:bg-[#2a7a2a] flex items-center justify-center shrink-0 transition-all duration-300 ease-out group-hover:scale-110 shadow-sm group-hover:shadow-md group-hover:shadow-[#2a7a2a]/20">
-                    <ShieldCheck className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:scale-110" strokeWidth={2} />
-                  </div>
-                  <p className="text-xs sm:text-sm font-semibold text-zinc-700 group-hover:text-[#1e4620] leading-snug transition-colors duration-300">
-                    Maintain the highest standards of hygiene and quality
-                  </p>
-                </div>
-
-                {/* Item 5 */}
                 <div className="flex items-start gap-3 group cursor-pointer">
                   <div className="w-8 h-8 rounded-lg bg-[#2a7a2a]/10 group-hover:bg-[#2a7a2a] flex items-center justify-center shrink-0 transition-all duration-300 ease-out group-hover:scale-110 shadow-sm group-hover:shadow-md group-hover:shadow-[#2a7a2a]/20">
                     <Users className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:-translate-y-0.5" strokeWidth={2} />
@@ -127,13 +117,13 @@ export default function HealthyPosterity() {
                   </p>
                 </div>
 
-                {/* Item 6 */}
-                <div className="flex items-start gap-3 group cursor-pointer">
+                {/* Item 5 */}
+                <div className="flex items-start gap-3 sm:col-span-2 group cursor-pointer">
                   <div className="w-8 h-8 rounded-lg bg-[#2a7a2a]/10 group-hover:bg-[#2a7a2a] flex items-center justify-center shrink-0 transition-all duration-300 ease-out group-hover:scale-110 shadow-sm group-hover:shadow-md group-hover:shadow-[#2a7a2a]/20">
                     <Heart className="w-4 h-4 text-[#2a7a2a] group-hover:text-white transition-all duration-300 ease-out group-hover:scale-110" strokeWidth={2} />
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-zinc-700 group-hover:text-[#1e4620] leading-snug transition-colors duration-300">
-                    Support healthy lifestyles for people of all ages
+                    Support healthy lifestyles for all ages
                   </p>
                 </div>
               </div>
@@ -147,7 +137,7 @@ export default function HealthyPosterity() {
                 <span className="opacity-60">⮘ ⮘</span>
               </div>
               <blockquote className="text-[#1e4620] font-bold italic text-sm sm:text-base max-w-xl leading-relaxed">
-                "To build a healthier future by making nutritious, traditional, and wholesome foods accessible to every family."
+                "To create a healthy posterity by making nutritious, traditional, and wholesome foods accessible to every family."
               </blockquote>
             </div>
 
