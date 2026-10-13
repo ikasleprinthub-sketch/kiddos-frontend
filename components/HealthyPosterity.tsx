@@ -31,7 +31,7 @@ export default function HealthyPosterity() {
           {/* ── Left Column: Image ── */}
           <div className="lg:col-span-6 relative w-full aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4] xl:aspect-[2/3] rounded-3xl overflow-hidden shadow-lg border-4 border-white">
             <Image
-              src="/images/about/healthy-posterity1.png"
+              src="/images/about/healthy-posterity1.webp"
               alt="Healthy family eating Kiddos Foods millet products"
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"

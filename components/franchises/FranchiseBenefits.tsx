@@ -5,25 +5,25 @@ import { Heart, TrendingUp, Truck, Headset } from "lucide-react";
 const benefits = [
   {
     num: "01",
-    icon: <Heart className="w-7 h-7 text-[#f97316]" />,
+    icon: <Heart className="h-5 w-5 text-[#f97316] sm:h-7 sm:w-7" />,
     title: "Trusted Brand",
     desc: "Built on traditional recipes, premium-quality ingredients, and hygienic preparation, Kiddos Foods is trusted by families seeking healthier food choices.",
   },
   {
     num: "02",
-    icon: <TrendingUp className="w-7 h-7 text-[#f97316]" />,
+    icon: <TrendingUp className="h-5 w-5 text-[#f97316] sm:h-7 sm:w-7" />,
     title: "Profitable Business Model",
     desc: "Benefit from a scalable franchise model with high-demand products, repeat customers, and excellent long-term growth potential.",
   },
   {
     num: "03",
-    icon: <Truck className="w-7 h-7 text-[#f97316]" />,
+    icon: <Truck className="h-5 w-5 text-[#f97316] sm:h-7 sm:w-7" />,
     title: "Centralized Supply Chain",
     desc: "Receive quality-assured products through our efficient procurement and distribution network, ensuring consistency across every outlet.",
   },
   {
     num: "04",
-    icon: <Headset className="w-7 h-7 text-[#f97316]" />,
+    icon: <Headset className="h-5 w-5 text-[#f97316] sm:h-7 sm:w-7" />,
     title: "Complete Business Support",
     desc: "From outlet setup and staff training to marketing assistance and ongoing operational guidance, we support you at every stage of your business journey.",
   },
@@ -45,14 +45,14 @@ export default function FranchiseBenefits() {
         </div>
 
         {/* Four cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 ">
           {benefits.map((b) => (
             <div
               key={b.num}
-              className="bg-white dark:bg-zinc-900 rounded-2xl p-7 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+              className="flex flex-col gap-2 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:gap-4 sm:p-7 hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
             >
               {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl bg-[#f97316]/10 border border-[#f97316]/20 flex items-center justify-center group-hover:bg-[#f97316]/30 group-hover:border-[#f97316] group-hover:shadow-lg group-hover:scale-110 transition-all duration-300 shrink-0">
+              <div className="h-11 w-11 rounded-xl bg-[#f97316]/10 sm:h-14 sm:w-14 sm:rounded-2xl border border-[#f97316]/20 flex items-center justify-center group-hover:bg-[#f97316]/30 group-hover:border-[#f97316] group-hover:shadow-lg group-hover:scale-110 transition-all duration-300 shrink-0">
                 <div className="group-hover:scale-125 transition-transform duration-300">
                   {b.icon}
                 </div>
@@ -62,12 +62,12 @@ export default function FranchiseBenefits() {
               <span className="text-xs font-bold text-[#f97316]/60 tracking-widest">{b.num}</span> */}
 
               {/* Title */}
-              <h3 className="text-base font-extrabold text-gray-800 dark:text-zinc-100 leading-snug">
+              <h3 className="text-sm font-extrabold text-gray-800 sm:text-base dark:text-zinc-100 leading-snug">
                 {b.title}
               </h3>
 
               {/* Description */}
-              <p className="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">
+              <p className="text-[11px] leading-relaxed text-gray-500 dark:text-zinc-400 sm:text-sm">
                 {b.desc}
               </p>
             </div>

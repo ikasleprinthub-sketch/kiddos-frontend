@@ -99,7 +99,7 @@ function ProductsPageContent() {
     ? parseInt(searchParams.get("maxPrice")!)
     : DEFAULT_MAX_PRICE;
   const initialMinPrice = searchParams.get("minPrice") ? parseInt(searchParams.get("minPrice")!) : 0;
-  const initialPage = searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1;
+  const initialPage = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
 
   // State Management
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
@@ -120,7 +120,7 @@ function ProductsPageContent() {
   });
 
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
-  const itemsPerPage = 9;
+  const itemsPerPage = 25;
 
   // Live categories from backend
   const [apiCategories, setApiCategories] = useState<ApiCategory[]>([]);
@@ -179,9 +179,16 @@ function ProductsPageContent() {
   useEffect(() => {
     fetch("/api/products?limit=200")
       .then((r) => r.json())
-      .then((data) => {
-        const list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
-        setApiProducts(list.map((p, i) => apiProductToProduct(p, i)));
+      .then(async (data) => {
+        let list: ApiProduct[] = Array.isArray(data) ? data : (data.products ?? []);
+        // Catalogue larger than one fetch: pull the remaining backend pages
+        const totalPages: number = Array.isArray(data) ? 1 : (data.pages ?? 1);
+        for (let pg = 2; pg <= totalPages; pg++) {
+          const more = await fetch(`/api/products?limit=200&page=${pg}`).then((r) => r.json());
+          list = list.concat(more.products ?? []);
+        }
+        const unique = Array.from(new Map(list.map((p) => [p.id, p])).values());
+        setApiProducts(unique.map((p, i) => apiProductToProduct(p, i)));
       })
       .catch(() => setApiProducts([]))
       .finally(() => setProdsLoading(false));
@@ -216,13 +223,17 @@ function ProductsPageContent() {
     setSearchQuery(searchParams.get("search") || "");
     setMinPrice(searchParams.get("minPrice") ? parseInt(searchParams.get("minPrice")!) : 0);
     setMaxPrice(searchParams.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!) : DEFAULT_MAX_PRICE);
-    setCurrentPage(searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1);
+    setCurrentPage(Math.max(1, parseInt(searchParams.get("page") || "1") || 1));
   }, [searchParams]);
 
-  // Reset pagination when filters change
+  // Reset pagination when filters change (but keep ?page=N on first load)
+  const filterSignature = JSON.stringify([selectedCategories, searchQuery, minPrice, maxPrice, sortBy, promotions, availability]);
+  const lastFilterSignature = useRef(filterSignature);
   useEffect(() => {
+    if (lastFilterSignature.current === filterSignature) return;
+    lastFilterSignature.current = filterSignature;
     setCurrentPage(1);
-  }, [selectedCategories, searchQuery, minPrice, maxPrice, sortBy, promotions, availability]);
+  }, [filterSignature]);
 
   // Use API products when available, otherwise fall back to static
   const allProducts = useMemo(
@@ -299,6 +310,10 @@ function ProductsPageContent() {
     });
   }, [selectedCategories, searchQuery, minPrice, maxPrice, sortBy, promotions, availability, allProducts]);
 
+  // Clamp to a valid page (e.g. ?page=99, or filters shrinking the list)
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+
   // Handle Add to Cart animation triggers
   const handleAddToCart = (product: Product) => {
     setAddingToCartId(product.id);
@@ -334,21 +349,21 @@ function ProductsPageContent() {
     <div className="w-full bg-[#faf8f5] dark:bg-[#061410] min-h-screen pb-20">
 
       {/* ── HERO BANNER ── */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-brand-green to-[#2a5e2f] dark:from-zinc-950 dark:to-brand-green py-16 px-4 md:px-8 text-center text-white">
+      <section className="relative overflow-hidden bg-gradient-to-r from-brand-green to-[#2a5e2f] px-4 py-8 text-center text-white dark:from-zinc-950 dark:to-brand-green sm:py-10 md:px-8 md:py-16">
         {/* Background Patterns */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-brand-gold/15 blur-2xl animate-pulse-subtle" />
         <div className="absolute -bottom-10 -right-10 w-64 h-64 rounded-full bg-brand-gold/15 blur-3xl" />
         
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">
+          <h1 className="mb-3 text-3xl font-black tracking-tight text-white sm:mb-4 sm:text-4xl md:mb-6 md:text-5xl">
             Our Products
           </h1>
           
           {/* Breadcrumb Pill */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 text-sm font-medium">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
             <Link href="/" className="flex items-center gap-1.5 text-white/80 hover:text-brand-gold transition-colors">
-              <Home className="w-4 h-4 text-brand-gold" />
+              <Home className="h-3.5 w-3.5 text-brand-gold sm:h-4 sm:w-4" />
               Home
             </Link>
             <ChevronRight className="w-3.5 h-3.5 text-white/40" />
@@ -357,7 +372,7 @@ function ProductsPageContent() {
         </div>
       </section>
 
-      <div ref={listRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <div ref={listRef} className="mx-auto mt-6 max-w-7xl px-4 sm:mt-8 sm:px-6 lg:mt-10 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* ── LEFT COLUMN: SIDEBAR FILTERS ── */}
@@ -617,7 +632,7 @@ function ProductsPageContent() {
                 <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
                   {prodsLoading
                     ? "Loading results..."
-                    : `Showing ${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filteredProducts.length)} of ${filteredProducts.length} results`}
+                    : `Showing ${filteredProducts.length === 0 ? 0 : (safePage - 1) * itemsPerPage + 1}-${Math.min(safePage * itemsPerPage, filteredProducts.length)} of ${filteredProducts.length} results`}
                 </p>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -704,7 +719,7 @@ function ProductsPageContent() {
 
             {/* PRODUCT GRID */}
             {prodsLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200/60 dark:border-zinc-800 animate-pulse">
                     <div className="w-full bg-zinc-200 dark:bg-zinc-800" style={{ aspectRatio: "4/3" }} />
@@ -723,15 +738,15 @@ function ProductsPageContent() {
               </div>
             ) : filteredProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-                  {filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((product) => {
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 mb-10">
+                  {filteredProducts.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage).map((product) => {
                     const isAdding = addingToCartId === product.id;
                     const hasHoverImg = !!product.image2;
                     const isOutOfStock = (product.stock ?? 1) <= 0;
                     const isRecipe = ["chutney-book", "chutney-books"].includes(product.category);
                     
                     return (
-                      <div key={product.id} className="relative">
+                      <div key={product.id} className="relative min-w-0">
                         {/* Bestseller ribbon — on card corner, clipped to card's border-radius */}
                         {product.isBestSeller && (
                           <div className="absolute top-0 left-0 w-[90px] h-[90px] overflow-hidden rounded-tl-[20px] z-30 pointer-events-none select-none">
@@ -747,7 +762,7 @@ function ProductsPageContent() {
                           </div>
                         )}
                         <article
-                          className="group bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden border border-zinc-200/50 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col p-4"
+                          className="group bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden border border-zinc-200/50 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col p-2.5 sm:p-4 h-full"
                         >
                         {/* ── IMAGE AREA ── */}
                         <div className="relative block overflow-hidden shrink-0 rounded-2xl bg-zinc-100 dark:bg-zinc-800" style={{ aspectRatio: "4/5" }}>
@@ -808,17 +823,17 @@ function ProductsPageContent() {
                                 e.preventDefault();
                                 toggleWishlist(product);
                               }}
-                              className="w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                              className={`flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md transition-colors dark:bg-zinc-800 ${isInWishlist(product.id) ? "text-red-500 ring-1 ring-red-200 dark:text-red-400 dark:ring-red-800" : "text-zinc-400 hover:text-red-500 dark:hover:text-red-400"}`}
                               title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
                             >
-                              <Heart className="w-4 h-4" fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                              <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : "fill-none"}`} />
                             </button>
                             <button 
                               onClick={(e) => {
                                 e.preventDefault();
                                 setQuickViewProduct(product);
                               }}
-                              className="w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold transition-colors opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 delay-75"
+                              className="w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold transition-colors opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-300 delay-75"
                               title="Quick View"
                             >
                               <Eye className="w-4 h-4" />
@@ -830,7 +845,7 @@ function ProductsPageContent() {
                                   if (!isOutOfStock) handleAddToCart(product);
                                 }}
                                 disabled={isOutOfStock || isAdding}
-                                className={`w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md transition-colors opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300 delay-100 ${isOutOfStock ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed" : isAdding ? "text-brand-green" : "text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold"}`}
+                                className={`w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md transition-colors opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-300 delay-100 ${isOutOfStock ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed" : isAdding ? "text-brand-green" : "text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold"}`}
                                 title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
                               >
                                 {isAdding ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
@@ -862,7 +877,7 @@ function ProductsPageContent() {
                               </span>
                             </div>
                           ) : (
-                            <div className="mt-2 flex items-center gap-2">
+                            <div className="mt-2 flex flex-wrap items-center gap-x-2">
                               <span className="text-[15px] font-bold text-[#b49852]">
                                 ₹{product.price.toFixed(2)}
                               </span>
@@ -886,11 +901,11 @@ function ProductsPageContent() {
                   <div className="flex justify-center items-center gap-2 mt-8">
                     <Stack spacing={2} sx={{ alignItems: 'center' }}>
                       <Typography sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                        Page: {currentPage}
+                        Page: {safePage}
                       </Typography>
                       <Pagination 
-                        count={Math.ceil(filteredProducts.length / itemsPerPage)} 
-                        page={currentPage} 
+                        count={totalPages} 
+                        page={safePage} 
                         onChange={(event, value) => {
                           setCurrentPage(value);
                           window.scrollTo({ top: 0, behavior: 'smooth' });

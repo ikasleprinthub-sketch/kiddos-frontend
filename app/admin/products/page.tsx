@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
-import DataTable, { Column } from "@/components/admin/DataTable";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminApi } from "@/lib/adminApi";
-import { Plus, Pencil, Trash2, Search, X, ImagePlus } from "lucide-react";
+import { AlertTriangle, Box, CheckCircle2, CircleX, Download, ImagePlus, MoreVertical, Pencil, Plus, Search, Trash2, X, Zap } from "lucide-react";
 
 interface NutrientRow { name: string; value: string }
 
@@ -121,6 +121,7 @@ export default function ProductsPage() {
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   // Nutrient facts visual editor state
   const [nutrientAmountPer, setNutrientAmountPer] = useState("100 gram");
@@ -183,6 +184,7 @@ export default function ProductsPage() {
     }
   }, [page, search]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
@@ -308,97 +310,57 @@ export default function ProductsPage() {
     }
   };
 
-  const columns: Column<Product>[] = [
-    {
-      key: "image",
-      label: "Image",
-      render: (row) => {
-        const img = row.images.find((i) => i.isPrimary) || row.images[0];
-        return img ? (
-          <img src={img.url} alt={row.name} className="w-10 h-10 rounded object-cover bg-gray-100" />
-        ) : (
-          <div className="w-10 h-10 rounded bg-gray-100" />
-        );
-      },
-    },
-    { key: "name", label: "Name" },
-    { key: "category", label: "Category", render: (row) => row.category.name },
-    { key: "price", label: "Price", render: (row) => `₹${row.price}` },
-    {
-      key: "stock", label: "Stock", render: (row) => (
-        row.stock <= 0
-          ? <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Out of Stock</span>
-          : <span className={row.stock <= 10 ? "text-orange-600 font-semibold" : ""}>{row.stock}</span>
-      )
-    },
-    {
-      key: "isActive", label: "Status", render: (row) => (
-        <div className="flex flex-wrap gap-1.5 max-w-[200px]">
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-            {row.isActive ? "Active" : "Inactive"}
-          </span>
-          {row.isFeatured && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
-              Best Seller
-            </span>
-          )}
-          {row.isPopularBatter && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800">
-              Popular Batter
-            </span>
-          )}
-          {row.isSpiceOil && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800">
-              Spice & Oil
-            </span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <button onClick={() => openEdit(row)} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors">
-            <Pencil size={15} />
-          </button>
-          <button onClick={() => handleDelete(row)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-            <Trash2 size={15} />
-          </button>
-        </div>
-      ),
-    },
-  ];
-
-  const cleanUnit = form.unit === "custom_temp" ? "" : form.unit;
+  const visibleProducts = products.filter((p) => statusFilter === "all" || (statusFilter === "active" ? p.isActive : !p.isActive));
+  // Summary counts for the products loaded on this page (same stock thresholds as the row badges)
+  const activeCount = products.filter((p) => p.isActive).length;
+  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
+  const outOfStockCount = products.filter((p) => p.stock <= 0).length;
+  const missingImages = products.filter((p) => !p.images?.length).length;
+  const exportProducts = () => { const rows=[["Product","SKU","Category","Price","Stock","Status"],...visibleProducts.map((p)=>[p.name,p.sku||"",p.category?.name||"",p.price,String(p.stock),p.isActive?"Active":"Inactive"])]; const csv=rows.map((row)=>row.map((cell)=>`"${cell.replaceAll('"','""')}"`).join(",")).join("\n"); const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); const link=document.createElement("a"); link.href=url; link.download="products.csv"; link.click(); URL.revokeObjectURL(url); };
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f7f9f8]">
       <AdminHeader title="Products" />
-      <main className="flex-1 overflow-y-auto p-6 space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-xs">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search products…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
-            />
-          </div>
-          <button
-            onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
-          >
-            <Plus size={16} /> Add Product
-          </button>
-        </div>
-        <p className="text-sm text-gray-500">{total} products</p>
-        <DataTable columns={columns} data={products} loading={loading} page={page} pages={pages} total={total} onPageChange={setPage} />
-      </main>
-
-      {modal && (
+      <main className="flex-1 overflow-y-auto"><div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h2 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Product management</h2><p className="mt-1 text-sm text-slate-500">Manage your catalog, pricing and availability.</p></div><div className="flex gap-2"><button onClick={exportProducts} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold"><Download size={17}/> Export</button><button onClick={openAdd} className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white"><Plus size={18}/> Add product</button></div></div>
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"><ProductSummary icon={Box} tone="emerald" label="Total products" value={total}/><ProductSummary icon={CheckCircle2} tone="emerald" label="Active products" value={activeCount}/><ProductSummary icon={AlertTriangle} tone="amber" label="Low stock" value={lowStockCount}/><ProductSummary icon={CircleX} tone="rose" label="Out of stock" value={outOfStockCount}/></section>
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 px-5 pt-4 pb-3">
+            <div className="flex gap-6">
+              <button
+                type="button"
+                onClick={() => setStatusFilter("all")}
+                className={`pb-2 text-sm font-bold transition-colors ${statusFilter === "all" ? "border-b-2 border-emerald-700 text-emerald-700" : "text-slate-500 hover:text-slate-800"}`}
+              >
+                All products ({total})
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("active")}
+                className={`pb-2 text-sm font-bold transition-colors ${statusFilter === "active" ? "border-b-2 border-emerald-700 text-emerald-700" : "text-slate-500 hover:text-slate-800"}`}
+              >
+                Active ({activeCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("inactive")}
+                className={`pb-2 text-sm font-bold transition-colors ${statusFilter === "inactive" ? "border-b-2 border-emerald-700 text-emerald-700" : "text-slate-500 hover:text-slate-800"}`}
+              >
+                Inactive ({products.length - activeCount})
+              </button>
+            </div>
+            <div className="relative w-full sm:w-64">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                placeholder="Search products..."
+                className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div><div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="bg-slate-50 text-xs font-bold text-slate-500"><tr><th className="px-3 py-3">Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody className="divide-y divide-slate-100">{loading?<tr><td colSpan={6} className="py-16 text-center"><span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"/></td></tr>:visibleProducts.length===0?<tr><td colSpan={6} className="py-16 text-center text-slate-400">No products found</td></tr>:visibleProducts.map((p)=>{const image=p.images?.find((i)=>i.isPrimary)||p.images?.[0];return <tr key={p.id} className="hover:bg-emerald-50/30"><td className="px-3 py-3"><div className="flex items-center gap-3">{image?<img src={image.url} alt={p.name} className="h-12 w-12 rounded-xl object-cover"/>:<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold">{p.name.slice(0,2).toUpperCase()}</div>}<div><p className="max-w-72 font-bold text-slate-900">{p.name}</p><p className="text-xs text-slate-400">{p.sku||"No SKU"}</p></div></div></td><td>{p.category?.name||"Uncategorized"}</td><td className="font-bold">₹{Number(p.price).toLocaleString("en-IN")}</td><td><p>{p.stock} units</p><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${p.stock<=0?"bg-rose-100 text-rose-700":p.stock<=10?"bg-amber-100 text-amber-700":"bg-emerald-100 text-emerald-700"}`}>{p.stock<=0?"Out of stock":p.stock<=10?"Low stock":"In stock"}</span></td><td><span className={`rounded-full px-3 py-1 text-xs font-bold ${p.isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>{p.isActive?"Active":"Inactive"}</span></td><td><div className="flex items-center"><button onClick={()=>openEdit(p)} className="flex items-center gap-2 rounded-lg px-2.5 py-2 hover:bg-emerald-50"><Pencil size={15}/> Edit</button><button onClick={()=>handleDelete(p)} className="p-2 text-slate-400 hover:text-rose-600"><Trash2 size={16}/></button><MoreVertical size={16}/></div></td></tr>})}</tbody></table></div><div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-3 sm:flex-row"><div className="flex items-center gap-3"><span className="text-xs text-slate-500">Showing {visibleProducts.length?((page-1)*10)+1:0}–{Math.min(page*10,total)} of {total}</span><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div></div></section>
+        <div className="grid gap-5 lg:grid-cols-2"><section className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5"><span className="rounded-xl bg-amber-100 p-3 text-amber-600"><ImagePlus size={20}/></span><div><h3 className="font-bold">Catalog checks</h3><p className="text-sm font-semibold">{missingImages} products without images</p><p className="text-xs text-slate-500">Add product images to create a better shopping experience.</p></div></section><section className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5"><span className="rounded-xl bg-emerald-100 p-3 text-emerald-700"><Zap size={20}/></span><div><h3 className="font-bold">Quick actions</h3><p className="text-xs text-slate-500">Use Add product or Edit to manage your catalog.</p></div></section></div>
+      </div></main>      {modal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">{modal === "add" ? "Add Product" : "Edit Product"}</h2>
@@ -788,4 +750,9 @@ export default function ProductsPage() {
       )}
     </div>
   );
+}
+
+function ProductSummary({ icon: Icon, tone, label, value }: { icon: React.ComponentType<{ size?: number }>; tone: "emerald" | "amber" | "rose"; label: string; value: number }) {
+  const colors = tone === "emerald" ? "bg-emerald-100 text-emerald-700" : tone === "amber" ? "bg-amber-100 text-amber-600" : "bg-rose-100 text-rose-600";
+  return <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:gap-4 sm:p-5"><div className={`shrink-0 rounded-xl p-2 sm:p-3 ${colors}`}><Icon size={22}/></div><div className="min-w-0"><p className="text-[11px] font-medium leading-tight text-slate-500 sm:text-sm">{label}</p><p className="mt-1 text-xl font-extrabold text-slate-950 sm:text-2xl">{value}</p></div></div>;
 }

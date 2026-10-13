@@ -48,7 +48,7 @@ export default function Home() {
 //         {/* Logo */}
 //         <div className="mb-6">
 //           <Image
-//             src="/logo.svg"
+//             src="/logo.webp"
 //             alt="Kiddos Foods Logo"
 //             width={110}
 //             height={110}

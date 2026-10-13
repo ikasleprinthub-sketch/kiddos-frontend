@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-32 h-32 mb-4 backdrop-blur rounded-2xl bg-white/5 p-3 border border-white/10 shadow-lg">
             <Image
-              src="/logo.svg"
+              src="/logo.webp"
               alt="Kiddos Foods"
               width={110}
               height={110}

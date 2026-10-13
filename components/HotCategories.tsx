@@ -56,24 +56,24 @@ export default function HotCategories() {
       const w = window.innerWidth;
       if (w < 640) {
         setVisibleCount(2);
-        setCardWidth(155);
-        setGap(12);
+        setCardWidth(140);
+        setGap(10);
       } else if (w < 768) {
         setVisibleCount(3);
-        setCardWidth(165);
-        setGap(16);
+        setCardWidth(150);
+        setGap(12);
       } else if (w < 1024) {
         setVisibleCount(4);
-        setCardWidth(175);
-        setGap(20);
+        setCardWidth(160);
+        setGap(14);
       } else if (w < 1280) {
         setVisibleCount(5);
-        setCardWidth(185);
-        setGap(20);
+        setCardWidth(170);
+        setGap(14);
       } else {
         setVisibleCount(6);
-        setCardWidth(195);
-        setGap(24);
+        setCardWidth(160);
+        setGap(12);
       }
     };
     handleResize();
@@ -85,6 +85,7 @@ export default function HotCategories() {
   const maxIndex = Math.max(0, displayCategories.length - visibleCount);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (currentIndex > maxIndex) setCurrentIndex(maxIndex);
   }, [maxIndex, currentIndex]);
 
@@ -117,19 +118,19 @@ export default function HotCategories() {
 
   if (loading) {
     return (
-      <section className="bg-zinc-50/30 py-10 px-4 sm:px-6 lg:px-8">
+      <section className="bg-zinc-50/30 py-6 px-4 sm:px-6 sm:py-8 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-5">
             <div className="h-8 w-48 bg-zinc-100 rounded animate-pulse mb-2" />
           </div>
-          <div className="flex gap-6 justify-center overflow-hidden">
+          <div className="flex gap-3 justify-center overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="flex flex-col items-center shrink-0 bg-white border border-zinc-100 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)]"
+                className="flex flex-col items-center shrink-0 bg-white border border-zinc-100 rounded-2xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.015)]"
                 style={{ width: `${cardWidth}px` }}
               >
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-zinc-100 animate-pulse mb-4" />
+                <div className="h-20 w-20 rounded-full bg-zinc-100 animate-pulse mb-3 sm:h-24 sm:w-24" />
                 <div className="h-5 w-20 bg-zinc-100 rounded animate-pulse mb-2" />
                 <div className="h-4 w-14 bg-zinc-100 rounded animate-pulse" />
               </div>
@@ -144,17 +145,17 @@ export default function HotCategories() {
 
   return (
     <section
-      className="bg-zinc-50/30 dark:bg-zinc-950/10 py-12 px-4 sm:px-6 lg:px-8"
+      className="bg-zinc-50/30 px-4 py-6 dark:bg-zinc-950/10 sm:px-6 sm:py-8 lg:px-8"
       onMouseEnter={() => { isHovered.current = true; }}
       onMouseLeave={() => { isHovered.current = false; }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
-        <div className="flex flex-col items-center mb-10">
-          <h2 className="text-[#1a2e1a] dark:text-zinc-100 font-bold text-2xl sm:text-3xl tracking-tight">
+        <div className="mb-5 flex flex-col items-center sm:mb-6">
+          <h2 className="text-xl font-bold tracking-tight text-[#1a2e1a] dark:text-zinc-100 sm:text-2xl">
             Hot Categories
           </h2>
-          <svg viewBox="0 0 80 14" className="mt-1.5 w-16 h-3" fill="none">
+          <svg viewBox="0 0 80 14" className="mt-1 h-2.5 w-14" fill="none">
             <path
               d="M4 10 Q20 2 40 7 Q60 12 76 4"
               stroke="#2a7a2a"
@@ -190,7 +191,7 @@ export default function HotCategories() {
           )}
 
           {/* Sliding track */}
-          <div className="overflow-hidden py-4 px-2 -mx-2">
+          <div className="-mx-2 overflow-hidden px-2 py-2">
             <div
               className={`flex ${animated ? "transition-transform duration-500 ease-in-out" : ""} ${maxIndex === 0 ? "justify-center" : ""
                 }`}
@@ -206,7 +207,7 @@ export default function HotCategories() {
                   <Link
                     key={cat.id}
                     href={`/products?category=${cat.slug}`}
-                    className="flex flex-col items-center shrink-0 group text-center bg-white dark:bg-zinc-900 border border-zinc-100/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:border-transparent dark:hover:border-transparent hover:bg-[var(--hover-bg)] dark:hover:bg-[var(--dark-hover-bg)] hover:-translate-y-1.5 transition-all duration-300"
+                    className="flex flex-col items-center shrink-0 group text-center bg-white dark:bg-zinc-900 border border-zinc-100/80 dark:border-zinc-800/80 rounded-2xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:border-transparent dark:hover:border-transparent hover:bg-[var(--hover-bg)] dark:hover:bg-[var(--dark-hover-bg)] hover:-translate-y-1.5 transition-all duration-300"
                     style={{ 
                       width: `${cardWidth}px`,
                       "--hover-bg": color.hoverBg,
@@ -214,7 +215,7 @@ export default function HotCategories() {
                     } as React.CSSProperties}
                   >
                     <div
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:scale-110 mb-4 shadow-lg group-hover:shadow-xl"
+                      className="mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg sm:h-24 sm:w-24"
                       style={{ backgroundColor: color.bg }}
                     >
                       {cat.image ? (
@@ -226,14 +227,14 @@ export default function HotCategories() {
                         />
                       ) : (
                         <span
-                          className="text-3xl font-black select-none"
+                          className="select-none text-2xl font-black sm:text-3xl"
                           style={{ color: color.text }}
                         >
                           {cat.name.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 leading-snug line-clamp-2 group-hover:text-[#2a7a2a] transition-colors duration-200 px-1 min-h-[44px] flex items-center justify-center">
+                    <p className="flex min-h-8 items-center justify-center px-1 text-sm font-bold leading-snug text-zinc-900 transition-colors duration-200 line-clamp-2 group-hover:text-[#2a7a2a] dark:text-zinc-100">
                       {cat.name}
                     </p>
                   </Link>
@@ -245,7 +246,7 @@ export default function HotCategories() {
 
         {/* Dot indicators */}
         {maxIndex > 0 && (
-          <div className="flex justify-center gap-1.5 mt-8">
+          <div className="mt-4 flex justify-center gap-1.5">
             {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
               <button
                 key={idx}

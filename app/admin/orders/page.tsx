@@ -1,231 +1,36 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
-import DataTable, { Column } from "@/components/admin/DataTable";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminApi } from "@/lib/adminApi";
-import { Search, Eye, ChevronDown } from "lucide-react";
+import { CheckCircle2, CircleX, Clock3, Download, Eye, FileText, MoreVertical, RefreshCw, Truck, X } from "lucide-react";
 
-interface Order {
-  id: string;
-  orderNumber: string;
-  status: string;
-  paymentStatus: string;
-  paymentMethod: string | null;
-  subtotal: string;
-  discount: string;
-  deliveryFee: string;
-  total: string;
-  createdAt: string;
-  user: { id: string; name: string; email: string };
-  items: Array<{ id: string; quantity: number; price: string; product: { name: string } }>;
+interface Order { id:string; orderNumber:string; status:string; paymentStatus:string; paymentMethod:string|null; subtotal:string; discount:string; deliveryFee:string; total:string; createdAt:string; user:{id:string;name:string;email:string}; items:Array<{id:string;quantity:number;price:string;product:{name:string}}> }
+interface OrderDetail extends Order { notes:string|null; shippingAddress:Record<string,string>; coupon:{code:string}|null }
+const ORDER_STATUSES=["PENDING","CONFIRMED","PROCESSING","SHIPPED","DELIVERED","CANCELLED","REFUNDED"];
+const PAYMENT_STATUSES=["PENDING","PAID","FAILED","REFUNDED"];
+const STATUS_COLORS:Record<string,string>={PENDING:"bg-amber-100 text-amber-700",CONFIRMED:"bg-sky-100 text-sky-700",PROCESSING:"bg-blue-100 text-blue-700",SHIPPED:"bg-indigo-100 text-indigo-700",DELIVERED:"bg-emerald-100 text-emerald-700",CANCELLED:"bg-rose-100 text-rose-700",REFUNDED:"bg-violet-100 text-violet-700"};
+const money=(value:string|number)=>`₹${Number(value).toLocaleString("en-IN",{maximumFractionDigits:2})}`;
+
+export default function OrdersPage(){
+ const [orders,setOrders]=useState<Order[]>([]); const [total,setTotal]=useState(0); const [page,setPage]=useState(1); const [pages,setPages]=useState(1); const [loading,setLoading]=useState(true); const [statusFilter,setStatusFilter]=useState(""); const [detail,setDetail]=useState<OrderDetail|null>(null); const [updating,setUpdating]=useState(false);
+ const load=useCallback(async()=>{setLoading(true);try{const params=new URLSearchParams({page:String(page)});if(statusFilter)params.set("status",statusFilter);const data=await adminApi.get<{orders:Order[];total:number;pages:number}>(`/admin/orders?${params}`);setOrders(data.orders);setTotal(data.total);setPages(data.pages)}finally{setLoading(false)}},[page,statusFilter]);
+ // eslint-disable-next-line react-hooks/set-state-in-effect
+ useEffect(()=>{load()},[load]);
+ const openDetail=async(order:Order)=>{const data=await adminApi.get<{order:OrderDetail}>(`/admin/orders/${order.id}`);setDetail(data.order)};
+ const updateStatus=async(field:"status"|"paymentStatus",value:string)=>{if(!detail)return;setUpdating(true);try{const data=await adminApi.put<{order:OrderDetail}>(`/admin/orders/${detail.id}`,{[field]:value});setDetail(data.order);load()}finally{setUpdating(false)}};
+ const counts=useMemo(()=>({process:orders.filter(o=>["PENDING","CONFIRMED","PROCESSING"].includes(o.status)).length,transit:orders.filter(o=>o.status==="SHIPPED").length,delivered:orders.filter(o=>o.status==="DELIVERED").length,cancelled:orders.filter(o=>o.status==="CANCELLED").length}),[orders]);
+ const exportOrders=()=>{const rows=[["Order","Date","Customer","Items","Total","Payment","Status"],...orders.map(o=>[o.orderNumber,new Date(o.createdAt).toLocaleDateString("en-IN"),o.user.name,String(o.items.length),o.total,o.paymentStatus,o.status])];const csv=rows.map(r=>r.map(v=>`"${v.replaceAll('"','""')}"`).join(",")).join("\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));const a=document.createElement("a");a.href=url;a.download="orders.csv";a.click();URL.revokeObjectURL(url)};
+ return <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f7f9f8]"><AdminHeader title="Orders"/><main className="flex-1 overflow-y-auto"><div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
+  <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h2 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Order management</h2><p className="mt-1 text-sm text-slate-500">Track payments, process orders and manage deliveries.</p></div><div className="flex gap-2"><button onClick={load} disabled={loading} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"><RefreshCw size={16} className={loading?"animate-spin":""}/> Refresh</button><button onClick={exportOrders} className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white"><Download size={17}/> Export orders</button></div></div>
+  <section className="grid grid-cols-3 gap-2 xl:grid-cols-5 xl:gap-4"><OrderSummary icon={FileText} tone="emerald" label="Total orders" value={total}/><OrderSummary icon={Clock3} tone="amber" label="To process" value={counts.process}/><OrderSummary icon={Truck} tone="blue" label="In transit" value={counts.transit}/><OrderSummary icon={CheckCircle2} tone="emerald" label="Delivered" value={counts.delivered}/><OrderSummary icon={CircleX} tone="rose" label="Cancelled" value={counts.cancelled}/></section>
+  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex gap-7 overflow-x-auto border-b border-slate-200 px-5 pt-4 text-sm whitespace-nowrap"><Tab active={!statusFilter} onClick={()=>setStatusFilter("")}>All orders ({total})</Tab><Tab active={statusFilter==="PROCESSING"} onClick={()=>setStatusFilter("PROCESSING")}>To process ({counts.process})</Tab><Tab active={statusFilter==="SHIPPED"} onClick={()=>setStatusFilter("SHIPPED")}>In transit ({counts.transit})</Tab><Tab active={statusFilter==="DELIVERED"} onClick={()=>setStatusFilter("DELIVERED")}>Delivered ({counts.delivered})</Tab><Tab active={statusFilter==="CANCELLED"} onClick={()=>setStatusFilter("CANCELLED")}>Cancelled ({counts.cancelled})</Tab></div><div className="overflow-x-auto"><table className="w-full min-w-[980px] text-left text-sm"><thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500"><tr><th>Order / date</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Order status</th><th>Actions</th></tr></thead><tbody className="divide-y divide-slate-100">{loading?<tr><td colSpan={7} className="py-16 text-center"><span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"/></td></tr>:orders.length===0?<tr><td colSpan={7} className="py-16 text-center text-slate-400">No orders found</td></tr>:orders.map(o=><tr key={o.id} className="hover:bg-emerald-50/30"><td className="py-3"><p className="font-bold text-slate-900">#{o.orderNumber}</p><p className="text-xs text-slate-500">{new Date(o.createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</p></td><td><p className="font-semibold text-slate-800">{o.user.name}</p><p className="max-w-48 truncate text-xs text-slate-400">{o.user.email}</p></td><td className="font-semibold">{o.items.reduce((sum,item)=>sum+item.quantity,0)}</td><td className="font-bold">{money(o.total)}</td><td><span className={`rounded-full px-3 py-1 text-xs font-bold ${o.paymentStatus==="PAID"?"bg-emerald-100 text-emerald-700":o.paymentStatus==="REFUNDED"?"bg-violet-100 text-violet-700":"bg-rose-100 text-rose-700"}`}>{o.paymentStatus}</span><span className="ml-2 text-xs text-slate-500">{o.paymentMethod||"—"}</span></td><td><span className={`rounded-full px-3 py-1 text-xs font-bold ${STATUS_COLORS[o.status]||"bg-slate-100 text-slate-600"}`}>{o.status}</span></td><td><div className="flex items-center gap-2"><button onClick={()=>openDetail(o)} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold hover:bg-slate-50"><Eye size={14}/> View</button><MoreVertical size={17} className="text-slate-400"/></div></td></tr>)}</tbody></table></div><div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-3 sm:flex-row"><p className="text-xs text-slate-500">{`Showing ${orders.length?((page-1)*10)+1:0}–${Math.min(page*10,total)} of ${total} orders`}</p><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div></section>
+ </div></main>
+ {detail&&<div className="fixed inset-0 z-50 flex justify-end bg-slate-950/45" onMouseDown={e=>{if(e.target===e.currentTarget)setDetail(null)}}><div className="flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white shadow-2xl"><div className="flex items-center justify-between border-b border-slate-200 px-6 py-5"><div><p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Order details</p><h2 className="mt-1 text-xl font-extrabold">#{detail.orderNumber}</h2></div><button onClick={()=>setDetail(null)} className="rounded-xl p-2 hover:bg-slate-100"><X size={20}/></button></div><div className="flex-1 space-y-6 p-6 text-sm"><div className="grid grid-cols-2 gap-3"><Field label="Order status"><select value={detail.status} onChange={e=>updateStatus("status",e.target.value)} disabled={updating} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">{ORDER_STATUSES.map(s=><option key={s}>{s}</option>)}</select></Field><Field label="Payment status"><select value={detail.paymentStatus} onChange={e=>updateStatus("paymentStatus",e.target.value)} disabled={updating} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-500">{PAYMENT_STATUSES.map(s=><option key={s}>{s}</option>)}</select></Field></div><Info title="Customer"><p className="font-semibold">{detail.user.name}</p><p className="text-slate-500">{detail.user.email}</p></Info><Info title="Shipping address"><div className="space-y-1 rounded-xl bg-slate-50 p-4 text-slate-600">{Object.entries(detail.shippingAddress||{}).map(([k,v])=><p key={k}><b className="capitalize">{k}:</b> {v}</p>)}</div></Info><Info title="Items"><div className="divide-y rounded-xl border border-slate-200">{detail.items.map(item=><div key={item.id} className="flex justify-between p-4"><div><p className="font-semibold">{item.product.name}</p><p className="text-xs text-slate-500">× {item.quantity} @ {money(item.price)}</p></div><b>{money(Number(item.price)*item.quantity)}</b></div>)}</div></Info><div className="space-y-2 rounded-xl bg-slate-50 p-4"><div className="flex justify-between"><span>Subtotal</span><span>{money(detail.subtotal)}</span></div>{Number(detail.discount)>0&&<div className="flex justify-between text-emerald-700"><span>Discount {detail.coupon?`(${detail.coupon.code})`:""}</span><span>−{money(detail.discount)}</span></div>}<div className="flex justify-between"><span>Delivery</span><span>{money(detail.deliveryFee)}</span></div><div className="flex justify-between border-t pt-2 text-base font-extrabold"><span>Total</span><span>{money(detail.total)}</span></div></div>{detail.notes&&<Info title="Notes"><p className="rounded-xl bg-slate-50 p-4">{detail.notes}</p></Info>}</div></div></div>}
+ </div>
 }
-
-interface OrderDetail extends Order {
-  notes: string | null;
-  shippingAddress: Record<string, string>;
-  coupon: { code: string } | null;
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-700",
-  CONFIRMED: "bg-blue-100 text-blue-700",
-  PROCESSING: "bg-purple-100 text-purple-700",
-  SHIPPED: "bg-indigo-100 text-indigo-700",
-  DELIVERED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-  REFUNDED: "bg-gray-100 text-gray-700",
-};
-
-const ORDER_STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
-const PAYMENT_STATUSES = ["PENDING", "PAID", "FAILED", "REFUNDED"];
-
-export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [detail, setDetail] = useState<OrderDetail | null>(null);
-  const [updating, setUpdating] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(page), search });
-      if (statusFilter) params.set("status", statusFilter);
-      const data = await adminApi.get<{ orders: Order[]; total: number; pages: number }>(
-        `/admin/orders?${params}`
-      );
-      setOrders(data.orders);
-      setTotal(data.total);
-      setPages(data.pages);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search, statusFilter]);
-
-  useEffect(() => { load(); }, [load]);
-
-  const openDetail = async (order: Order) => {
-    const data = await adminApi.get<{ order: OrderDetail }>(`/admin/orders/${order.id}`);
-    setDetail(data.order);
-  };
-
-  const updateStatus = async (field: "status" | "paymentStatus", value: string) => {
-    if (!detail) return;
-    setUpdating(true);
-    try {
-      const data = await adminApi.put<{ order: OrderDetail }>(`/admin/orders/${detail.id}`, { [field]: value });
-      setDetail(data.order);
-      load();
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const columns: Column<Order>[] = [
-    { key: "orderNumber", label: "Order #", render: (row) => <span className="font-mono text-sm">#{row.orderNumber}</span> },
-    { key: "user", label: "Customer", render: (row) => (
-      <div>
-        <p className="font-medium text-sm">{row.user.name}</p>
-        <p className="text-xs text-gray-400">{row.user.email}</p>
-      </div>
-    )},
-    { key: "status", label: "Status", render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[row.status] || ""}`}>
-        {row.status}
-      </span>
-    )},
-    { key: "paymentStatus", label: "Payment", render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-        {row.paymentStatus}
-      </span>
-    )},
-    { key: "total", label: "Total", render: (row) => <span className="font-semibold">₹{row.total}</span> },
-    { key: "createdAt", label: "Date", render: (row) => new Date(row.createdAt).toLocaleDateString("en-IN") },
-    { key: "actions", label: "Actions", render: (row) => (
-      <button onClick={() => openDetail(row)} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors">
-        <Eye size={15} />
-      </button>
-    )},
-  ];
-
-  return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      <AdminHeader title="Orders" />
-      <main className="flex-1 overflow-y-auto p-6 space-y-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-48 max-w-xs">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search orders…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-          </div>
-          <div className="relative">
-            <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="appearance-none pl-3 pr-8 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300">
-              <option value="">All statuses</option>
-              {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-        <p className="text-sm text-gray-500">{total} orders</p>
-        <DataTable columns={columns} data={orders} loading={loading} page={page} pages={pages} total={total} onPageChange={setPage} />
-      </main>
-
-      {/* Order Detail Drawer */}
-      {detail && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex justify-end">
-          <div className="bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-800">Order #{detail.orderNumber}</h2>
-              <button onClick={() => setDetail(null)} className="text-gray-500 hover:text-gray-700 text-xl">×</button>
-            </div>
-            <div className="flex-1 p-6 space-y-6 text-sm">
-              {/* Status controls */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-1 block">Order Status</label>
-                  <select value={detail.status} onChange={(e) => updateStatus("status", e.target.value)} disabled={updating}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300">
-                    {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-1 block">Payment Status</label>
-                  <select value={detail.paymentStatus} onChange={(e) => updateStatus("paymentStatus", e.target.value)} disabled={updating}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300">
-                    {PAYMENT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              {/* Customer */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Customer</h3>
-                <p className="text-gray-800">{detail.user.name}</p>
-                <p className="text-gray-500">{detail.user.email}</p>
-              </div>
-
-              {/* Shipping */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Shipping Address</h3>
-                <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-gray-600">
-                  {Object.entries(detail.shippingAddress || {}).map(([k, v]) => (
-                    <p key={k}><span className="font-medium capitalize">{k}:</span> {v}</p>
-                  ))}
-                </div>
-              </div>
-
-              {/* Items */}
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Items</h3>
-                <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
-                  {detail.items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between px-4 py-3">
-                      <div>
-                        <p className="font-medium text-gray-800">{item.product.name}</p>
-                        <p className="text-gray-500 text-xs">× {item.quantity} @ ₹{item.price}</p>
-                      </div>
-                      <span className="font-semibold text-gray-700">₹{(Number(item.price) * item.quantity).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Totals */}
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span><span>₹{detail.subtotal}</span>
-                </div>
-                {Number(detail.discount) > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount {detail.coupon ? `(${detail.coupon.code})` : ""}</span>
-                    <span>−₹{detail.discount}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-gray-600">
-                  <span>Delivery</span><span>₹{detail.deliveryFee}</span>
-                </div>
-                <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2">
-                  <span>Total</span><span>₹{detail.total}</span>
-                </div>
-              </div>
-
-              {detail.notes && (
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-1">Notes</h3>
-                  <p className="text-gray-600 bg-gray-50 rounded-lg p-3">{detail.notes}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+function Tab({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button onClick={onClick} className={`pb-3 font-semibold ${active?"border-b-2 border-emerald-700 text-emerald-700":"text-slate-500"}`}>{children}</button>}
+function OrderSummary({icon:Icon,tone,label,value}:{icon:React.ComponentType<{size?:number}>;tone:"emerald"|"amber"|"blue"|"rose";label:string;value:number}){const color={emerald:"bg-emerald-100 text-emerald-700",amber:"bg-amber-100 text-amber-600",blue:"bg-blue-100 text-blue-700",rose:"bg-rose-100 text-rose-600"}[tone];return <div className="flex min-w-0 flex-col items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 text-center shadow-sm sm:p-4 xl:flex-row xl:gap-4 xl:p-5 xl:text-left"><div className={`shrink-0 rounded-xl p-2 sm:p-3 ${color}`}><Icon size={22}/></div><div className="min-w-0"><p className="flex min-h-6 items-center justify-center text-[10px] leading-tight text-slate-500 sm:min-h-8 sm:text-xs xl:min-h-0 xl:justify-start xl:text-sm">{label}</p><p className="mt-0.5 text-xl font-extrabold sm:text-2xl">{value}</p></div></div>}
+function Field({label,children}:{label:string;children:React.ReactNode}){return <label><span className="mb-1.5 block text-xs font-bold text-slate-500">{label}</span>{children}</label>}
+function Info({title,children}:{title:string;children:React.ReactNode}){return <section><h3 className="mb-2 font-bold text-slate-800">{title}</h3>{children}</section>}

@@ -9,7 +9,7 @@ export default function FranchiseHero() {
   const [heroData, setHeroData] = useState({
     title: "Franchise Opportunity",
     subtitle: "Be a part of Kiddos Foods family and grow with us",
-    image: "/images/franchisis/franchisis_hero.svg"
+    image: "/images/franchisis/franchisis_hero.webp"
   });
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function FranchiseHero() {
           setHeroData({
             title: data.franchise_hero_title || "Franchise Opportunity",
             subtitle: data.franchise_hero_subtitle || "Be a part of Kiddos Foods family and grow with us",
-            image: data.franchise_hero_image || "/images/franchisis/franchisis_hero.svg"
+            image: data.franchise_hero_image || "/images/franchisis/franchisis_hero.webp"
           });
         }
       })
@@ -92,7 +92,7 @@ export default function FranchiseHero() {
 
             <div className="relative w-full max-w-[820px] lg:max-w-[950px] xl:max-w-[1050px] lg:w-[115%] xl:w-[125%] lg:-mr-16 xl:-mr-24 z-10 transition-all duration-300">
               <Image
-                src="/images/franchisis/f_hero2.svg"
+                src="/images/franchisis/f_hero2.webp"
                 alt="Kiddos Foods Franchise Outlet"
                 width={820}
                 height={960}

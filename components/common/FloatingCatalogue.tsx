@@ -5,12 +5,12 @@ export default function FloatingCatalogue() {
     <a
       href="/Catalogue/KiddosFoods-Catalog.pdf"
       download
-      className="fixed bottom-24 right-6 z-50 flex items-center justify-center w-14 h-14 bg-brand-green rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+      className="group fixed bottom-[4.5rem] right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-brand-green shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl sm:bottom-20 sm:right-5 sm:h-12 sm:w-12"
       aria-label="Download Catalogue"
     >
-      <Download className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" />
+      <Download className="h-5 w-5 text-white transition-transform duration-300 group-hover:scale-110" />
       {/* Tooltip */}
-      <span className="absolute right-16 px-3 py-1.5 text-xs font-semibold text-white bg-zinc-800 dark:bg-zinc-700 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+      <span className="pointer-events-none absolute right-14 whitespace-nowrap rounded bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-md transition-opacity duration-300 group-hover:opacity-100 dark:bg-zinc-700">
         Download Catalogue
       </span>
     </a>

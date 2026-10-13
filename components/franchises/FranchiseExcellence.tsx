@@ -28,7 +28,7 @@ export default function FranchiseExcellence() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative rounded-3xl overflow-hidden group shadow-lg">
             <Image
-              src="/images/franchisis/experience1.svg"
+              src="/images/franchisis/experience1.webp"
               alt="Kiddos Foods Store Experience"
               width={640}
               height={480}
@@ -44,7 +44,7 @@ export default function FranchiseExcellence() {
 
           <div className="relative rounded-3xl overflow-hidden group shadow-lg">
             <Image
-              src="/images/franchisis/experience2.svg"
+              src="/images/franchisis/experience2.webp"
               alt="Kiddos Foods Production"
               width={640}
               height={480}

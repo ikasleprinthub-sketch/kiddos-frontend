@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useCallback } from "react";
+import { useUserScopedList } from "@/lib/useUserScopedList";
 
 export interface CartItem {
   id: string; // Unique cart item ID (productId + variantId)
@@ -28,29 +29,20 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Merge a guest cart into the user's cart on login (sum quantities of the same item)
+function mergeCarts(own: CartItem[], guest: CartItem[]): CartItem[] {
+  const merged = [...own];
+  for (const g of guest) {
+    const i = merged.findIndex((m) => m.id === g.id);
+    if (i >= 0) merged[i] = { ...merged[i], quantity: merged[i].quantity + g.quantity };
+    else merged.push(g);
+  }
+  return merged;
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("kiddos_cart");
-      if (stored) {
-        setItems(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.error("Failed to load cart from localStorage", e);
-    }
-    setIsInitialized(true);
-  }, []);
-
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem("kiddos_cart", JSON.stringify(items));
-    }
-  }, [items, isInitialized]);
+  // Cart is stored per logged-in user (see useUserScopedList)
+  const [items, setItems] = useUserScopedList<CartItem>("kiddos_cart", mergeCarts);
 
   const addItem = useCallback((newItem: Omit<CartItem, "quantity">) => {
     setItems((prev) => {

@@ -58,7 +58,7 @@ export default function SignupPage() {
         {/* Logo */}
         <div className="relative z-10 flex flex-col items-center gap-4 text-center">
           <Image
-            src="/logo.svg"
+            src="/logo.webp"
             alt="Kiddos Foods"
             width={130}
             height={130}
@@ -108,7 +108,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex lg:hidden justify-center mb-8">
-            <Image src="/logo.svg" alt="Kiddos Foods" width={80} height={80} className="object-contain" />
+            <Image src="/logo.webp" alt="Kiddos Foods" width={80} height={80} className="object-contain" />
           </div>
 
           <h2 className="text-gray-900 font-extrabold text-2xl mb-1">

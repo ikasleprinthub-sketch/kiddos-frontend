@@ -37,7 +37,7 @@ export default function FranchiseHero() {
           <div className="bg-white dark:bg-zinc-900 p-4 sm:p-5 pb-8 sm:pb-10 rounded-3xl shadow-[0_15px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-zinc-150/40 dark:border-zinc-800/40 max-w-[500px] w-full transform hover:scale-1.02 transition-transform duration-300">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800">
               <Image
-                src="/images/franchisis/franchisis_hero.svg"
+                src="/images/franchisis/franchisis_hero.webp"
                 alt="Kiddos Foods Storefront Franchise"
                 fill
                 sizes="(max-width: 768px) 100vw, 500px"

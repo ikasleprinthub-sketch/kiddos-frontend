@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminApi } from "@/lib/adminApi";
-import { Search, Eye, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, X } from "lucide-react";
 
 interface ContactInquiry {
   id: string;
@@ -49,6 +50,7 @@ export default function ContactInquiriesPage() {
     }
   }, [page, search]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async () => {
@@ -61,7 +63,7 @@ export default function ContactInquiriesPage() {
       await adminApi.delete(`/admin/contact-inquiries/${selected.id}`);
       setSelected(null);
       load();
-    } catch (err) {
+    } catch {
       alert("Failed to delete inquiry");
     } finally {
       setDeleting(false);
@@ -71,7 +73,7 @@ export default function ContactInquiriesPage() {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <AdminHeader title="Contact Inquiries" />
-      <main className="flex-1 overflow-y-auto p-6 space-y-4">
+      <main className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
 
         {/* Top bar */}
         <div className="flex items-center gap-3">
@@ -87,85 +89,49 @@ export default function ContactInquiriesPage() {
           <p className="text-sm text-gray-400">{total} messages</p>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Subject</th>
-                <th className="px-4 py-3">Message</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="border-b border-gray-50">
-                    {Array.from({ length: 6 }).map((__, j) => (
-                      <td key={j} className="px-4 py-3">
-                        <div className="h-4 bg-gray-100 rounded animate-pulse w-24" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : inquiries.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-400 text-sm">
-                    No contact messages yet.
-                  </td>
-                </tr>
-              ) : (
-                inquiries.map((inq) => (
-                  <tr key={inq.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="font-semibold text-gray-800">{inq.name}</p>
-                      <p className="text-xs text-gray-400">{inq.email}</p>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{inq.phone || "—"}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${SUBJECT_COLORS[inq.subject ?? ""] ?? "bg-zinc-100 text-zinc-600"}`}>
-                        {inq.subject || "—"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 max-w-[200px] truncate">
-                      {inq.message}
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
-                      {new Date(inq.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => setSelected(inq)}
-                        className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                        title="View message"
-                      >
-                        <Eye size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        {/* Card grid */}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div className="h-5 w-2/3 animate-pulse rounded bg-gray-100" />
+                <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
+                <div className="h-4 w-4/5 animate-pulse rounded bg-gray-100" />
+              </div>
+            ))
+          ) : inquiries.length === 0 ? (
+            <div className="rounded-2xl border border-gray-100 bg-white px-4 py-12 text-center text-sm text-gray-400 md:col-span-2 xl:col-span-3">
+              No contact messages yet.
+            </div>
+          ) : (
+            inquiries.map((inq) => (
+              <article key={inq.id} className="flex min-w-0 flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate font-bold text-gray-800">{inq.name}</h3>
+                    <p className="truncate text-xs text-gray-400">{inq.email}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${SUBJECT_COLORS[inq.subject ?? ""] ?? "bg-zinc-100 text-zinc-600"}`}>
+                    {inq.subject || "—"}
+                  </span>
+                </div>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-3 py-4 text-sm">
+                  <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Phone</dt><dd className="mt-0.5 font-medium text-gray-700">{inq.phone || "—"}</dd></div>
+                  <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Submitted</dt><dd className="mt-0.5 text-xs font-medium text-gray-700">{new Date(inq.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</dd></div>
+                </dl>
+                <div className="mb-4 rounded-xl bg-gray-50 p-3">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">Message</p>
+                  <p className="line-clamp-2 text-xs leading-relaxed text-gray-600">{inq.message}</p>
+                </div>
+                <button onClick={() => setSelected(inq)} className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50">
+                  <Eye size={15} /> View message
+                </button>
+              </article>
+            ))
+          )}
         </div>
-
         {/* Pagination */}
-        {pages > 1 && (
-          <div className="flex items-center gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-              className="p-1.5 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50">
-              <ChevronLeft size={15} />
-            </button>
-            <span className="text-sm text-gray-500">Page {page} of {pages}</span>
-            <button onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page === pages}
-              className="p-1.5 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50">
-              <ChevronRight size={15} />
-            </button>
-          </div>
-        )}
+        <div className="flex justify-center"><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div>
       </main>
 
       {/* Detail drawer */}

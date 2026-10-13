@@ -2,12 +2,20 @@
 
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { useState } from "react";
 import Link from "next/link";
+import Pagination from "@mui/material/Pagination";
 import { Heart, ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
 
 export default function WishlistPage() {
   const { items, removeFromWishlist, clearWishlist } = useWishlist();
   const { addItem } = useCart();
+
+  const itemsPerPage = 25;
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+  const safePage = Math.min(page, totalPages); // removing items can shrink the last page
+  const pageItems = items.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
 
   return (
     <div className="min-h-screen bg-[#faf8f5] dark:bg-[#061410] py-10 px-4 sm:px-6 lg:px-8">
@@ -66,11 +74,11 @@ export default function WishlistPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((product) => (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+            {pageItems.map((product) => (
               <article
                 key={product.id}
-                className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200/60 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200/60 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col min-w-0"
               >
                 {/* Image Area */}
                 <Link href={`/products/${product.slug || product.id}`} className="relative block overflow-hidden shrink-0" style={{ aspectRatio: "4/3" }}>
@@ -90,7 +98,7 @@ export default function WishlistPage() {
                   )}
 
                   {product.originalPrice && (
-                    <span className="absolute top-3 left-3 z-10 bg-red-500 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow">
+                    <span className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-red-500 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow">
                       Sale
                     </span>
                   )}
@@ -100,7 +108,7 @@ export default function WishlistPage() {
                       e.preventDefault();
                       removeFromWishlist(product.id);
                     }}
-                    className="absolute top-3 right-3 z-10 p-2 bg-white/90 dark:bg-zinc-800/90 text-zinc-400 hover:text-red-500 hover:bg-white rounded-full backdrop-blur-sm shadow-sm transition-all"
+                    className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 p-2 bg-white/90 dark:bg-zinc-800/90 text-zinc-400 hover:text-red-500 hover:bg-white rounded-full backdrop-blur-sm shadow-sm transition-all"
                     title="Remove from Wishlist"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -108,18 +116,18 @@ export default function WishlistPage() {
                 </Link>
 
                 {/* Content */}
-                <div className="p-5 flex-1 flex flex-col">
+                <div className="p-3 sm:p-5 flex-1 flex flex-col">
                   <span className="text-[10px] font-bold text-brand-green dark:text-brand-gold uppercase tracking-widest mb-1.5">
                     {product.categoryLabel}
                   </span>
                   <Link href={`/products/${product.slug || product.id}`}>
-                    <h3 className="text-base font-black text-zinc-800 dark:text-zinc-100 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors line-clamp-1 mb-2">
+                    <h3 className="text-sm sm:text-base font-black text-zinc-800 dark:text-zinc-100 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors line-clamp-1 mb-2">
                       {product.name}
                     </h3>
                   </Link>
 
-                  <div className="flex items-end gap-2 mb-4 mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                    <span className="text-xl font-black text-brand-green dark:text-brand-gold">
+                  <div className="flex flex-wrap items-end gap-x-2 mb-4 mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                    <span className="text-lg sm:text-xl font-black text-brand-green dark:text-brand-gold">
                       ₹{product.price}
                     </span>
                     {product.originalPrice && (
@@ -145,7 +153,7 @@ export default function WishlistPage() {
                       });
                       removeFromWishlist(product.id);
                     }}
-                    className="w-full py-3 bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green rounded-xl font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2.5 sm:py-3 bg-brand-green hover:bg-brand-green-light dark:bg-brand-gold dark:hover:bg-brand-gold-light text-white dark:text-brand-green rounded-xl font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     Move to Cart
@@ -153,6 +161,28 @@ export default function WishlistPage() {
                 </div>
               </article>
             ))}
+          </div>
+        )}
+
+        {items.length > itemsPerPage && (
+          <div className="flex justify-center mt-10">
+            <Pagination
+              count={totalPages}
+              page={safePage}
+              onChange={(_, value) => {
+                setPage(value);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              shape="rounded"
+              size="large"
+              sx={{
+                "& .Mui-selected": {
+                  backgroundColor: "#2C4A3B !important",
+                  color: "#ffffff !important",
+                  "&:hover": { backgroundColor: "#1f352a !important" },
+                },
+              }}
+            />
           </div>
         )}
       </div>

@@ -1,0 +1,12 @@
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /orders
+Disallow: /profile
+Disallow: /settings
+Disallow: /wishlist
+
+Sitemap: https://kiddosfoods.com/sitemap.xml

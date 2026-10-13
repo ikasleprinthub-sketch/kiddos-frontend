@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { startTransition, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
@@ -270,11 +270,12 @@ export default function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [banners, setBanners] = useState<ApiBanner[]>([]);
-  const [loading, setLoading] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
+  const [failedBannerImages, setFailedBannerImages] = useState<Set<string>>(new Set());
   useEffect(() => {
-    fetch("/api/banners?position=HOME")
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 2500);
+
+    fetch("/api/banners?position=HOME", { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error("API error");
         return r.json();
@@ -284,37 +285,35 @@ export default function HeroSection() {
         const list: ApiBanner[] = Array.isArray(data)
           ? data
           : (data as { banners: ApiBanner[] }).banners ?? [];
-        setBanners(list.filter((b) => b.isActive));
+        startTransition(() => {
+          setBanners(list.filter((b) => b.isActive));
+        });
       })
-      .catch((err) => console.error("Failed to load banners:", err))
-      .finally(() => setLoading(false));
+      .catch((err: unknown) => {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          console.error("Failed to load banners:", err);
+        }
+      })
+      .finally(() => window.clearTimeout(timeout));
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
 
   const hasBanners = banners.length > 0;
   const totalSlides = hasBanners ? banners.length : 2;
 
-  const startAutoplay = () => {
-    stopAutoplay();
-    if (totalSlides <= 1) return;
-    timerRef.current = setInterval(() => {
+  useEffect(() => {
+    if (isHovered || totalSlides <= 1) return;
+
+    const timer = window.setInterval(() => {
       setActiveSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
     }, 6000);
-  };
 
-  const stopAutoplay = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-  };
-
-  useEffect(() => {
-    if (!isHovered) {
-      startAutoplay();
-    } else {
-      stopAutoplay();
-    }
-    return () => stopAutoplay();
-  }, [isHovered]);
+    return () => window.clearInterval(timer);
+  }, [isHovered, totalSlides]);
 
   const handlePrev = () => {
     if (totalSlides <= 1) return;
@@ -333,7 +332,7 @@ export default function HeroSection() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="group/hero relative w-full h-[420px] sm:h-[500px] md:h-[600px] lg:h-[700px] rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
+        <div className="group/hero relative w-full h-[25svh] min-h-[160px] max-h-[220px] sm:h-[500px] sm:min-h-0 sm:max-h-none md:h-[600px] lg:h-[700px] rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-xs border border-zinc-100 dark:border-zinc-800">
           {/* SVG definitions for patterns */}
           <svg width="0" height="0" className="absolute pointer-events-none">
             <defs>
@@ -350,11 +349,7 @@ export default function HeroSection() {
 
           {/* CAROUSEL SLIDES WRAPPER */}
           <div className="relative w-full h-full">
-            {loading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900">
-                <div className="w-10 h-10 border-4 border-zinc-300 dark:border-zinc-700 border-t-emerald-600 rounded-full animate-spin" />
-              </div>
-            ) : hasBanners ? (
+            {hasBanners ? (
               banners.map((banner, idx) => (
                 <div
                   key={banner.id}
@@ -366,11 +361,12 @@ export default function HeroSection() {
                     {banner.image ? (
                       <>
                         <Image
-                          src={banner.image}
-                          alt={banner.title || "Banner"}
+                          src={failedBannerImages.has(banner.id) ? "/images/hero_millet_bg.webp" : banner.image}
+                          alt=""
                           fill
                           priority={idx === 0}
                           className="object-cover"
+                          onError={() => setFailedBannerImages((current) => new Set(current).add(banner.id))}
                         />
                         <div className="absolute inset-0 bg-black/15" />
                       </>
@@ -384,7 +380,7 @@ export default function HeroSection() {
                         {banner.title}
                       </h1>
                     )}
-                    {banner.subtitle && (
+                    {banner.subtitle && !["nil", "null", "undefined"].includes(banner.subtitle.trim().toLowerCase()) && (
                       <p className="text-[#7e7e7e] text-xs sm:text-base md:text-lg mb-4 sm:mb-6 max-w-md leading-relaxed line-clamp-2 sm:line-clamp-none">
                         {banner.subtitle}
                       </p>
@@ -447,7 +443,7 @@ export default function HeroSection() {
                   <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                     <div className="hidden lg:block absolute left-[38%] top-[15%] w-[8%] aspect-square pointer-events-auto cursor-pointer animate-float-slow group transition-all duration-300">
                       <Image
-                        src="/images/carrot.png"
+                        src="/images/carrot.webp"
                         alt="Floating carrot"
                         width={60}
                         height={60}
@@ -457,7 +453,7 @@ export default function HeroSection() {
                     </div>
                     <div className="absolute left-[40%] top-[68%] w-[4%] aspect-square pointer-events-auto cursor-pointer animate-drift-spin group">
                       <Image
-                        src="/images/pasta_spiral.png"
+                        src="/images/pasta_spiral.webp"
                         alt="Floating fusilli pasta"
                         width={30}
                         height={30}
@@ -467,7 +463,7 @@ export default function HeroSection() {
                     </div>
                     <div className="absolute right-[5%] top-[15%] w-[4%] aspect-square pointer-events-auto cursor-pointer animate-drift-spin group">
                       <Image
-                        src="/images/pasta_spiral.png"
+                        src="/images/pasta_spiral.webp"
                         alt="Floating fusilli pasta"
                         width={30}
                         height={30}

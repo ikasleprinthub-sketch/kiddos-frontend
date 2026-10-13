@@ -209,9 +209,9 @@ export default function ProductShowcase() {
 
         {/* Products Showcase Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white border border-zinc-100 rounded-[24px] p-5 h-[360px] animate-pulse">
+              <div key={i} className="bg-white border border-zinc-100 rounded-[24px] p-3 sm:p-5 h-[300px] sm:h-[360px] animate-pulse">
                 <div className="bg-zinc-100 rounded-[20px] aspect-square w-full mb-4 animate-pulse" />
                 <div className="h-4 bg-zinc-100 rounded w-2/3 mb-2" />
                 <div className="h-5 bg-zinc-100 rounded w-full mb-4" />
@@ -220,7 +220,7 @@ export default function ProductShowcase() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8">
             {products.map((p, idx) => {
               const variant = p.variants?.[0];
               const finalPrice = variant ? (variant.salePrice ? Number(variant.salePrice) : Number(variant.price)) : (p.salePrice ? Number(p.salePrice) : Number(p.price));
@@ -239,10 +239,10 @@ export default function ProductShowcase() {
               return (
                 <div
                   key={p.id}
-                  className="relative bg-white dark:bg-zinc-900 rounded-[24px] border border-zinc-100 dark:border-zinc-800/80 p-5 shadow-[0_4px_25px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:-translate-y-1.5 transition-all duration-300 group flex flex-col"
+                  className="relative bg-white dark:bg-zinc-900 rounded-[24px] border border-zinc-100 dark:border-zinc-800/80 p-3 sm:p-5 min-w-0 shadow-[0_4px_25px_rgba(0,0,0,0.015)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:-translate-y-1.5 transition-all duration-300 group flex flex-col"
                 >
                   {/* Image container */}
-                  <div className="relative overflow-hidden rounded-[20px] bg-zinc-50 dark:bg-zinc-850 aspect-4/5 max-h-[220px] sm:max-h-[280px] md:max-h-none flex items-center justify-center mb-5 border border-zinc-100/50 dark:border-zinc-800/50">
+                  <div className="relative overflow-hidden rounded-[20px] bg-zinc-50 dark:bg-zinc-850 aspect-4/5 max-h-[220px] sm:max-h-[280px] md:max-h-none flex items-center justify-center mb-3 sm:mb-5 border border-zinc-100/50 dark:border-zinc-800/50">
                     <Link href={`/products/${p.slug}`} className="w-full h-full flex items-center justify-center">
                       {image ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -260,13 +260,13 @@ export default function ProductShowcase() {
 
                     {/* Discount badge */}
                     {discount && discount > 0 && (
-                      <span className="absolute top-4 left-4 bg-[#1e4620] text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-sm">
+                      <span className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-[#1e4620] text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-sm">
                         {discount}% off
                       </span>
                     )}
 
                     {/* Floating Actions on Hover */}
-                    <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-350">
+                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-350">
                       {/* Wishlist */}
                       <button
                         onClick={() => toggleWishlist(p)}
@@ -322,7 +322,7 @@ export default function ProductShowcase() {
 
                   {/* Title */}
                   <Link href={`/products/${p.slug}`}>
-                    <h3 className="text-base font-bold text-zinc-850 dark:text-zinc-100 hover:text-[#2a7a2a] transition-colors leading-tight line-clamp-1">
+                    <h3 className="text-sm sm:text-base font-bold text-zinc-850 dark:text-zinc-100 hover:text-[#2a7a2a] transition-colors leading-tight line-clamp-1">
                       {p.name}
                     </h3>
                   </Link>
@@ -335,8 +335,8 @@ export default function ProductShowcase() {
                   )}
 
                   {/* Prices row */}
-                  <div className="mt-auto flex items-center gap-2.5 pt-4 border-t border-zinc-100/60 dark:border-zinc-800/60">
-                    <span className="text-lg font-extrabold text-[#1e4620] dark:text-[#f97316]">
+                  <div className="mt-auto flex flex-wrap items-center gap-x-2.5 pt-4 border-t border-zinc-100/60 dark:border-zinc-800/60">
+                    <span className="text-base sm:text-lg font-extrabold text-[#1e4620] dark:text-[#f97316]">
                       ₹{finalPrice.toFixed(2)}
                     </span>
                     {crossedPrice && (

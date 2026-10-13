@@ -55,6 +55,8 @@ export default function BannersPage() {
     }
   }, [positionFilter]);
 
+  // The callback synchronizes the selected banner position with the API.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   const openAdd = () => { setForm({ ...EMPTY_FORM, position: positionFilter }); setEditing(null); setModal("add"); setError(""); };
@@ -116,12 +118,12 @@ export default function BannersPage() {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <AdminHeader title="Banners" />
-      <main className="flex-1 overflow-y-auto p-6 space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex gap-2">
+      <main className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-full gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
             {POSITIONS.map((pos) => (
               <button key={pos} onClick={() => setPositionFilter(pos)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                   positionFilter === pos
                     ? "bg-emerald-600 text-white"
                     : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
@@ -131,7 +133,7 @@ export default function BannersPage() {
             ))}
           </div>
           <button onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700">
+            className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto">
             <Plus size={16} /> Add Banner
           </button>
         </div>

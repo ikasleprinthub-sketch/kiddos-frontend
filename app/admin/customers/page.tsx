@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
-import DataTable, { Column } from "@/components/admin/DataTable";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminApi } from "@/lib/adminApi";
-import { Search, Eye } from "lucide-react";
+import { BadgeCheck, Download, Eye, MailCheck, MoreVertical, ShoppingBag, UserX, UsersRound } from "lucide-react";
 
 interface Customer {
   id: string;
@@ -35,7 +35,8 @@ export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search] = useState("");
+  const [view, setView] = useState<"all" | "verified" | "unverified" | "blocked">("all");
   const [detail, setDetail] = useState<{ customer: CustomerDetail; totalSpent: string } | null>(null);
   const [toggling, setToggling] = useState(false);
 
@@ -58,6 +59,7 @@ export default function CustomersPage() {
     }
   }, [page, search]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   const openDetail = async (c: Customer) => {
@@ -107,7 +109,7 @@ export default function CustomersPage() {
       } : null);
       setIsEditing(false);
       load();
-    } catch (err) {
+    } catch {
       alert("Failed to save customer details");
     } finally {
       setSaving(false);
@@ -124,57 +126,27 @@ export default function CustomersPage() {
       await adminApi.delete(`/admin/customers/${detail.customer.id}`);
       setDetail(null);
       load();
-    } catch (err) {
+    } catch {
       alert("Failed to delete customer");
     } finally {
       setDeleting(false);
     }
   };
 
-  const columns: Column<Customer>[] = [
-    { key: "name", label: "Name", render: (row) => (
-      <div>
-        <p className="font-medium">{row.name}</p>
-        <p className="text-xs text-gray-400">{row.email}</p>
-      </div>
-    )},
-    { key: "phone", label: "Phone", render: (row) => row.phone || "—" },
-    { key: "_count", label: "Orders", render: (row) => String(row._count.orders) },
-    { key: "isVerified", label: "Verified", render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isVerified ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-        {row.isVerified ? "Yes" : "No"}
-      </span>
-    )},
-    { key: "isActive", label: "Status", render: (row) => (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${row.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
-        {row.isActive ? "Active" : "Suspended"}
-      </span>
-    )},
-    { key: "createdAt", label: "Joined", render: (row) => new Date(row.createdAt).toLocaleDateString("en-IN") },
-    { key: "actions", label: "Actions", render: (row) => (
-      <button onClick={() => openDetail(row)} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded">
-        <Eye size={15} />
-      </button>
-    )},
-  ];
-
+  const visibleCustomers = customers.filter((customer) => view === "all" || (view === "verified" ? customer.isVerified : view === "unverified" ? !customer.isVerified : !customer.isActive));
+  const verifiedCount = customers.filter((customer) => customer.isVerified).length;
+  const repeatBuyers = customers.filter((customer) => customer._count.orders >= 2).length;
+  const blockedCount = customers.filter((customer) => !customer.isActive).length;
+  const exportCustomers = () => { const rows = [["Name","Email","Phone","Orders","Verified","Status","Joined"], ...visibleCustomers.map((customer) => [customer.name, customer.email, customer.phone || "", String(customer._count.orders), customer.isVerified ? "Yes" : "No", customer.isActive ? "Active" : "Blocked", new Date(customer.createdAt).toLocaleDateString("en-IN")])]; const csv = rows.map((row) => row.map((cell) => `"${cell.replaceAll('"','""')}"`).join(",")).join("\n"); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); const link = document.createElement("a"); link.href = url; link.download = "customers.csv"; link.click(); URL.revokeObjectURL(url); };
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f7f9f8]">
       <AdminHeader title="Customers" />
-      <main className="flex-1 overflow-y-auto p-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-xs">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search customers…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
-          </div>
-        </div>
-        <p className="text-sm text-gray-500">{total} customers</p>
-        <DataTable columns={columns} data={customers} loading={loading} page={page} pages={pages} total={total} onPageChange={setPage} />
-      </main>
-
-      {detail && (
+      <main className="flex-1 overflow-y-auto"><div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h2 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Customer management</h2><p className="mt-1 text-sm text-slate-500">View customer profiles, purchase history and account status.</p></div><button onClick={exportCustomers} className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm"><Download size={17}/> Export customers</button></div>
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"><CustomerCard icon={UsersRound} tone="emerald" label="Total customers" value={total}/><CustomerCard icon={MailCheck} tone="emerald" label="Verified customers" value={verifiedCount}/><CustomerCard icon={ShoppingBag} tone="amber" label="Repeat buyers" value={repeatBuyers}/><CustomerCard icon={UserX} tone="rose" label="Blocked accounts" value={blockedCount}/></section>
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex gap-7 overflow-x-auto border-b border-slate-200 px-5 pt-4 whitespace-nowrap"><CustomerTab active={view==="all"} onClick={()=>setView("all")}>All customers ({total})</CustomerTab><CustomerTab active={view==="verified"} onClick={()=>setView("verified")}>Verified ({verifiedCount})</CustomerTab><CustomerTab active={view==="unverified"} onClick={()=>setView("unverified")}>Unverified ({customers.length-verifiedCount})</CustomerTab><CustomerTab active={view==="blocked"} onClick={()=>setView("blocked")}>Blocked ({blockedCount})</CustomerTab></div><div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500"><tr><th>Customer / Phone</th><th>Orders</th><th>Verification</th><th>Account status</th><th>Joined</th><th>Actions</th></tr></thead><tbody className="divide-y divide-slate-100">{loading?<tr><td colSpan={6} className="py-16 text-center"><span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"/></td></tr>:visibleCustomers.length===0?<tr><td colSpan={6} className="py-16 text-center text-slate-400">No customers found</td></tr>:visibleCustomers.map((customer)=><tr key={customer.id} className="hover:bg-emerald-50/30"><td className="py-3"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">{customer.name.slice(0,2).toUpperCase()}</span><div><p className="font-bold text-slate-900">{customer.name}</p><p className="text-xs text-slate-400">{customer.phone || customer.email}</p></div></div></td><td className="font-semibold">{customer._count.orders}</td><td><span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${customer.isVerified?"bg-emerald-100 text-emerald-700":"bg-amber-100 text-amber-700"}`}>{customer.isVerified&&<BadgeCheck size={13}/>} {customer.isVerified?"Verified":"Unverified"}</span></td><td><span className={`rounded-full px-3 py-1 text-xs font-bold ${customer.isActive?"bg-emerald-100 text-emerald-700":"bg-rose-100 text-rose-700"}`}>{customer.isActive?"Active":"Blocked"}</span></td><td>{new Date(customer.createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td><td><div className="flex items-center gap-2"><button onClick={()=>openDetail(customer)} className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-xs font-bold text-emerald-700"><Eye size={14}/> View profile</button><MoreVertical size={17} className="text-slate-400"/></div></td></tr>)}</tbody></table></div><div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-3 sm:flex-row"><p className="text-xs text-slate-500">{`Showing ${visibleCustomers.length?((page-1)*10)+1:0}–${Math.min(page*10,total)} of ${total} customers`}</p><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div></section>
+        <p className="text-xs text-slate-400">Repeat buyers: customers with 2 or more orders.</p>
+      </div></main>      {detail && (
         <div className="fixed inset-0 z-50 bg-black/40 flex justify-end">
           <div className="bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -333,3 +305,5 @@ export default function CustomersPage() {
     </div>
   );
 }
+function CustomerTab({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button onClick={onClick} className={`pb-3 text-sm font-semibold ${active?"border-b-2 border-emerald-700 text-emerald-700":"text-slate-500"}`}>{children}</button>}
+function CustomerCard({icon:Icon,tone,label,value}:{icon:React.ComponentType<{size?:number}>;tone:"emerald"|"amber"|"rose";label:string;value:number}){const color={emerald:"bg-emerald-100 text-emerald-700",amber:"bg-amber-100 text-amber-700",rose:"bg-rose-100 text-rose-700"}[tone];return <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:gap-4 sm:p-5"><div className={`shrink-0 rounded-full p-2 sm:p-3 ${color}`}><Icon size={22}/></div><div className="min-w-0"><p className="text-[11px] leading-tight text-slate-500 sm:text-sm">{label}</p><p className="mt-1 text-xl font-extrabold text-slate-950 sm:text-2xl">{value}</p></div></div>}

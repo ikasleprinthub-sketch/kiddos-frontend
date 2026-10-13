@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-8 text-center">
           <Image
-            src="/logo.svg"
+            src="/logo.webp"
             alt="Kiddos Foods"
             width={80}
             height={80}

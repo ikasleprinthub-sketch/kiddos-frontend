@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/admin/Sidebar";
 import { AdminMobileProvider } from "@/context/AdminMobileContext";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
 
   const isLoginPage = pathname === "/admin/login";
@@ -44,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminMobileProvider>
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-[#f6f8f7] text-slate-900">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           {children}

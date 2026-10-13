@@ -25,7 +25,7 @@ const NAV = [
   { href: "/admin/contact-inquiries", label: "Contact Messages", icon: MessageSquare },
   // { href: "/admin/reports", label: "Reports", icon: BarChart2 },
   // { href: "/admin/import", label: "Import", icon: Upload },
-  // { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar() {
@@ -59,7 +59,7 @@ export default function Sidebar() {
           {!collapsed && (
             <div className="bg-white p-1 rounded-md shadow-sm flex items-center justify-center shrink-0">
               <div className="relative h-16 w-44">
-                <img src="/orglogo.svg" alt="Kiddos Admin" className="h-full w-full object-contain" />
+                <img src="/orglogo.webp" alt="Kiddos Admin" className="h-full w-full object-contain" />
               </div>
             </div>
           )}
@@ -125,7 +125,7 @@ export default function Sidebar() {
         <div className="flex items-center justify-between px-4 py-4 border-b border-emerald-700">
           <div className="bg-white p-1 rounded-md shadow-sm flex items-center justify-center">
             <div className="relative h-16 w-48">
-              <img src="/orglogo.svg" alt="Kiddos Admin" className="h-full w-full object-contain" />
+              <img src="/orglogo.webp" alt="Kiddos Admin" className="h-full w-full object-contain" />
             </div>
           </div>
           <button

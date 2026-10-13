@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Caveat, Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import PublicShell from "@/components/common/PublicShell";
 import { AuthProvider } from "@/context/AuthContext";
@@ -16,9 +16,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+});
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kiddosfoods.com"),
   title: "Kiddos Foods",
   description: "Premium food delivery and franchises for kids and families",
+  alternates: { canonical: "./" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    siteName: "Kiddos Foods",
+    title: "Kiddos Foods",
+    description: "Premium food delivery and franchises for kids and families",
+    url: "./",
+  },
 };
 
 export const viewport: Viewport = {
@@ -35,7 +56,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${caveat.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
         <AuthProvider>

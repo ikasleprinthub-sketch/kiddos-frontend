@@ -7,7 +7,7 @@ export default function ChutneyBookBadge() {
   return (
     <Link
       href="/category/chutney-book"
-      className="fixed bottom-6 left-6 z-50 inline-flex items-center justify-center w-20 h-20 group cursor-pointer select-none"
+      className="group fixed bottom-4 left-4 z-50 inline-flex h-14 w-14 cursor-pointer select-none items-center justify-center sm:bottom-5 sm:left-5 sm:h-16 sm:w-16"
       title="View Chutney Book Recipes"
       aria-label="Chutney Book Recipes"
     >
@@ -38,8 +38,8 @@ export default function ChutneyBookBadge() {
       </svg>
 
       {/* Center circle */}
-      <div className="relative z-10 w-11 h-11 rounded-full border-2 border-white shadow-md group-hover:scale-110 transition-transform duration-300 bg-amber-600 flex items-center justify-center">
-        <BookOpen className="w-5 h-5 text-white" strokeWidth={2} />
+      <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-amber-600 shadow-md transition-transform duration-300 group-hover:scale-110 sm:h-9 sm:w-9">
+        <BookOpen className="h-4 w-4 text-white" strokeWidth={2} />
       </div>
 
       <style jsx>{`

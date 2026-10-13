@@ -75,6 +75,7 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [activeImageFailed, setActiveImageFailed] = useState(false);
   const [chutneyBooks, setChutneyBooks] = useState<ApiProduct[]>([]);
   const [recommendedBatters, setRecommendedBatters] = useState<ApiProduct[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<ApiProduct[]>([]);
@@ -100,6 +101,7 @@ export default function ProductDetailPage() {
           setProduct(p);
           const primary = p.images?.find((i) => i.isPrimary)?.url ?? p.images?.[0]?.url ?? null;
           setActiveImage(primary);
+          setActiveImageFailed(false);
         }
       })
       .catch(() => setNotFound(true))
@@ -282,14 +284,15 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
 
           {/* ── LEFT: Product Visual ── */}
-          <div className="sticky top-24 space-y-3">
+          <div className="space-y-3 md:sticky md:top-24">
             <div className={`relative ${isRecipe ? "aspect-[3/4]" : "aspect-square"} rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden shadow-lg border border-white/30`}>
               <div className="absolute inset-0 plastic-sheen opacity-50" />
-              {activeImage ? (
+              {activeImage && !activeImageFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={activeImage}
                   alt={product.name}
+                  onError={() => setActiveImageFailed(true)}
                   className="w-[92%] h-[92%] object-contain relative z-10 drop-shadow-xl rounded-2xl"
                 />
               ) : (
@@ -323,15 +326,19 @@ export default function ProductDetailPage() {
 
             {/* Thumbnail row */}
             {product.images && product.images.length > 1 && (
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2 overflow-hidden">
                 {product.images.slice(0, 6).map((img, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={i}
                     src={img.url}
                     alt={`View ${i + 1}`}
-                    onClick={() => setActiveImage(img.url)}
-                    className={`w-14 h-14 rounded-xl object-cover border-2 cursor-pointer hover:scale-105 transition-all ${
+                    onClick={() => {
+                      setActiveImage(img.url);
+                      setActiveImageFailed(false);
+                    }}
+                    onError={(event) => { event.currentTarget.style.visibility = "hidden"; }}
+                    className={`h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border-2 object-cover transition-all hover:scale-105 ${
                       activeImage === img.url
                         ? "border-brand-green dark:border-brand-gold shadow-md"
                         : "border-zinc-200 dark:border-zinc-700"
@@ -514,7 +521,7 @@ export default function ProductDetailPage() {
                 title={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
                 className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${
                   isInWishlist(product.id)
-                    ? "bg-red-50 border-red-300 dark:bg-red-950/30 dark:border-red-700"
+                    ? "border-red-300 bg-red-50 text-red-500 shadow-sm dark:border-red-700 dark:bg-red-950/30 dark:text-red-400"
                     : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-red-300 dark:hover:border-red-700"
                 }`}
               >

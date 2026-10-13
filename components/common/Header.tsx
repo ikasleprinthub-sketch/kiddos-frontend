@@ -57,6 +57,7 @@ export default function Header() {
   }, [isMobileMenuOpen]);
 
   // Fetch categories from API
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setCatsLoading(true);
     setCatsError(null);
@@ -74,6 +75,7 @@ export default function Header() {
       .catch(() => setCatsError("Failed to load categories"))
       .finally(() => setCatsLoading(false));
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const navLinks: { name: string; href: string; download?: boolean }[] = [
     { name: "Home", href: "/" },
@@ -119,7 +121,7 @@ export default function Header() {
             <Link href="/" onClick={handleCloseAll} className="group flex-shrink-0">
               <div className="relative h-12 w-28 md:h-16 md:w-40 lg:h-12 lg:w-32 xl:h-16 xl:w-48 2xl:h-20 2xl:w-64 overflow-hidden">
                 <Image
-                  src="/orglogo.svg"
+                  src="/orglogo.webp"
                   alt="Kiddos Foods Logo"
                   fill
                   sizes="(max-width: 768px) 112px, 256px"
@@ -212,7 +214,7 @@ export default function Header() {
               className="relative p-2 lg:p-1.5 xl:p-2.5 text-zinc-600 hover:text-red-500 dark:text-zinc-300 dark:hover:text-red-400 bg-zinc-100/60 hover:bg-red-50 dark:bg-zinc-900/40 dark:hover:bg-red-950/20 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
               aria-label="View Wishlist"
             >
-              <Heart className="w-4 h-4 xl:w-5 xl:h-5 transition-transform duration-200 group-hover:scale-110" />
+              <Heart className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 xl:h-6 xl:w-6" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-red-500 text-[9px] xl:text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
                   {wishlistCount}
@@ -227,7 +229,7 @@ export default function Header() {
               className="relative p-2 lg:p-1.5 xl:p-2.5 text-zinc-600 hover:text-brand-green dark:text-zinc-300 dark:hover:text-brand-gold bg-zinc-100/60 hover:bg-zinc-150 dark:bg-zinc-900/40 dark:hover:bg-zinc-900/80 rounded-full border border-zinc-200/20 dark:border-zinc-850 transition-all duration-200 group"
               aria-label="View Cart"
             >
-              <ShoppingCart className="w-4 h-4 xl:w-5 xl:h-5 transition-transform duration-200 group-hover:scale-110" />
+              <ShoppingCart className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 xl:h-6 xl:w-6" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-brand-gold text-[9px] xl:text-[10px] font-bold text-brand-green border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
                   {cartCount}
@@ -303,12 +305,12 @@ export default function Header() {
             onClick={handleCloseAll}
           />
           {/* Drawer */}
-          <div className="fixed left-0 top-[80px] h-[calc(100svh-80px)] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 p-6 flex flex-col justify-between shadow-2xl lg:hidden overflow-y-auto animate-in slide-in-from-left duration-250">
-            <div className="space-y-6">
+          <div className="fixed left-0 top-[80px] h-[calc(100svh-80px)] w-full max-w-sm bg-white dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-900 z-50 flex flex-col justify-between overflow-y-auto p-4 shadow-2xl lg:hidden sm:p-5 animate-in slide-in-from-left duration-250">
+            <div className="space-y-3">
               <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                 Navigation Menu
               </div>
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-1">
                 {navLinks.map((link) => {
                   const isActive = pathname === link.href && !link.download;
                   return (
@@ -317,7 +319,7 @@ export default function Header() {
                       href={link.href}
                       download={link.download || undefined}
                       onClick={handleCloseAll}
-                      className={`flex items-center justify-between px-4 py-3 rounded-2xl text-base font-medium transition-all duration-200 ${
+                      className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                         isActive
                           ? "bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green font-semibold"
                           : "text-zinc-700 hover:text-brand-green hover:bg-zinc-50 dark:text-zinc-300 dark:hover:text-brand-gold dark:hover:bg-zinc-900/50"
@@ -332,10 +334,10 @@ export default function Header() {
 
               {/* Categories Section */}
               <div>
-                <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">
                   Shop by Categories
                 </div>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                <div className="max-h-[220px] space-y-1 overflow-y-auto">
                   {catsLoading ? (
                     <div className="p-4 text-center text-sm text-zinc-500">Loading...</div>
                   ) : catsError ? (
@@ -346,9 +348,9 @@ export default function Header() {
                         key={cat.id}
                         href={`/products?category=${cat.slug}`}
                         onClick={handleCloseAll}
-                        className="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-colors"
+                        className="flex items-center gap-2.5 rounded-xl p-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
                       >
-                        <div className="shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <div className="shrink-0 h-8 w-8 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
                           {cat.image ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -372,11 +374,11 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-6 mt-6">
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 mt-4">
               {isLoggedIn && user ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="w-10 h-10 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center text-base">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5 px-1">
+                    <div className="h-9 w-9 rounded-full bg-brand-gold text-brand-green font-bold flex items-center justify-center text-base">
                       {initials}
                     </div>
                     <div>
@@ -388,13 +390,13 @@ export default function Header() {
                     <Link
                       href="/profile"
                       onClick={handleCloseAll}
-                      className="flex items-center justify-center gap-2 p-3 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/80 rounded-2xl transition-colors"
+                      className="flex items-center justify-center gap-2 p-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/80 rounded-2xl transition-colors"
                     >
                       <User className="w-4 h-4" /><span>Profile</span>
                     </Link>
                     <button
                       onClick={async () => { await logout(); handleCloseAll(); }}
-                      className="flex items-center justify-center gap-2 p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 rounded-2xl transition-colors"
+                      className="flex items-center justify-center gap-2 p-2.5 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 rounded-2xl transition-colors"
                     >
                       <LogOut className="w-4 h-4" /><span>Sign Out</span>
                     </button>

@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { adminApi } from "@/lib/adminApi";
-import { Search, Eye, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, X } from "lucide-react";
 
 interface DownloadLead {
   id: string;
@@ -40,6 +41,7 @@ export default function FranchiseDownloadsPage() {
     }
   }, [page, search]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async () => {
@@ -52,7 +54,7 @@ export default function FranchiseDownloadsPage() {
       await adminApi.delete(`/admin/franchise-downloads/${selected.id}`);
       setSelected(null);
       load();
-    } catch (err) {
+    } catch {
       alert("Failed to delete download lead");
     } finally {
       setDeleting(false);
@@ -145,19 +147,7 @@ export default function FranchiseDownloadsPage() {
         </div>
 
         {/* Pagination */}
-        {pages > 1 && (
-          <div className="flex items-center gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-              className="p-1.5 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50">
-              <ChevronLeft size={15} />
-            </button>
-            <span className="text-sm text-gray-500">Page {page} of {pages}</span>
-            <button onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page === pages}
-              className="p-1.5 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50">
-              <ChevronRight size={15} />
-            </button>
-          </div>
-        )}
+        <div className="flex justify-center"><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div>
       </main>
 
       {/* Detail drawer */}

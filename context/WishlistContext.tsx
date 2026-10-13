@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useCallback } from "react";
+import { useUserScopedList } from "@/lib/useUserScopedList";
 import type { Product } from "@/components/productsData";
 
 interface WishlistContextType {
@@ -15,39 +16,30 @@ interface WishlistContextType {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 const STORAGE_KEY = "kiddos_wishlist";
 
+// Merge a guest wishlist into the user's wishlist on login (no duplicates)
+function mergeWishlists(own: Product[], guest: Product[]): Product[] {
+  return [...own, ...guest.filter((g) => !own.some((o) => String(o.id) === String(g.id)))];
+}
+
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<Product[]>([]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setItems(JSON.parse(saved));
-    } catch { /* ignore parse errors */ }
-  }, []);
-
-  // Persist to localStorage whenever items change
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch { /* ignore quota errors */ }
-  }, [items]);
+  // Wishlist is stored per logged-in user (see useUserScopedList)
+  const [items, setItems] = useUserScopedList<Product>(STORAGE_KEY, mergeWishlists);
 
   const addToWishlist = useCallback((item: Product) => {
-    setItems((prev) => prev.find((i) => i.id === item.id) ? prev : [...prev, item]);
-  }, []);
+    setItems((prev) => prev.find((i) => String(i.id) === String(item.id)) ? prev : [...prev, item]);
+  }, [setItems]);
 
   const removeFromWishlist = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }, []);
+    setItems((prev) => prev.filter((i) => String(i.id) !== String(id)));
+  }, [setItems]);
 
   const isInWishlist = useCallback((id: string) => {
-    return items.some((i) => i.id === id);
+    return items.some((i) => String(i.id) === String(id));
   }, [items]);
 
   const clearWishlist = useCallback(() => {
     setItems([]);
-  }, []);
+  }, [setItems]);
 
   return (
     <WishlistContext.Provider value={{ items, count: items.length, addToWishlist, removeFromWishlist, isInWishlist, clearWishlist }}>

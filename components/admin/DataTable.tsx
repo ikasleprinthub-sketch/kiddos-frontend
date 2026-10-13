@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import AdminPagination from "@/components/admin/AdminPagination";
 
 export interface Column<T> {
   key: string;
@@ -83,25 +83,7 @@ export default function DataTable<T extends { id: string }>({
           <p className="text-xs text-gray-500">
             {total !== undefined ? `${total} total` : `Page ${page} of ${pages}`}
           </p>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
-              className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-xs text-gray-600 px-2">
-              {page} / {pages}
-            </span>
-            <button
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= pages}
-              className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <AdminPagination page={page} pages={pages} onPageChange={onPageChange} />
         </div>
       )}
     </div>

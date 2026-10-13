@@ -40,7 +40,7 @@ export default function AboutIntro() {
           {/* ── Right: image ── */}
           <div className="w-full lg:w-[50%] rounded-2xl overflow-hidden">
             <Image
-              src="/images/about/abouthero.svg"
+              src="/images/about/abouthero.webp"
               alt="Kiddos Foods products"
               width={640}
               height={420}
@@ -51,13 +51,13 @@ export default function AboutIntro() {
         </div>
 
         {/* Bottom: stats full width */}
-        <div className="border-t border-gray-100 pt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+        <div className="grid grid-cols-4 gap-1 border-t border-gray-100 pt-6 text-center sm:gap-6 sm:pt-8">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col items-center">
-              <span className="text-[#1e4620] font-black text-2xl sm:text-3xl leading-none">
+              <span className="text-xl font-black leading-none text-[#1e4620] sm:text-3xl">
                 {stat.value}
               </span>
-              <span className="text-zinc-400 text-xs mt-1.5">{stat.label}</span>
+              <span className="mt-1.5 whitespace-nowrap text-[9px] text-zinc-400 sm:text-xs">{stat.label}</span>
             </div>
           ))}
         </div>

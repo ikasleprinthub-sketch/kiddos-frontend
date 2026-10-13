@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string; user?: User }>;
+  loginWithGoogle: (credential: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
   verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
@@ -73,6 +74,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkLogin();
   }, []);
 
+  // Another tab logged in/out or switched account: reload so this tab never shows the previous user's data
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "token") window.location.reload();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -110,6 +120,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       console.error("Login context error:", err);
+      return { success: false, message: "Network error occurred. Please try again." };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (credential: string) => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return {
+          success: false,
+          message: data.message || "Google sign-in failed",
+        };
+      }
+
+      localStorage.setItem("token", data.token);
+
+      const meRes = await fetch("/api/auth/me", {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${data.token}`,
+        },
+      });
+
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        setUser(meData.user);
+        return { success: true, user: meData.user as User };
+      } else {
+        return { success: false, message: "Failed to load user profile." };
+      }
+    } catch (err) {
+      console.error("Google login context error:", err);
       return { success: false, message: "Network error occurred. Please try again." };
     } finally {
       setLoading(false);
@@ -232,6 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         loading,
         login,
+        loginWithGoogle,
         logout,
         signup,
         verifyOtp,

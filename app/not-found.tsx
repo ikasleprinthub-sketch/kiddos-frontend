@@ -22,7 +22,7 @@ export default function NotFound() {
       <div className="relative z-10 flex justify-center pt-10 pb-4">
         <Link href="/">
           <Image
-            src="/orglogo.svg"
+            src="/orglogo.webp"
             alt="Kiddos Foods"
             width={180}
             height={78}

@@ -1,13 +1,28 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import Script from "next/script";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+type GoogleId = {
+  initialize: (config: {
+    client_id: string;
+    callback: (response: { credential: string }) => void;
+  }) => void;
+  renderButton: (parent: HTMLElement, options: Record<string, unknown>) => void;
+};
+
+function getGoogleId(): GoogleId | undefined {
+  return (window as unknown as { google?: { accounts?: { id?: GoogleId } } }).google?.accounts?.id;
+}
+
 function LoginForm() {
-  const { login, logout } = useAuth();
+  const { login, loginWithGoogle, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
@@ -16,6 +31,48 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+  const [googleReady, setGoogleReady] = useState(false);
+
+  async function handleGoogleCredential(credential: string) {
+    setLoading(true);
+    setError(null);
+
+    const result = await loginWithGoogle(credential);
+
+    if (result.success) {
+      if (result.user?.role === "ADMIN") {
+        await logout();
+        setError("Admin accounts must sign in through the Admin Panel, not here.");
+        setLoading(false);
+        return;
+      }
+      router.push("/");
+    } else {
+      setError(result.message || "Google sign-in failed");
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const googleId = getGoogleId();
+    if (!googleReady || !GOOGLE_CLIENT_ID || !googleId || !googleBtnRef.current) return;
+
+    googleId.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: (response) => handleGoogleCredential(response.credential),
+    });
+    googleId.renderButton(googleBtnRef.current, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      shape: "pill",
+      width: 400,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [googleReady]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -43,7 +100,18 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex flex-1 min-h-[calc(100vh-140px)]">
+    <div className="relative flex flex-1 min-h-screen">
+
+      {/* ── Back to home ── */}
+      <Link
+        href="/"
+        className="absolute top-5 left-5 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#1e4620] text-sm font-semibold shadow-md hover:bg-gray-100 transition"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back
+      </Link>
 
       {/* ── Left brand panel ── */}
       <div className="hidden lg:flex w-[45%] bg-[#1e4620] flex-col items-center justify-center gap-8 px-12 relative overflow-hidden">
@@ -55,7 +123,7 @@ function LoginForm() {
         {/* Logo */}
         <div className="relative z-10 flex flex-col items-center gap-4 text-center">
           <Image
-            src="/logo.svg"
+            src="/logo.webp"
             alt="Kiddos Foods"
             width={130}
             height={130}
@@ -106,7 +174,7 @@ function LoginForm() {
 
           {/* Mobile logo */}
           <div className="flex lg:hidden justify-center mb-8">
-            <Image src="/logo.svg" alt="Kiddos Foods" width={80} height={80} className="object-contain" />
+            <Image src="/logo.webp" alt="Kiddos Foods" width={80} height={80} className="object-contain" />
           </div>
 
           <h2 className="text-gray-900 font-extrabold text-2xl mb-1">
@@ -241,10 +309,24 @@ function LoginForm() {
               )}
             </button>
 
-           
-
-           
           </form>
+
+          {/* Google sign-in */}
+          {GOOGLE_CLIENT_ID && (
+            <>
+              <Script
+                src="https://accounts.google.com/gsi/client"
+                strategy="afterInteractive"
+                onReady={() => setGoogleReady(true)}
+              />
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs text-gray-400 uppercase tracking-wide">or</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+              <div ref={googleBtnRef} className="flex justify-center min-h-[44px]" />
+            </>
+          )}
 
           {/* Sign up link */}
           <p className="text-center text-sm text-gray-500 mt-8">

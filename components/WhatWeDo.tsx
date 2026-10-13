@@ -6,7 +6,7 @@ import Image from "next/image";
 const cards = [
   {
     title: "Our Promise",
-    image: "/images/whatwedo/what1.svg",
+    image: "/images/whatwedo/what1.webp",
     items: [
       "Made with carefully selected natural ingredients",
       "No preservatives or artificial additives",
@@ -19,7 +19,7 @@ const cards = [
   },
   {
     title: "We Specialize in",
-    image: "/images/whatwedo/what2.svg",
+    image: "/images/whatwedo/what2.webp",
     items: [
       "30+ varieties of idli dosa batters",
       "Traditional spice powders masala blends",
@@ -31,7 +31,7 @@ const cards = [
   },
   {
     title: "Our Recipes are Inspired by",
-    image: "/images/whatwedo/what3.svg",
+    image: "/images/whatwedo/what3.webp",
     items: [
       "Traditional home style cooking practices",
       "Authentic regional flavours and heritage recipes",
@@ -58,18 +58,18 @@ export default function WhatWeDo() {
       </h2>
 
       {/* Tab selectors */}
-      <div className="flex items-center justify-center gap-3 mb-8 flex-wrap">
+      <div className="mb-8 flex items-center justify-center gap-1 sm:gap-3">
         {cards.map((c, idx) => (
           <button
             key={c.title}
             onClick={() => setActive(idx)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[9px] font-medium leading-none transition-all duration-200 sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm ${
               active === idx
                 ? "bg-[#1e4620] text-white shadow-md"
                 : "bg-white text-[#1e4620] hover:bg-[#1e4620]/10"
             }`}
           >
-            <span className={`w-2 h-2 rounded-full ${active === idx ? "bg-white" : "bg-[#2a7a2a]"}`} />
+            <span className={`h-1.5 w-1.5 shrink-0 rounded-full sm:h-2 sm:w-2 ${active === idx ? "bg-white" : "bg-[#2a7a2a]"}`} />
             {c.title}
           </button>
         ))}

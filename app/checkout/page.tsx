@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
@@ -93,6 +93,63 @@ function CheckoutInner() {
     document.body.appendChild(script);
     return () => { document.body.removeChild(script); };
   }, []);
+
+  // Auto-fill the address: last order's address first, then the account's name/phone.
+  // Only empty fields are filled, so anything the customer already typed is kept.
+  const prefilledFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user || prefilledFor.current === user.id) return;
+    prefilledFor.current = user.id;
+
+    const fillEmpty = (saved: Partial<ShippingAddress>) =>
+      setAddress((cur) => {
+        const next = { ...cur };
+        (Object.keys(saved) as (keyof ShippingAddress)[]).forEach((k) => {
+          if (!next[k] && saved[k]) next[k] = String(saved[k]);
+        });
+        return next;
+      });
+
+    const token = localStorage.getItem("token");
+    const headers = { Authorization: `Bearer ${token}` };
+    (async () => {
+      try {
+        const res = await fetch("/api/orders?limit=1", { headers });
+        if (res.ok) {
+          const data = await res.json();
+          const last = data.orders?.[0]?.shippingAddress;
+          if (last) fillEmpty(last);
+        }
+      } catch { /* ignore, fall back to profile */ }
+      try {
+        const res = await fetch("/api/auth/me", { headers });
+        if (res.ok) {
+          const data = await res.json();
+          fillEmpty({ name: data.user?.name, phone: data.user?.phone ?? "" });
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [user]);
+
+  // Pincode -> city & state (India Post public API); only fills empty city/state
+  useEffect(() => {
+    const pin = address.pincode.trim();
+    if (!/^\d{6}$/.test(pin)) return;
+    const ctrl = new AbortController();
+    fetch(`https://api.postalpincode.in/pincode/${pin}`, { signal: ctrl.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        const office = data?.[0]?.PostOffice?.[0];
+        if (!office) return;
+        setAddress((cur) =>
+          cur.pincode.trim() !== pin
+            ? cur
+            : { ...cur, city: cur.city || office.District || "", state: cur.state || office.State || "" }
+        );
+      })
+      .catch(() => { /* lookup is a convenience; ignore failures */ });
+    return () => ctrl.abort();
+  }, [address.pincode]);
 
   // Redirect to cart if empty or not logged in
   useEffect(() => {
