@@ -366,7 +366,7 @@ export default function MyOrdersPage() {
                     <MapPin className="w-4 h-4 text-zinc-400" /> Shipping Address
                   </h3>
                   <div className="bg-zinc-50 dark:bg-zinc-800/40 rounded-xl p-3.5 space-y-1 text-zinc-600 dark:text-zinc-400">
-                    {Object.entries((detail as OrderDetail).shippingAddress).map(([k, v]) => (
+                    {Object.entries((detail as OrderDetail).shippingAddress).filter(([, v]) => v).map(([k, v]) => (
                       <p key={k}>
                         <span className="font-medium capitalize text-zinc-700 dark:text-zinc-300">{k}: </span>
                         {v}

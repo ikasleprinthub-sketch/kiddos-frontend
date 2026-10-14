@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useDeliveryFields } from "@/lib/useDeliveryFields";
 import {
   ArrowLeft, ShieldCheck, Truck, MapPin, Check, AlertCircle,
 } from "lucide-react";
@@ -65,12 +66,21 @@ const EMPTY_ADDRESS: ShippingAddress = {
   city: "", state: "", pincode: "",
 };
 
+// Parse a response body without throwing, so a down/erroring backend gives a clear message
+// instead of "Unexpected end of JSON input".
+async function readJson(res: Response): Promise<{ message?: string; success?: boolean; order?: { id?: string; orderNumber: string; total: string | number }; razorpayPaymentId?: string; razorpayOrderId?: string; keyId?: string; orderSummary?: OrderSummary }> {
+  try { return await res.json(); } catch { return {} as never; }
+}
+const serverDown = (status: number) =>
+  `The server could not process your request (error ${status}). Please try again in a moment.`;
+
 function CheckoutInner() {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const couponCode = searchParams.get("coupon") || "";
+  const { fields: required } = useDeliveryFields();
 
   const [step, setStep] = useState<"address" | "payment" | "success">("address");
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
@@ -160,19 +170,26 @@ function CheckoutInner() {
 
   const validate = useCallback((): boolean => {
     const errs: Partial<ShippingAddress> = {};
-    if (!address.name.trim()) errs.name = "Name is required";
-    if (!address.phone.trim() || !/^[6-9]\d{9}$/.test(address.phone.trim())) {
+    const v = (k: keyof ShippingAddress) => address[k].trim();
+    // Required fields must be filled; optional ones are only format-checked when filled
+    if (!v("name") && required.name) errs.name = "Name is required";
+    if (!v("phone") ? required.phone : !/^[6-9]\d{9}$/.test(v("phone"))) {
       errs.phone = "Enter a valid 10-digit mobile number";
     }
-    if (!address.addressLine1.trim()) errs.addressLine1 = "Address is required";
-    if (!address.city.trim()) errs.city = "City is required";
-    if (!address.state.trim()) errs.state = "State is required";
-    if (!address.pincode.trim() || !/^\d{6}$/.test(address.pincode.trim())) {
+    if (!v("addressLine1") && required.addressLine1) errs.addressLine1 = "Address is required";
+    if (!v("addressLine2") && required.addressLine2) errs.addressLine2 = "Address line 2 is required";
+    if (!v("city") && required.city) errs.city = "City is required";
+    if (!v("state") && required.state) errs.state = "State is required";
+    if (!v("pincode") ? required.pincode : !/^\d{6}$/.test(v("pincode"))) {
       errs.pincode = "Enter a valid 6-digit pincode";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [address]);
+  }, [address, required]);
+
+  const verifyingRef = useRef(false);
+  const pendingPaymentRef = useRef<RazorpayResponse | null>(null);
+  const verifyRef = useRef<(r: RazorpayResponse) => Promise<void>>(async () => {});
 
   const createRazorpayOrder = useCallback(async () => {
     if (!validate()) return;
@@ -193,21 +210,26 @@ function CheckoutInner() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to create order");
+      const data = await readJson(res);
+      if (!res.ok) throw new Error(data.message || serverDown(res.status));
+      if (!data.razorpayOrderId || !data.orderSummary) throw new Error("Could not start the payment. Please try again.");
 
       setOrderSummary(data.orderSummary);
-      setRazorpayOrderId(data.razorpayOrderId);
-      setKeyId(data.keyId);
+      setRazorpayOrderId(data.razorpayOrderId ?? "");
+      setKeyId(data.keyId ?? "");
       setStep("payment");
     } catch (e: unknown) {
-      setApiError(e instanceof Error ? e.message : "Something went wrong");
+      setApiError(e instanceof Error && e.message !== "Failed to fetch" ? e.message : "Cannot reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   }, [validate, user, items, address, couponCode, notes, router]);
 
   const openRazorpay = useCallback(() => {
+    // Already paid but the order could not be saved: retry saving it (safe, the server is idempotent)
+    // instead of opening the payment window again.
+    if (pendingPaymentRef.current) { void verifyRef.current(pendingPaymentRef.current); return; }
+    if (verifyingRef.current) return;
     if (!window.Razorpay) { setApiError("Payment gateway is loading. Please try again."); return; }
     setApiError("");
 
@@ -225,7 +247,7 @@ function CheckoutInner() {
       },
       theme: { color: "#059669" },
       handler: async (response: RazorpayResponse) => {
-        await verifyPayment(response);
+        await verifyRef.current(response);
       },
       modal: {
         ondismiss: () => setApiError("Payment was cancelled. You can try again."),
@@ -235,6 +257,9 @@ function CheckoutInner() {
   }, [keyId, orderSummary, razorpayOrderId, address, user]);
 
   const verifyPayment = useCallback(async (response: RazorpayResponse) => {
+    if (verifyingRef.current) return; // ignore double clicks / duplicate handler calls
+    verifyingRef.current = true;
+    pendingPaymentRef.current = response; // kept until the order is confirmed saved
     setLoading(true);
     setApiError("");
     try {
@@ -253,26 +278,40 @@ function CheckoutInner() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Payment verification failed");
+      const data = await readJson(res);
+      if (!res.ok) throw new Error(data.message || serverDown(res.status));
+      // Only show success once the server confirms a saved order with an id
+      if (!data.success || !data.order?.id || !data.order?.orderNumber) {
+        throw new Error("The server did not confirm your order.");
+      }
 
+      pendingPaymentRef.current = null;
       setConfirmedOrder({
         orderNumber: data.order.orderNumber,
         total: data.order.total,
-        razorpayPaymentId: data.razorpayPaymentId,
+        razorpayPaymentId: data.razorpayPaymentId ?? response.razorpay_payment_id,
       });
       clearCart();
       setStep("success");
     } catch (e: unknown) {
-      setApiError(e instanceof Error ? e.message : "Payment verification failed");
+      const reason = e instanceof Error && e.message !== "Failed to fetch" ? e.message : "Cannot reach the server.";
+      setApiError(
+        `Your payment (ID ${response.razorpay_payment_id}) went through, but we could not save your order: ${reason} ` +
+        `Press the button again to retry saving it - you will not be charged twice. If it keeps failing, contact support with this payment ID.`
+      );
     } finally {
+      verifyingRef.current = false;
       setLoading(false);
     }
   }, [orderSummary, address, couponCode, notes, clearCart]);
+  useEffect(() => { verifyRef.current = verifyPayment; }, [verifyPayment]);
 
   const field = (key: keyof ShippingAddress, label: string, placeholder: string, type = "text", maxLength?: number) => (
     <div>
-      <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">{label}</label>
+      <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
+        {label}{required[key] && <span className="text-red-500"> *</span>}
+        {!required[key] && <span className="font-normal text-zinc-400"> (optional)</span>}
+      </label>
       <input
         type={type}
         value={address[key]}
@@ -372,13 +411,13 @@ function CheckoutInner() {
               <MapPin size={15} className="text-emerald-600" />
               <span className="font-semibold text-sm text-zinc-700 dark:text-zinc-300">Delivering to</span>
             </div>
-            <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{address.name}</p>
-            <p className="text-sm text-zinc-500">{address.phone}</p>
+            {address.name && <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{address.name}</p>}
+            {address.phone && <p className="text-sm text-zinc-500">{address.phone}</p>}
             <p className="text-sm text-zinc-500">
-              {address.addressLine1}{address.addressLine2 ? `, ${address.addressLine2}` : ""}
+              {[address.addressLine1, address.addressLine2].filter(Boolean).join(", ")}
             </p>
             <p className="text-sm text-zinc-500">
-              {address.city}, {address.state} – {address.pincode}
+              {[[address.city, address.state].filter(Boolean).join(", "), address.pincode].filter(Boolean).join(" – ")}
             </p>
           </div>
 
@@ -505,15 +544,15 @@ function CheckoutInner() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {field("name", "Full Name *", "Your name")}
-            {field("phone", "Mobile Number *", "10-digit number", "tel", 10)}
+            {field("name", "Full Name", "Your name")}
+            {field("phone", "Mobile Number", "10-digit number", "tel", 10)}
           </div>
-          {field("addressLine1", "Address Line 1 *", "House / Flat No., Building, Street")}
-          {field("addressLine2", "Address Line 2", "Area, Landmark (optional)")}
+          {field("addressLine1", "Address Line 1", "House / Flat No., Building, Street")}
+          {field("addressLine2", "Address Line 2", "Area, Landmark")}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {field("city", "City *", "Mumbai")}
-            {field("state", "State *", "Maharashtra")}
-            {field("pincode", "Pincode *", "400001", "tel", 6)}
+            {field("city", "City", "Mumbai")}
+            {field("state", "State", "Maharashtra")}
+            {field("pincode", "Pincode", "400001", "tel", 6)}
           </div>
 
           <div>

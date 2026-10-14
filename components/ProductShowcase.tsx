@@ -266,34 +266,34 @@ export default function ProductShowcase() {
                     )}
 
                     {/* Floating Actions on Hover */}
-                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-350">
+                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-1.5 sm:gap-2 opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-350">
                       {/* Wishlist */}
                       <button
                         onClick={() => toggleWishlist(p)}
-                        className={`w-8.5 h-8.5 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shadow-md cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 ${
+                        className={`w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shadow-md cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 ${
                           isAddedToWishlist
                             ? "text-red-500 fill-red-500"
                             : "text-zinc-650 hover:text-red-500 dark:text-zinc-300"
                         }`}
                         aria-label={isAddedToWishlist ? "Remove from wishlist" : "Add to wishlist"}
                       >
-                        <Heart className="w-4 h-4" />
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
 
                       {/* Zoom link */}
                       <Link
                         href={`/products/${p.slug}`}
-                        className="w-8.5 h-8.5 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shadow-md text-zinc-650 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200"
+                        className="w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shadow-md text-zinc-650 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200"
                         aria-label="View Details"
                       >
-                        <Maximize2 className="w-4 h-4" />
+                        <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </Link>
 
                       {/* Add to Cart */}
                       <button
                         onClick={() => handleAddToCart(p, idx)}
                         disabled={isAdding}
-                        className={`w-8.5 h-8.5 rounded-full flex items-center justify-center shadow-md cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 ${
+                        className={`w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full flex items-center justify-center shadow-md cursor-pointer hover:scale-110 active:scale-95 transition-all duration-200 ${
                           isAdding
                             ? "bg-[#1e4620] text-white"
                             : "bg-white dark:bg-zinc-800 text-zinc-650 dark:text-zinc-300 hover:text-emerald-700"
@@ -301,9 +301,9 @@ export default function ProductShowcase() {
                         aria-label="Add to cart"
                       >
                         {isAdding ? (
-                          <Check className="w-4 h-4 stroke-[2.5px]" />
+                          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5px]" />
                         ) : (
-                          <ShoppingBag className="w-4 h-4" />
+                          <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         )}
                       </button>
                     </div>

@@ -64,6 +64,22 @@ export default function CartPage() {
   });
   const [addressErrors, setAddressErrors] = useState<Partial<ShippingAddress>>({});
 
+  // Shipping rules come from Admin > Settings > Shipping (same defaults the server uses)
+  const [shipping, setShipping] = useState({ freeAbove: 500, fee: 50 });
+  useEffect(() => {
+    fetch("/api/settings?group=shipping", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((d: Record<string, string>) => {
+        const freeAbove = Number(d.free_shipping_threshold);
+        const fee = Number(d.default_delivery_fee);
+        setShipping({
+          freeAbove: d.free_shipping_threshold !== undefined && d.free_shipping_threshold !== "" && Number.isFinite(freeAbove) && freeAbove >= 0 ? freeAbove : 500,
+          fee: d.default_delivery_fee !== undefined && d.default_delivery_fee !== "" && Number.isFinite(fee) && fee >= 0 ? fee : 50,
+        });
+      })
+      .catch(() => { /* keep defaults */ });
+  }, []);
+
   // Stock map: productId → current stock from backend
   const [stockMap, setStockMap] = useState<Record<string, number>>({});
   const [isStockLoading, setIsStockLoading] = useState(true);
@@ -129,8 +145,8 @@ export default function CartPage() {
   // Cart Calculations
   const calculations = useMemo(() => {
     const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const isFreeDelivery = subtotal >= 500 || activeCoupon === "FREESHIP" || subtotal === 0;
-    const deliveryFee = isFreeDelivery ? 0 : 40;
+    const isFreeDelivery = subtotal >= shipping.freeAbove || activeCoupon === "FREESHIP" || subtotal === 0;
+    const deliveryFee = isFreeDelivery ? 0 : shipping.fee;
     const tax = Math.round(subtotal * 0.05);
     let discount = 0;
     if (activeCoupon === "KIDDOS20" && subtotal > 0) {
@@ -138,7 +154,7 @@ export default function CartPage() {
     }
     const total = subtotal + tax + deliveryFee - discount;
     return { subtotal, deliveryFee, tax, discount, total, isFreeDelivery };
-  }, [items, activeCoupon]);
+  }, [items, activeCoupon, shipping]);
 
   // Navigate to checkout with active coupon
   const handleCheckout = async () => {
@@ -662,7 +678,7 @@ export default function CartPage() {
                     <div className="bg-zinc-50 dark:bg-zinc-900/40 rounded-xl p-2.5 border border-zinc-150/40 dark:border-zinc-800/40 text-[11px] text-zinc-500 flex items-center gap-2">
                       <Truck className="w-3.5 h-3.5 text-brand-gold shrink-0" />
                       <span>
-                        Add <strong>₹{500 - calculations.subtotal}</strong> more for{" "}
+                        Add <strong>₹{shipping.freeAbove - calculations.subtotal}</strong> more for{" "}
                         <strong>FREE shipping</strong>!
                       </span>
                     </div>

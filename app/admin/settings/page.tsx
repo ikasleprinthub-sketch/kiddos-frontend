@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { adminApi } from "@/lib/adminApi";
-import { Bell, Check, RotateCcw, Save, Settings2, Store, Truck } from "lucide-react";
+import { Bell, Check, MapPin, RotateCcw, Save, Settings2, Store, Truck } from "lucide-react";
 
 interface SettingItem {
   id: string;
@@ -12,7 +12,7 @@ interface SettingItem {
   group: string;
 }
 
-type Field = { key: string; label: string; type: "text" | "email" | "number" | "textarea" | "checkbox"; placeholder?: string; help?: string };
+type Field = { key: string; label: string; type: "text" | "email" | "number" | "textarea" | "checkbox" | "required"; placeholder?: string; help?: string; default?: string };
 type Group = { group: string; label: string; description: string; icon: typeof Store; fields: Field[] };
 
 const SETTING_GROUPS: Group[] = [
@@ -34,6 +34,18 @@ const SETTING_GROUPS: Group[] = [
       { key: "free_shipping_threshold", label: "Free shipping above (₹)", type: "number", placeholder: "500" },
       { key: "default_delivery_fee", label: "Default delivery fee (₹)", type: "number", placeholder: "50" },
       { key: "delivery_eta_days", label: "Estimated delivery days", type: "number", placeholder: "3" },
+    ],
+  },
+  {
+    group: "delivery", label: "Delivery Fields", description: "Choose which checkout address fields customers must fill in. Changes apply to the storefront immediately after saving.", icon: MapPin,
+    fields: [
+      { key: "delivery_field_name_required", label: "Full name", type: "required", default: "true" },
+      { key: "delivery_field_phone_required", label: "Mobile number", type: "required", default: "true", help: "When filled, must be a valid 10-digit number." },
+      { key: "delivery_field_addressLine1_required", label: "Address line 1", type: "required", default: "true" },
+      { key: "delivery_field_addressLine2_required", label: "Address line 2", type: "required", default: "false" },
+      { key: "delivery_field_city_required", label: "City", type: "required", default: "true" },
+      { key: "delivery_field_state_required", label: "State", type: "required", default: "true" },
+      { key: "delivery_field_pincode_required", label: "Pincode", type: "required", default: "true", help: "When filled, must be a valid 6-digit pincode." },
     ],
   },
   {
@@ -68,6 +80,7 @@ export default function SettingsPage() {
       .then((data) => {
         const flat: Record<string, string> = {};
         for (const item of data.settings) flat[item.key] = item.value;
+        for (const group of SETTING_GROUPS) for (const field of group.fields) if (field.default !== undefined && flat[field.key] === undefined) flat[field.key] = field.default;
         setSettings(flat);
         setSavedSettings(flat);
       })
@@ -91,7 +104,7 @@ export default function SettingsPage() {
     try {
       const payload = SETTING_GROUPS.flatMap((group) => group.fields.map((field) => ({
         key: field.key,
-        value: settings[field.key] ?? "",
+        value: settings[field.key] ?? field.default ?? "",
         group: group.group,
       })));
       await adminApi.put("/admin/settings", { settings: payload });
@@ -137,8 +150,13 @@ export default function SettingsPage() {
                 </div>
                 <div className="grid gap-5 p-4 sm:grid-cols-2 sm:p-6">
                   {currentGroup.fields.map((field) => (
-                    <div key={field.key} className={field.type === "textarea" || field.type === "checkbox" ? "sm:col-span-2" : ""}>
-                      {field.type === "checkbox" ? (
+                    <div key={field.key} className={field.type === "textarea" || field.type === "checkbox" ?  "sm:col-span-2" : ""}>
+                      {field.type === "required" ? (
+                        <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                          <span><span className="block text-sm font-bold text-slate-800">{field.label}{settings[field.key] === "true" && <span className="text-rose-500"> *</span>}</span>{field.help && <span className="mt-1 block text-xs text-slate-500">{field.help}</span>}</span>
+                          <button type="button" role="switch" aria-checked={settings[field.key] === "true"} aria-label={`${field.label}: ${settings[field.key] === "true" ? "Required" : "Optional"}`} onClick={() => handleChange(field.key, settings[field.key] === "true" ? "false" : "true")} className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition ${settings[field.key] === "true" ? "bg-emerald-700 text-white" : "bg-slate-200 text-slate-600"}`}>{settings[field.key] === "true" ? "Required" : "Optional"}</button>
+                        </div>
+                      ) : field.type === "checkbox" ? (
                         <label className="flex cursor-pointer items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                           <span><span className="block text-sm font-bold text-slate-800">{field.label}</span>{field.help && <span className="mt-1 block text-xs text-slate-500">{field.help}</span>}</span>
                           <input type="checkbox" checked={settings[field.key] === "true"} onChange={(event) => handleChange(field.key, event.target.checked ? "true" : "false")} className="mt-0.5 h-5 w-5 shrink-0 accent-emerald-700" />
