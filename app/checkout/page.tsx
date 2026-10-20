@@ -74,8 +74,11 @@ async function readJson(res: Response): Promise<{ message?: string; success?: bo
 const serverDown = (status: number) =>
   `The server could not process your request (error ${status}). Please try again in a moment.`;
 
+// Same rule as the backend: starts with a letter; letters (any language), spaces, . ' - only, 2–100 chars
+const NAME_PATTERN = /^\p{L}[\p{L}\p{M}\s.'-]{1,99}$/u;
+
 function CheckoutInner() {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, ready } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -163,16 +166,19 @@ function CheckoutInner() {
 
   // Redirect to cart if empty or not logged in
   useEffect(() => {
-    if (items.length === 0 && step === "address") {
+    // Wait for the cart to load, or a just-logged-in user would be bounced before their items appear
+    if (ready && items.length === 0 && step === "address") {
       router.replace("/cart");
     }
-  }, [items.length, step, router]);
+  }, [ready, items.length, step, router]);
 
   const validate = useCallback((): boolean => {
     const errs: Partial<ShippingAddress> = {};
     const v = (k: keyof ShippingAddress) => address[k].trim();
     // Required fields must be filled; optional ones are only format-checked when filled
-    if (!v("name") && required.name) errs.name = "Name is required";
+    if (!v("name") ? required.name : !NAME_PATTERN.test(v("name"))) {
+      errs.name = v("name") ? "Enter a valid name (letters and spaces only)" : "Name is required";
+    }
     if (!v("phone") ? required.phone : !/^[6-9]\d{9}$/.test(v("phone"))) {
       errs.phone = "Enter a valid 10-digit mobile number";
     }
@@ -377,7 +383,7 @@ function CheckoutInner() {
 
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 py-3 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-bold tracking-wide uppercase transition-all shadow-md"
+            className="inline-flex items-center gap-2 py-3 px-8 bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl text-sm font-bold tracking-wide uppercase transition-all shadow-md"
           >
             Continue Shopping
           </Link>
@@ -469,7 +475,7 @@ function CheckoutInner() {
           <button
             onClick={openRazorpay}
             disabled={loading}
-            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-bold uppercase tracking-wide shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full py-4 bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl text-sm font-bold uppercase tracking-wide shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {loading ? (
               <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Verifying…</>
@@ -510,8 +516,8 @@ function CheckoutInner() {
           </div>
           <div className="h-px bg-zinc-200 flex-1" />
           <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Delivery</span>
+            <span className="w-7 h-7 rounded-full bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green text-xs font-bold flex items-center justify-center shadow-sm">2</span>
+            <span className="text-xs font-bold text-brand-green dark:text-brand-gold">Delivery</span>
           </div>
           <div className="h-px bg-zinc-200 flex-1" />
           <div className="flex items-center gap-2 opacity-50">
@@ -590,7 +596,7 @@ function CheckoutInner() {
         <button
           onClick={createRazorpayOrder}
           disabled={loading || !user}
-          className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-bold uppercase tracking-wide shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full py-4 bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl text-sm font-bold uppercase tracking-wide shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? (
             <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Please wait…</>

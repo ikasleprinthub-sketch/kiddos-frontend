@@ -3,11 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { adminApi } from "@/lib/adminApi";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 
 interface Banner {
   id: string;
-  title: string;
+  title: string | null;
   subtitle: string | null;
   image: string;
   link: string | null;
@@ -31,6 +32,7 @@ const EMPTY_FORM: FormState = {
 };
 
 const POSITIONS = ["HOME", "PROMO", "CATEGORY", "PRODUCT", "CHECKOUT"];
+const MAX_UPLOAD_MB = 5;
 
 export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -38,6 +40,7 @@ export default function BannersPage() {
   const [positionFilter, setPositionFilter] = useState("HOME");
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editing, setEditing] = useState<Banner | null>(null);
+  const [deleting, setDeleting] = useState<Banner | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -61,7 +64,7 @@ export default function BannersPage() {
 
   const openAdd = () => { setForm({ ...EMPTY_FORM, position: positionFilter }); setEditing(null); setModal("add"); setError(""); };
   const openEdit = (b: Banner) => {
-    setForm({ title: b.title, subtitle: b.subtitle || "", image: b.image, link: b.link || "", isActive: b.isActive, sortOrder: b.sortOrder, position: b.position });
+    setForm({ title: b.title || "", subtitle: b.subtitle || "", image: b.image, link: b.link || "", isActive: b.isActive, sortOrder: b.sortOrder, position: b.position });
     setEditing(b);
     setModal("edit");
     setError("");
@@ -69,7 +72,13 @@ export default function BannersPage() {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = ""; // allow picking the same file again after an error
     if (!file) return;
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      setError(`Image is too large. Maximum allowed size is ${MAX_UPLOAD_MB} MB.`);
+      return;
+    }
+    setError("");
     const fd = new FormData();
     fd.append("file", file);
     fd.append("folder", "banners");
@@ -77,16 +86,30 @@ export default function BannersPage() {
     try {
       const res = await adminApi.upload<{ url: string }>("/upload", fd);
       setForm((f) => ({ ...f, image: res.url }));
-    } catch {
-      setError("Image upload failed");
+    } catch (e: unknown) {
+      setError(`Image upload failed: ${e instanceof Error ? e.message : "please try again"}`);
     } finally {
       setUploading(false);
     }
   };
 
+  // Same rules as the backend, so problems are shown before saving
+  const validate = (): string | null => {
+    if (!form.image.trim()) return "Image is required";
+    const link = form.link.trim();
+    if (link && !(/^\/(?!\/)/.test(link) || /^https?:\/\/\S+$/i.test(link))) {
+      return 'Link must start with "/" (e.g. /products) or be a full http(s) URL';
+    }
+    if (!Number.isInteger(form.sortOrder) || form.sortOrder < 0 || form.sortOrder > 9999) {
+      return "Sort order must be a whole number from 0 to 9999";
+    }
+    return null;
+  };
+
   const handleSave = async () => {
     setError("");
-    if (!form.image.trim()) { setError("Image is required"); return; }
+    const problem = validate();
+    if (problem) { setError(problem); return; }
     setSaving(true);
     try {
       if (modal === "add") await adminApi.post("/admin/banners", form);
@@ -100,19 +123,21 @@ export default function BannersPage() {
     }
   };
 
-  const handleDelete = async (b: Banner) => {
-    if (!confirm(`Delete banner "${b.title}"?`)) return;
-    try {
-      await adminApi.delete(`/admin/banners/${b.id}`);
-      load();
-    } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Delete failed");
-    }
+  // Errors are thrown so ConfirmDialog shows them inside the dialog
+  const handleDelete = async () => {
+    if (!deleting) return;
+    await adminApi.delete(`/admin/banners/${deleting.id}`);
+    setDeleting(null);
+    load();
   };
 
   const toggleActive = async (b: Banner) => {
-    await adminApi.put(`/admin/banners/${b.id}`, { isActive: !b.isActive });
-    load();
+    try {
+      await adminApi.put(`/admin/banners/${b.id}`, { isActive: !b.isActive });
+      load();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Could not update banner");
+    }
   };
 
   return (
@@ -151,7 +176,7 @@ export default function BannersPage() {
             {banners.map((banner) => (
               <div key={banner.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="relative aspect-[16/6] bg-gray-100">
-                  <img src={banner.image} alt={banner.title} className="w-full h-full object-cover" />
+                  <img src={banner.image} alt={banner.title || "Banner"} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <p className="text-white font-semibold text-sm truncate">{banner.title}</p>
@@ -174,7 +199,7 @@ export default function BannersPage() {
                     <button onClick={() => openEdit(banner)} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded">
                       <Pencil size={14} />
                     </button>
-                    <button onClick={() => handleDelete(banner)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded">
+                    <button onClick={() => setDeleting(banner)}className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -193,7 +218,7 @@ export default function BannersPage() {
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title <span className="font-normal text-gray-400">(optional)</span></label>
                 <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300" />
               </div>
@@ -207,7 +232,7 @@ export default function BannersPage() {
                 {form.image && (
                   <img src={form.image} alt="preview" className="w-full h-24 rounded object-cover mb-2 bg-gray-100" />
                 )}
-                <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleUpload} disabled={uploading}
                   className="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-emerald-50 file:text-emerald-700 file:text-sm file:font-medium hover:file:bg-emerald-100" />
                 {uploading && <p className="text-xs text-gray-400 mt-1">Uploading…</p>}
               </div>
@@ -247,6 +272,17 @@ export default function BannersPage() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleting}
+        title="Delete banner?"
+        message={deleting && <>
+          <p>You are about to delete {deleting.title ? <b className="text-slate-900">&ldquo;{deleting.title}&rdquo;</b> : "this banner"} from the {deleting.position.toLowerCase()} banners. This cannot be undone.</p>
+          {deleting.isActive && <p className="mt-2">It is currently live and will disappear from the website immediately. To hide it temporarily, click its &ldquo;Live&rdquo; badge to switch it off instead.</p>}
+        </>}
+        confirmLabel="Delete banner"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleting(null)}
+      />
     </div>
   );
 }

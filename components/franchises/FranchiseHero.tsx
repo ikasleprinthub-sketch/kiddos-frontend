@@ -90,12 +90,13 @@ export default function FranchiseHero() {
           {/* Right — Image, flush to bottom */}
           <div className="relative flex justify-center lg:justify-end self-end mt-auto">
 
-            <div className="relative w-full max-w-[820px] lg:max-w-[950px] xl:max-w-[1050px] lg:w-[115%] xl:w-[125%] lg:-mr-16 xl:-mr-24 z-10 transition-all duration-300">
+            <div className="relative w-full max-w-[820px] z-10 transition-all duration-300">
               <Image
                 src="/images/franchisis/f_hero2.webp"
                 alt="Kiddos Foods Franchise Outlet"
-                width={820}
-                height={960}
+                width={1200}
+                height={799}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 className="w-full h-auto object-contain drop-shadow-xl rounded-3xl"
                 priority
               />

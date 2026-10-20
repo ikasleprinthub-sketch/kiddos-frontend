@@ -118,7 +118,7 @@ export default function PromoBanners() {
                   <>
                     <Image
                       src={banner.image}
-                      alt={banner.title}
+                      alt={banner.title || "Promotional banner"}
                       fill
                       sizes="(max-width: 640px) 100vw, 50vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"

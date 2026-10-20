@@ -3,19 +3,24 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { adminApi } from "@/lib/adminApi";
-import { BadgeCheck, Download, Eye, MailCheck, MoreVertical, ShoppingBag, UserX, UsersRound } from "lucide-react";
+import { BadgeCheck, Ban, Copy, Download, Eye, MailCheck, MoreVertical, Pencil, ShoppingBag, Trash2, UserCheck, UserX, UsersRound } from "lucide-react";
 
 interface Customer {
   id: string;
   name: string;
   email: string;
   phone: string | null;
+  /** Phone from the customer's latest order — sign-up doesn't collect one (list endpoint only) */
+  orderPhone?: string | null;
   isVerified: boolean;
   isActive: boolean;
   createdAt: string;
   _count: { orders: number };
 }
+
+const phoneOf = (c: Customer) => c.phone || c.orderPhone || null;
 
 interface CustomerDetail extends Customer {
   updatedAt: string;
@@ -44,6 +49,26 @@ export default function CustomersPage() {
   const [editForm, setEditForm] = useState({ name: "", email: "", phone: "", isVerified: false });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ kind: "suspend" | "delete"; customer: { id: string; name: string; email: string } } | null>(null);
+  // Row action menu — fixed-positioned so the table's horizontal scroll container can't clip it
+  const [menu, setMenu] = useState<{ customer: Customer; top: number; right: number } | null>(null);
+  const [menuBusy, setMenuBusy] = useState(false);
+
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(null);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    document.addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+    return () => {
+      document.removeEventListener("click", close);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+    };
+  }, [menu]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -116,20 +141,60 @@ export default function CustomersPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!detail) return;
-    const ok = confirm(`Are you sure you want to delete ${detail.customer.name}? This will permanently delete their account, wishlist, and all orders!`);
-    if (!ok) return;
+  const openMenu = (e: React.MouseEvent<HTMLButtonElement>, customer: Customer) => {
+    e.stopPropagation();
+    if (menu?.customer.id === customer.id) { setMenu(null); return; }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const MENU_HEIGHT = 250;
+    const top = rect.bottom + MENU_HEIGHT > window.innerHeight ? Math.max(8, rect.top - MENU_HEIGHT) : rect.bottom + 4;
+    setMenu({ customer, top, right: window.innerWidth - rect.right });
+  };
 
-    setDeleting(true);
+  const copyToClipboard = async (text: string) => {
+    setMenu(null);
+    try { await navigator.clipboard.writeText(text); } catch { alert("Could not copy to clipboard"); }
+  };
+
+  // Reactivating is harmless and runs directly; suspending asks first (see ConfirmDialog below)
+  const setCustomerActive = async (customer: Customer, isActive: boolean) => {
+    setMenu(null);
+    if (!isActive) { setPendingAction({ kind: "suspend", customer }); return; }
+    setMenuBusy(true);
     try {
-      await adminApi.delete(`/admin/customers/${detail.customer.id}`);
-      setDetail(null);
+      await adminApi.put(`/admin/customers/${customer.id}`, { isActive });
       load();
     } catch {
-      alert("Failed to delete customer");
+      alert("Failed to update account status");
+    } finally {
+      setMenuBusy(false);
+    }
+  };
+
+  // From the row menu or the detail drawer: both open the same confirmation
+  const deleteCustomer = (customer: { id: string; name: string; email: string }) => {
+    setMenu(null);
+    setPendingAction({ kind: "delete", customer });
+  };
+  const handleDelete = () => { if (detail) deleteCustomer(detail.customer); };
+
+  // Runs from the confirm dialog; a thrown error is shown inside it
+  const runPendingAction = async () => {
+    if (!pendingAction) return;
+    const { kind, customer } = pendingAction;
+    setDeleting(kind === "delete");
+    setMenuBusy(true);
+    try {
+      if (kind === "suspend") {
+        await adminApi.put(`/admin/customers/${customer.id}`, { isActive: false });
+      } else {
+        await adminApi.delete(`/admin/customers/${customer.id}`);
+        if (detail?.customer.id === customer.id) setDetail(null);
+      }
+      setPendingAction(null);
+      load();
     } finally {
       setDeleting(false);
+      setMenuBusy(false);
     }
   };
 
@@ -137,14 +202,14 @@ export default function CustomersPage() {
   const verifiedCount = customers.filter((customer) => customer.isVerified).length;
   const repeatBuyers = customers.filter((customer) => customer._count.orders >= 2).length;
   const blockedCount = customers.filter((customer) => !customer.isActive).length;
-  const exportCustomers = () => { const rows = [["Name","Email","Phone","Orders","Verified","Status","Joined"], ...visibleCustomers.map((customer) => [customer.name, customer.email, customer.phone || "", String(customer._count.orders), customer.isVerified ? "Yes" : "No", customer.isActive ? "Active" : "Blocked", new Date(customer.createdAt).toLocaleDateString("en-IN")])]; const csv = rows.map((row) => row.map((cell) => `"${cell.replaceAll('"','""')}"`).join(",")).join("\n"); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); const link = document.createElement("a"); link.href = url; link.download = "customers.csv"; link.click(); URL.revokeObjectURL(url); };
+  const exportCustomers = () => { const rows = [["Name","Email","Phone","Orders","Verified","Status","Joined"], ...visibleCustomers.map((customer) => [customer.name, customer.email, phoneOf(customer) || "", String(customer._count.orders), customer.isVerified ? "Yes" : "No", customer.isActive ? "Active" : "Blocked", new Date(customer.createdAt).toLocaleDateString("en-IN")])]; const csv = rows.map((row) => row.map((cell) => `"${cell.replaceAll('"','""')}"`).join(",")).join("\n"); const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); const link = document.createElement("a"); link.href = url; link.download = "customers.csv"; link.click(); URL.revokeObjectURL(url); };
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f7f9f8]">
       <AdminHeader title="Customers" />
       <main className="flex-1 overflow-y-auto"><div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><h2 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Customer management</h2><p className="mt-1 text-sm text-slate-500">View customer profiles, purchase history and account status.</p></div><button onClick={exportCustomers} className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm"><Download size={17}/> Export customers</button></div>
         <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"><CustomerCard icon={UsersRound} tone="emerald" label="Total customers" value={total}/><CustomerCard icon={MailCheck} tone="emerald" label="Verified customers" value={verifiedCount}/><CustomerCard icon={ShoppingBag} tone="amber" label="Repeat buyers" value={repeatBuyers}/><CustomerCard icon={UserX} tone="rose" label="Blocked accounts" value={blockedCount}/></section>
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex gap-7 overflow-x-auto border-b border-slate-200 px-5 pt-4 whitespace-nowrap"><CustomerTab active={view==="all"} onClick={()=>setView("all")}>All customers ({total})</CustomerTab><CustomerTab active={view==="verified"} onClick={()=>setView("verified")}>Verified ({verifiedCount})</CustomerTab><CustomerTab active={view==="unverified"} onClick={()=>setView("unverified")}>Unverified ({customers.length-verifiedCount})</CustomerTab><CustomerTab active={view==="blocked"} onClick={()=>setView("blocked")}>Blocked ({blockedCount})</CustomerTab></div><div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500"><tr><th>Customer / Phone</th><th>Orders</th><th>Verification</th><th>Account status</th><th>Joined</th><th>Actions</th></tr></thead><tbody className="divide-y divide-slate-100">{loading?<tr><td colSpan={6} className="py-16 text-center"><span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"/></td></tr>:visibleCustomers.length===0?<tr><td colSpan={6} className="py-16 text-center text-slate-400">No customers found</td></tr>:visibleCustomers.map((customer)=><tr key={customer.id} className="hover:bg-emerald-50/30"><td className="py-3"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">{customer.name.slice(0,2).toUpperCase()}</span><div><p className="font-bold text-slate-900">{customer.name}</p><p className="text-xs text-slate-400">{customer.phone || customer.email}</p></div></div></td><td className="font-semibold">{customer._count.orders}</td><td><span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${customer.isVerified?"bg-emerald-100 text-emerald-700":"bg-amber-100 text-amber-700"}`}>{customer.isVerified&&<BadgeCheck size={13}/>} {customer.isVerified?"Verified":"Unverified"}</span></td><td><span className={`rounded-full px-3 py-1 text-xs font-bold ${customer.isActive?"bg-emerald-100 text-emerald-700":"bg-rose-100 text-rose-700"}`}>{customer.isActive?"Active":"Blocked"}</span></td><td>{new Date(customer.createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td><td><div className="flex items-center gap-2"><button onClick={()=>openDetail(customer)} className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-xs font-bold text-emerald-700"><Eye size={14}/> View profile</button><MoreVertical size={17} className="text-slate-400"/></div></td></tr>)}</tbody></table></div><div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-3 sm:flex-row"><p className="text-xs text-slate-500">{`Showing ${visibleCustomers.length?((page-1)*10)+1:0}–${Math.min(page*10,total)} of ${total} customers`}</p><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div></section>
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="flex gap-7 overflow-x-auto border-b border-slate-200 px-5 pt-4 whitespace-nowrap"><CustomerTab active={view==="all"} onClick={()=>setView("all")}>All customers ({total})</CustomerTab><CustomerTab active={view==="verified"} onClick={()=>setView("verified")}>Verified ({verifiedCount})</CustomerTab><CustomerTab active={view==="unverified"} onClick={()=>setView("unverified")}>Unverified ({customers.length-verifiedCount})</CustomerTab><CustomerTab active={view==="blocked"} onClick={()=>setView("blocked")}>Blocked ({blockedCount})</CustomerTab></div><div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500"><tr><th>Customer / Phone</th><th>Orders</th><th>Verification</th><th>Account status</th><th>Joined</th><th>Actions</th></tr></thead><tbody className="divide-y divide-slate-100">{loading?<tr><td colSpan={6} className="py-16 text-center"><span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"/></td></tr>:visibleCustomers.length===0?<tr><td colSpan={6} className="py-16 text-center text-slate-400">No customers found</td></tr>:visibleCustomers.map((customer)=><tr key={customer.id} className="hover:bg-emerald-50/30"><td className="py-3"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">{customer.name.slice(0,2).toUpperCase()}</span><div><p className="font-bold text-slate-900">{customer.name}</p>{phoneOf(customer)?<p className="text-xs font-semibold text-slate-600">{phoneOf(customer)}</p>:<p className="text-xs italic text-slate-400">No phone number</p>}<p className="text-xs text-slate-400">{customer.email}</p></div></div></td><td className="font-semibold">{customer._count.orders}</td><td><span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${customer.isVerified?"bg-emerald-100 text-emerald-700":"bg-amber-100 text-amber-700"}`}>{customer.isVerified&&<BadgeCheck size={13}/>} {customer.isVerified?"Verified":"Unverified"}</span></td><td><span className={`rounded-full px-3 py-1 text-xs font-bold ${customer.isActive?"bg-emerald-100 text-emerald-700":"bg-rose-100 text-rose-700"}`}>{customer.isActive?"Active":"Blocked"}</span></td><td>{new Date(customer.createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td><td><div className="flex items-center gap-2"><button onClick={()=>openDetail(customer)} className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-xs font-bold text-emerald-700"><Eye size={14}/> View profile</button><button type="button" onClick={(e)=>openMenu(e,customer)} disabled={menuBusy} aria-label={`More actions for ${customer.name}`} aria-haspopup="menu" aria-expanded={menu?.customer.id===customer.id} className={`rounded-lg p-1.5 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50 ${menu?.customer.id===customer.id?"bg-slate-100 text-slate-700":"text-slate-400"}`}><MoreVertical size={17}/></button></div></td></tr>)}</tbody></table></div><div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-3 sm:flex-row"><p className="text-xs text-slate-500">{`Showing ${visibleCustomers.length?((page-1)*10)+1:0}–${Math.min(page*10,total)} of ${total} customers`}</p><AdminPagination page={page} pages={pages} onPageChange={setPage} /></div></section>
         <p className="text-xs text-slate-400">Repeat buyers: customers with 2 or more orders.</p>
       </div></main>      {detail && (
         <div className="fixed inset-0 z-50 bg-black/40 flex justify-end">
@@ -302,7 +367,55 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
+
+      {menu && (
+        <div
+          role="menu"
+          onClick={(e) => e.stopPropagation()}
+          style={{ top: menu.top, right: menu.right }}
+          className="fixed z-50 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-sm shadow-xl"
+        >
+          <MenuItem icon={Eye} onClick={() => { const c = menu.customer; setMenu(null); openDetail(c); }}>View profile</MenuItem>
+          <MenuItem icon={Pencil} onClick={async () => { const c = menu.customer; setMenu(null); await openDetail(c); setIsEditing(true); }}>Edit details</MenuItem>
+          <MenuItem icon={Copy} onClick={() => copyToClipboard(menu.customer.email)}>Copy email</MenuItem>
+          <MenuItem icon={Copy} disabled={!phoneOf(menu.customer)} onClick={() => copyToClipboard(phoneOf(menu.customer) || "")}>Copy phone</MenuItem>
+          <div className="my-1 border-t border-slate-100" />
+          {menu.customer.isActive ? (
+            <MenuItem icon={Ban} tone="amber" onClick={() => setCustomerActive(menu.customer, false)}>Suspend account</MenuItem>
+          ) : (
+            <MenuItem icon={UserCheck} tone="emerald" onClick={() => setCustomerActive(menu.customer, true)}>Activate account</MenuItem>
+          )}
+          <MenuItem
+            icon={Trash2}
+            tone="rose"
+            disabled={menu.customer.isActive}
+            title={menu.customer.isActive ? "Suspend the account before deleting" : undefined}
+            onClick={() => deleteCustomer(menu.customer)}
+          >
+            Delete customer
+          </MenuItem>
+        </div>
+      )}
+      <ConfirmDialog
+        open={!!pendingAction}
+        title={pendingAction?.kind === "suspend" ? "Suspend customer?" : "Delete customer?"}
+        message={pendingAction && (pendingAction.kind === "suspend"
+          ? <p><b className="text-slate-900">{pendingAction.customer.name}</b> ({pendingAction.customer.email}) will not be able to log in until you reactivate the account.</p>
+          : <><p>You are about to delete <b className="text-slate-900">{pendingAction.customer.name}</b> ({pendingAction.customer.email}).</p><p className="mt-2 font-medium text-rose-700">This permanently deletes their account, wishlist and all their orders. It cannot be undone.</p></>)}
+        confirmLabel={pendingAction?.kind === "suspend" ? "Suspend" : "Delete customer"}
+        onConfirm={runPendingAction}
+        onCancel={() => setPendingAction(null)}
+      />
     </div>
+  );
+}
+function MenuItem({ icon: Icon, tone, disabled, title, onClick, children }: { icon: React.ComponentType<{ size?: number }>; tone?: "amber" | "emerald" | "rose"; disabled?: boolean; title?: string; onClick: () => void; children: React.ReactNode }) {
+  const color = tone === "amber" ? "text-amber-700" : tone === "emerald" ? "text-emerald-700" : tone === "rose" ? "text-rose-600" : "text-slate-700";
+  return (
+    <button type="button" role="menuitem" disabled={disabled} title={title} onClick={onClick} className={`flex w-full items-center gap-2.5 px-3.5 py-2 text-left font-medium transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent ${color}`}>
+      <Icon size={15} />
+      {children}
+    </button>
   );
 }
 function CustomerTab({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button onClick={onClick} className={`pb-3 text-sm font-semibold ${active?"border-b-2 border-emerald-700 text-emerald-700":"text-slate-500"}`}>{children}</button>}

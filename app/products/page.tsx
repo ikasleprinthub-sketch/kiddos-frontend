@@ -143,6 +143,14 @@ function ProductsPageContent() {
 
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Lock background page scroll while the quick view / mobile filter / sort overlays are open
+  const isOverlayOpen = !!quickViewProduct || isMobileFilterOpen || isMobileSortOpen;
+  useEffect(() => {
+    if (!isOverlayOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOverlayOpen]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (listRef.current) {
@@ -154,7 +162,7 @@ function ProductsPageContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  const { addItem } = useCart();
+  const { addItem, buyNow } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   const toggleWishlist = (product: Product) => {
@@ -196,6 +204,8 @@ function ProductsPageContent() {
 
   // Cart feedback state (per product id)
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
+  // Products whose image failed to load — show the category placeholder instead of broken alt text
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
   
   // Sync state changes with URL parameters for shareable filtering
   // Sync state changes with URL parameters for shareable filtering
@@ -234,6 +244,18 @@ function ProductsPageContent() {
     lastFilterSignature.current = filterSignature;
     setCurrentPage(1);
   }, [filterSignature]);
+
+  // Bring the results back into view when the category selection changes (skip first render)
+  const categorySignature = selectedCategories.join(",");
+  const lastCategorySignature = useRef(categorySignature);
+  useEffect(() => {
+    if (lastCategorySignature.current === categorySignature) return;
+    lastCategorySignature.current = categorySignature;
+    if (!listRef.current) return;
+    const offset = 120; // Offset for the sticky header + breathing room
+    const top = listRef.current.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, [categorySignature]);
 
   // Use API products when available, otherwise fall back to static
   const allProducts = useMemo(
@@ -305,7 +327,6 @@ function ProductsPageContent() {
     }).sort((a, b) => {
       if (sortBy === "price-low-high") return a.price - b.price;
       if (sortBy === "price-high-low") return b.price - a.price;
-      if (sortBy === "rating") return b.rating - a.rating;
       return 0; // default sorting
     });
   }, [selectedCategories, searchQuery, minPrice, maxPrice, sortBy, promotions, availability, allProducts]);
@@ -315,20 +336,25 @@ function ProductsPageContent() {
   const safePage = Math.min(currentPage, totalPages);
 
   // Handle Add to Cart animation triggers
+  const toCartItem = (product: Product) => ({
+    id: product.id,
+    productId: product.id,
+    name: product.name,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    image: product.image,
+    emoji: product.emoji,
+    gradient: product.gradient,
+    weightOrQty: product.weightOrQty,
+    slug: product.slug || product.id,
+  });
+
+  // Buy Now: add to cart and go straight to checkout
+  const handleBuyNow = (product: Product) => buyNow(toCartItem(product));
+
   const handleAddToCart = (product: Product) => {
     setAddingToCartId(product.id);
-    addItem({
-      id: product.id,
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      image: product.image,
-      emoji: product.emoji,
-      gradient: product.gradient,
-      weightOrQty: product.weightOrQty,
-      slug: product.slug || product.id,
-    });
+    addItem(toCartItem(product));
     // Simulate API request / cart update delay
     setTimeout(() => {
       setAddingToCartId(null);
@@ -648,7 +674,6 @@ function ProductsPageContent() {
                     <option value="default">Default Sorting</option>
                     <option value="price-low-high">Price: Low to High</option>
                     <option value="price-high-low">Price: High to Low</option>
-                    <option value="rating">Top Rated</option>
                   </select>
                 </div>
               </div>
@@ -747,20 +772,6 @@ function ProductsPageContent() {
                     
                     return (
                       <div key={product.id} className="relative min-w-0">
-                        {/* Bestseller ribbon — on card corner, clipped to card's border-radius */}
-                        {product.isBestSeller && (
-                          <div className="absolute top-0 left-0 w-[90px] h-[90px] overflow-hidden rounded-tl-[20px] z-30 pointer-events-none select-none">
-                            <div
-                              className="absolute top-[19px] left-[-27px] w-[112px] text-center bg-[#f97316] text-white text-[9px] font-black uppercase tracking-wider py-[5px] -rotate-45"
-                              style={{
-                                clipPath: 'polygon(9px 0%, calc(100% - 9px) 0%, 100% 50%, calc(100% - 9px) 100%, 9px 100%, 0% 50%)',
-                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.28))',
-                              }}
-                            >
-                              Best Seller
-                            </div>
-                          </div>
-                        )}
                         <article
                           className="group bg-white dark:bg-zinc-900 rounded-[20px] overflow-hidden border border-zinc-200/50 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col p-2.5 sm:p-4 h-full"
                         >
@@ -769,11 +780,12 @@ function ProductsPageContent() {
 
                           <Link href={`/products/${product.slug || product.id}`} className="absolute inset-0 z-0">
                             {/* Primary image */}
-                            {product.image ? (
+                            {product.image && !brokenImages.has(product.id) ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={product.image}
                                 alt={product.name}
+                                onError={() => setBrokenImages((prev) => new Set(prev).add(product.id))}
                                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${hasHoverImg ? "group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"}`}
                               />
                             ) : (
@@ -804,6 +816,11 @@ function ProductsPageContent() {
 
                           {/* Top Left Badges */}
                           <div className="absolute top-3 left-3 flex flex-col gap-2 z-20 pointer-events-none">
+                            {product.isBestSeller && (
+                              <span className="bg-[#f97316] text-white text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full shadow-sm w-fit">
+                                Best Seller
+                              </span>
+                            )}
                             {isRecipe && (
                               <span className="bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm w-fit">
                                 Free Recipe
@@ -816,51 +833,35 @@ function ProductsPageContent() {
                             )}
                           </div>
 
-                          {/* Top Right Buttons (Wishlist & Quick View) */}
-                          <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
-                            <button 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                toggleWishlist(product);
-                              }}
-                              className={`flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md transition-colors dark:bg-zinc-800 ${isInWishlist(product.id) ? "text-red-500 ring-1 ring-red-200 dark:text-red-400 dark:ring-red-800" : "text-zinc-400 hover:text-red-500 dark:hover:text-red-400"}`}
-                              title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
-                            >
-                              <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : "fill-none"}`} />
-                            </button>
-                            <button 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setQuickViewProduct(product);
-                              }}
-                              className="w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold transition-colors opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-300 delay-75"
-                              title="Quick View"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            {!isRecipe && (
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  if (!isOutOfStock) handleAddToCart(product);
-                                }}
-                                disabled={isOutOfStock || isAdding}
-                                className={`w-8 h-8 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-md transition-colors opacity-0 max-sm:opacity-100 group-hover:opacity-100 translate-x-2 max-sm:translate-x-0 group-hover:translate-x-0 transition-all duration-300 delay-100 ${isOutOfStock ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed" : isAdding ? "text-brand-green" : "text-zinc-400 hover:text-brand-green dark:hover:text-brand-gold"}`}
-                                title={isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                              >
-                                {isAdding ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-                              </button>
-                            )}
-                        </div>
+                          {/* Wishlist — always visible */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleWishlist(product);
+                            }}
+                            className={`absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md transition-colors dark:bg-zinc-800 ${isInWishlist(product.id) ? "text-red-500 ring-1 ring-red-200 dark:text-red-400 dark:ring-red-800" : "text-zinc-400 hover:text-red-500 dark:hover:text-red-400"}`}
+                            title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                            aria-label={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                          >
+                            <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-current" : "fill-none"}`} />
+                          </button>
                         </div>
 
                         {/* ── CONTENT ── */}
                         <div className="pt-4 flex-1 flex flex-col">
                           
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-[12px] font-medium text-zinc-400 dark:text-zinc-500">
+                          <div className="flex justify-between items-center gap-2 mb-1">
+                            <span className="text-[12px] font-medium text-zinc-400 dark:text-zinc-500 truncate">
                               {product.categoryLabel}
                             </span>
+                            <button
+                              onClick={() => setQuickViewProduct(product)}
+                              className="shrink-0 -my-1 p-1 rounded-full text-zinc-400 hover:text-brand-green hover:bg-zinc-100 dark:hover:text-brand-gold dark:hover:bg-zinc-800 transition-colors"
+                              title="Quick View"
+                              aria-label={`Quick view ${product.name}`}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
                           </div>
 
                           <Link href={`/products/${product.slug || product.id}`}>
@@ -887,6 +888,34 @@ function ProductsPageContent() {
                                 </span>
                               )}
                             </div>
+                          )}
+
+                          {/* Actions — always visible: Add to Cart + Buy Now */}
+                          {!isRecipe && (
+                            isOutOfStock ? (
+                              <div className="mt-auto pt-3">
+                                <span className="w-full h-9 inline-flex items-center justify-center rounded-full bg-zinc-100 text-zinc-400 text-[12px] sm:text-[13px] font-bold dark:bg-zinc-800 dark:text-zinc-500">
+                                  Out of Stock
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="mt-auto pt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button
+                                  onClick={() => handleAddToCart(product)}
+                                  disabled={isAdding}
+                                  className="min-w-0 h-9 inline-flex items-center justify-center gap-1.5 rounded-full border border-brand-green text-brand-green hover:bg-brand-green/5 dark:border-brand-gold dark:text-brand-gold dark:hover:bg-brand-gold/10 text-[12px] sm:text-[13px] font-bold transition-colors"
+                                >
+                                  {isAdding ? <Check className="w-4 h-4 shrink-0" /> : <ShoppingCart className="w-4 h-4 shrink-0" />}
+                                  <span className="truncate">{isAdding ? "Added" : "Add to Cart"}</span>
+                                </button>
+                                <button
+                                  onClick={() => handleBuyNow(product)}
+                                  className="min-w-0 h-9 inline-flex items-center justify-center gap-1.5 rounded-full bg-brand-green text-white hover:bg-brand-green-light dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light text-[12px] sm:text-[13px] font-bold transition-colors"
+                                >
+                                  <span className="truncate">Buy Now</span>
+                                </button>
+                              </div>
+                            )
                           )}
 
                         </div>
@@ -979,18 +1008,12 @@ function ProductsPageContent() {
                   </div>
                 )}
                 {quickViewProduct.isBestSeller && (
-                  <div
-                    className="absolute top-[22px] left-[-34px] w-[130px] text-center bg-[#f97316] text-white text-[10px] font-black uppercase tracking-wider py-2 -rotate-45 z-20 pointer-events-none select-none"
-                    style={{
-                      clipPath: 'polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)',
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.30))',
-                    }}
-                  >
+                  <span className="absolute top-4 left-4 z-20 pointer-events-none select-none bg-[#f97316] text-white text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full shadow-sm">
                     Best Seller
-                  </div>
+                  </span>
                 )}
               </div>
-              <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto">
+              <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto overscroll-contain">
                 <span className="text-xs font-bold text-brand-green dark:text-brand-gold uppercase tracking-widest mb-2">
                   {quickViewProduct.categoryLabel}
                 </span>
@@ -1251,7 +1274,6 @@ function ProductsPageContent() {
                 { id: "default", label: "Default Sorting" },
                 { id: "price-low-high", label: "Price: Low to High" },
                 { id: "price-high-low", label: "Price: High to Low" },
-                { id: "rating", label: "Top Rated" },
               ].map((option) => (
                 <button
                   key={option.id}

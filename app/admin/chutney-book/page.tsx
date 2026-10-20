@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { adminApi } from "@/lib/adminApi";
 import { Plus, Pencil, Trash2, BookOpen, X } from "lucide-react";
 
@@ -39,6 +40,7 @@ export default function ChutneyBookPage() {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editing, setEditing] = useState<ChutneyBook | null>(null);
+  const [deleting, setDeleting] = useState<ChutneyBook | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -140,14 +142,12 @@ export default function ChutneyBookPage() {
     }
   };
 
-  const handleDelete = async (book: ChutneyBook) => {
-    if (!confirm(`Delete "${book.name}"? This cannot be undone.`)) return;
-    try {
-      await adminApi.delete(`/admin/products/${book.id}`);
-      load();
-    } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Delete failed");
-    }
+  // Runs from the confirm dialog; a thrown error is shown inside it
+  const handleDelete = async () => {
+    if (!deleting) return;
+    await adminApi.delete(`/admin/products/${deleting.id}`);
+    setDeleting(null);
+    load();
   };
 
   return (
@@ -225,7 +225,8 @@ export default function ChutneyBookPage() {
                       <Pencil size={14} />
                     </button>
                     <button
-                      onClick={() => handleDelete(book)}
+                      onClick={() => setDeleting(book)}
+                      aria-label={`Delete ${book.name}`}
                       className="w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 size={14} />
@@ -363,6 +364,14 @@ export default function ChutneyBookPage() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleting}
+        title="Delete recipe?"
+        message={deleting && <p>The chutney book recipe <b className="text-slate-900">{deleting.name}</b> will be permanently deleted. This cannot be undone.</p>}
+        confirmLabel="Delete recipe"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleting(null)}
+      />
     </div>
   );
 }

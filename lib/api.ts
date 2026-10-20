@@ -80,7 +80,7 @@ export interface ApiProduct {
 
 export interface ApiBanner {
   id: string;
-  title: string;
+  title: string | null;
   subtitle: string | null;
   image: string;
   link: string | null;

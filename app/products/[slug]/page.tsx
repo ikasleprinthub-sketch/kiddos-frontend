@@ -183,21 +183,19 @@ export default function ProductDetailPage() {
     const finalOriginalPrice = activeVariant ? (activeVariant.salePrice ? Number(activeVariant.price) : undefined) : originalPrice;
     const finalWeight = activeVariant ? (activeVariant.weight ? `${Number(activeVariant.weight)} ${activeVariant.unit ?? "kg"}` : (activeVariant.unit ?? "")) : weight;
 
-    for (let i = 0; i < qty; i++) {
-      addItem({
-        id: activeVariant?.id || product.id,
-        productId: product.id,
-        variantId: activeVariant?.id || undefined,
-        name: product.name,
-        price: finalPrice,
-        originalPrice: finalOriginalPrice,
-        image: activeImage ?? undefined,
-        emoji: "",
-        gradient,
-        weightOrQty: finalWeight,
-        slug: product.slug,
-      });
-    }
+    addItem({
+      id: activeVariant?.id || product.id,
+      productId: product.id,
+      variantId: activeVariant?.id || undefined,
+      name: product.name,
+      price: finalPrice,
+      originalPrice: finalOriginalPrice,
+      image: activeImage ?? undefined,
+      emoji: "",
+      gradient,
+      weightOrQty: finalWeight,
+      slug: product.slug,
+    }, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

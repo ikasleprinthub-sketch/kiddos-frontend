@@ -47,5 +47,8 @@ export function useUserScopedList<T>(baseKey: string, merge: (own: T[], guest: T
     try { localStorage.setItem(key, JSON.stringify(items)); } catch { /* ignore quota errors */ }
   }, [items, loadedKey, key]);
 
-  return [items, setItems] as const;
+  // true once the list for the current identity has been loaded from storage
+  const loaded = loadedKey === key;
+
+  return [items, setItems, loaded] as const;
 }

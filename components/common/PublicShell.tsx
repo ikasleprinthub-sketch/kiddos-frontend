@@ -10,34 +10,38 @@ import FloatingWhatsApp from "@/components/common/FloatingWhatsApp";
 import FloatingCatalogue from "@/components/common/FloatingCatalogue";
 import ChutneyBookBadge from "@/components/ChutneyBookBadge";
 
-type MaintenanceSettings = { enabled: boolean; message: string; storeName: string };
+export type MaintenanceSettings = { enabled: boolean; message: string; storeName: string };
+export const DEFAULT_MAINTENANCE_MESSAGE = "We are improving your shopping experience. Please check back soon.";
+const SITE_OPEN: MaintenanceSettings = { enabled: false, message: "", storeName: "Kiddos Foods" };
 
-export default function PublicShell({ children }: { children: React.ReactNode }) {
+/**
+ * `initialMaintenance` is read on the server (root layout) so pages render immediately.
+ * If the server couldn't reach the API (null) the site renders as open and we re-check from the browser.
+ */
+export default function PublicShell({ children, initialMaintenance }: { children: React.ReactNode; initialMaintenance: MaintenanceSettings | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
   const isAdminPath = pathname.startsWith("/admin");
   const isProductDetailPath = pathname.startsWith("/products/");
-  const [maintenance, setMaintenance] = useState<MaintenanceSettings | null>(isAdminPath ? { enabled: false, message: "", storeName: "Kiddos Foods" } : null);
+  const [maintenance, setMaintenance] = useState<MaintenanceSettings>(initialMaintenance ?? SITE_OPEN);
 
   useEffect(() => {
-    if (isAdminPath) return;
+    if (isAdminPath || initialMaintenance) return;
     let active = true;
     fetch("/api/settings?group=general", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : {})
       .then((data: Record<string, string>) => {
-        if (!active) return;
+        if (!active || data.maintenance_mode !== "true") return;
         setMaintenance({
-          enabled: data.maintenance_mode === "true",
-          message: data.maintenance_message || "We are improving your shopping experience. Please check back soon.",
+          enabled: true,
+          message: data.maintenance_message || DEFAULT_MAINTENANCE_MESSAGE,
           storeName: data.store_name || "Kiddos Foods",
         });
       })
-      .catch(() => {
-        if (active) setMaintenance({ enabled: false, message: "", storeName: "Kiddos Foods" });
-      });
+      .catch(() => { /* keep the site open */ });
     return () => { active = false; };
-  }, [isAdminPath]);
+  }, [isAdminPath, initialMaintenance]);
 
   useEffect(() => {
     if (!isAdminPath && !loading && user?.role === "ADMIN") router.replace("/admin");
@@ -47,10 +51,6 @@ export default function PublicShell({ children }: { children: React.ReactNode })
 
   if (!loading && user?.role === "ADMIN") {
     return <div className="flex h-screen flex-col items-center justify-center gap-4 bg-gray-50"><div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" /><p className="animate-pulse text-sm font-medium text-gray-500">Redirecting to admin portal...</p></div>;
-  }
-
-  if (maintenance === null) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#f7f9f8]"><div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" /></div>;
   }
 
   if (maintenance.enabled) {

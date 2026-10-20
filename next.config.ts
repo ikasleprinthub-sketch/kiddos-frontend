@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+// Backend that /api/* and /uploads/* are proxied to (read at build time). All API calls,
+// including banners, go through these rewrites so there is one place to configure it.
+const BACKEND_URL = (process.env.BACKEND_URL || "http://127.0.0.1:5050").replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowSVG: true,
@@ -30,11 +34,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://127.0.0.1:5050/api/:path*",
+        destination: `${BACKEND_URL}/api/:path*`,
       },
       {
         source: "/uploads/:path*",
-        destination: "http://127.0.0.1:5050/uploads/:path*",
+        destination: `${BACKEND_URL}/uploads/:path*`,
       },
     ];
   },

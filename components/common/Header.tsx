@@ -216,7 +216,7 @@ export default function Header() {
             >
               <Heart className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 xl:h-6 xl:w-6" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-red-500 text-[9px] xl:text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-red-600 text-[9px] xl:text-[10px] font-bold text-white border border-white dark:border-zinc-950 shadow-sm">
                   {wishlistCount}
                 </span>
               )}
@@ -231,7 +231,7 @@ export default function Header() {
             >
               <ShoppingCart className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 xl:h-6 xl:w-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-brand-gold text-[9px] xl:text-[10px] font-bold text-brand-green border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 xl:h-5 xl:w-5 items-center justify-center rounded-full bg-brand-gold text-[9px] xl:text-[10px] font-bold text-zinc-950 border border-white dark:border-zinc-950 shadow-sm animate-pulse-subtle">
                   {cartCount}
                 </span>
               )}

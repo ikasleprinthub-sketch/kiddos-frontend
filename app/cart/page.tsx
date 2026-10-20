@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import ChefMascot from "@/components/common/ChefMascot";
 
 interface ShippingAddress {
   name: string;
@@ -401,7 +402,7 @@ export default function CartPage() {
 
   // ── CART STEP ──
   return (
-    <div className="w-full bg-[#faf8f5] dark:bg-[#061410] min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+    <div className="w-full bg-[#faf8f5] dark:bg-[#061410] min-h-screen py-10 px-4 sm:px-6 lg:px-8 overflow-x-clip">
       <div className="max-w-7xl mx-auto">
         {/* ── STEPS PROGRESS TRACKER ── */}
         <div className="flex items-center justify-center gap-2 sm:gap-4 mb-10 max-w-lg mx-auto">
@@ -441,7 +442,12 @@ export default function CartPage() {
         </h1>
 
         {items.length > 0 ? (
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div className="relative flex flex-col lg:flex-row gap-8 items-start">
+            {/* Background chef in the empty left margin on wide screens (out of flow, no layout impact) */}
+            <div className="hidden min-[1760px]:block absolute top-4 right-full mr-6">
+              <ChefMascot className="w-[clamp(200px,calc((100vw_-_80rem)/2_-_64px),320px)]" />
+            </div>
+
             {/* ── LEFT COLUMN: CART ITEMS LIST ── */}
             <div className="flex-1 w-full space-y-4">
               {items.map((item) => {
@@ -569,6 +575,11 @@ export default function CartPage() {
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                 <span>Continue Shopping</span>
               </Link>
+
+              {/* Decorative chef on the left below the items, when the side margin is too narrow */}
+              <div className="hidden sm:max-[1759px]:flex justify-start pt-6">
+                <ChefMascot className="w-[260px] lg:w-[320px] max-w-full" />
+              </div>
             </div>
 
             {/* ── RIGHT COLUMN: ORDER SUMMARY ── */}
@@ -717,6 +728,11 @@ export default function CartPage() {
                 </div>
               </div>
             </aside>
+
+            {/* Decorative chef on mobile, below the order summary */}
+            <div className="flex sm:hidden justify-center w-full pt-2">
+              <ChefMascot className="w-[200px] max-w-[60vw]" />
+            </div>
           </div>
         ) : (
           // ── EMPTY STATE ──

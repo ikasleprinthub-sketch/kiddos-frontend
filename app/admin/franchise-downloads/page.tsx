@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { adminApi } from "@/lib/adminApi";
 import { Search, Eye, X } from "lucide-react";
 
@@ -24,6 +25,7 @@ export default function FranchiseDownloadsPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<DownloadLead | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,16 +48,12 @@ export default function FranchiseDownloadsPage() {
 
   const handleDelete = async () => {
     if (!selected) return;
-    const ok = confirm(`Are you sure you want to delete this download lead from ${selected.name}?`);
-    if (!ok) return;
-
     setDeleting(true);
     try {
       await adminApi.delete(`/admin/franchise-downloads/${selected.id}`);
       setSelected(null);
       load();
-    } catch {
-      alert("Failed to delete download lead");
+      setConfirmingDelete(false);
     } finally {
       setDeleting(false);
     }
@@ -180,7 +178,7 @@ export default function FranchiseDownloadsPage() {
 
               <div className="border-t border-gray-100 pt-4 mt-auto">
                 <button
-                  onClick={handleDelete}
+                  onClick={() => setConfirmingDelete(true)}
                   disabled={deleting}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50"
                 >
@@ -191,6 +189,14 @@ export default function FranchiseDownloadsPage() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={confirmingDelete && !!selected}
+        title="Delete download lead?"
+        message={selected && <p>The download lead from <b className="text-slate-900">{selected.name}</b> ({selected.email}) will be permanently deleted. This cannot be undone.</p>}
+        confirmLabel="Delete lead"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }

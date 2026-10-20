@@ -26,6 +26,9 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
+  // Where to go after login (only same-site paths, to avoid open redirects)
+  const redirectParam = searchParams.get("redirect") || "";
+  const redirectTo = redirectParam.startsWith("/") && !redirectParam.startsWith("//") ? redirectParam : "/";
 
   const [form, setForm] = useState({ email: prefillEmail, password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +51,7 @@ function LoginForm() {
         setLoading(false);
         return;
       }
-      router.push("/");
+      router.push(redirectTo);
     } else {
       setError(result.message || "Google sign-in failed");
       setLoading(false);
@@ -92,7 +95,7 @@ function LoginForm() {
         setLoading(false);
         return;
       }
-      router.push("/");
+      router.push(redirectTo);
     } else {
       setError(result.message || "Invalid email or password");
       setLoading(false);

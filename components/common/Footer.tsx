@@ -77,6 +77,8 @@ export default function Footer() {
             <div className="flex gap-2 md:gap-3 md:mt-1">
               <a
                 href="https://www.facebook.com/kiddosfoodsofficial/"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="Facebook"
                 className="w-9 h-9 rounded-full border border-white/40 flex items-center justify-center hover:border-white hover:bg-white/10 transition-colors"
               >
@@ -86,6 +88,8 @@ export default function Footer() {
               </a>
               <a
                 href="https://www.youtube.com/@kiddosfoods"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="YouTube"
                 className="w-9 h-9 rounded-full border border-white/40 flex items-center justify-center hover:border-white hover:bg-white/10 transition-colors"
               >

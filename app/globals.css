@@ -190,3 +190,74 @@ body {
   display: flex;
   width: max-content;
 }
+
+/* Cart chef mascot */
+.chef-mascot {
+  position: relative;
+}
+
+.chef-mascot::before {
+  content: "";
+  position: absolute;
+  inset: 12% 8% 4%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(249 115 22 / 0.16) 0%, rgb(30 70 32 / 0.10) 45%, transparent 70%);
+  filter: blur(14px);
+  z-index: 0;
+}
+
+.chef-mascot-float {
+  position: relative;
+  z-index: 1;
+  animation: chef-float 4.5s ease-in-out infinite;
+}
+
+.chef-mascot-img {
+  opacity: 0.95;
+  filter: drop-shadow(0 8px 14px rgb(30 70 32 / 0.12));
+  transition: transform 350ms ease, filter 350ms ease, opacity 350ms ease;
+  transform-origin: 50% 85%;
+}
+
+@keyframes chef-float {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes chef-bounce {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  45% {
+    transform: scale(1.08) rotate(2.5deg) translateY(-8px);
+  }
+  70% {
+    transform: scale(1.05) rotate(2.5deg) translateY(1px);
+  }
+  100% {
+    transform: scale(1.06) rotate(2.5deg);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chef-mascot-img:hover {
+    opacity: 1;
+    transform: scale(1.06) rotate(2.5deg);
+    filter: drop-shadow(0 18px 24px rgb(30 70 32 / 0.25));
+    animation: chef-bounce 400ms ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chef-mascot-float,
+  .chef-mascot-img,
+  .chef-mascot-img:hover {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+}

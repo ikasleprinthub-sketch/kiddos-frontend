@@ -1,7 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Caveat, Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import PublicShell from "@/components/common/PublicShell";
+import PublicShell, { DEFAULT_MAINTENANCE_MESSAGE, type MaintenanceSettings } from "@/components/common/PublicShell";
+import { backendGet } from "@/lib/serverBackend";
+import Script from "next/script";
+
+// Google Tag Manager container, e.g. GTM-ABC1234. Unset (or malformed) = GTM is not loaded.
+const GTM_ID = /^GTM-[A-Z0-9]+$/.test(process.env.NEXT_PUBLIC_GTM_ID ?? "") ? process.env.NEXT_PUBLIC_GTM_ID : undefined;
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
@@ -48,11 +53,19 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read on the server so pages render straight away instead of waiting for a browser fetch
+  const settings = await backendGet<Record<string, string>>("/api/settings?group=general");
+  const maintenance: MaintenanceSettings | null = settings && {
+    enabled: settings.maintenance_mode === "true",
+    message: settings.maintenance_message || DEFAULT_MAINTENANCE_MESSAGE,
+    storeName: settings.store_name || "Kiddos Foods",
+  };
+
   return (
     <html
       lang="en"
@@ -60,10 +73,21 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
+        {GTM_ID && (
+          <>
+            {/* Standard GTM snippet, loaded after hydration so it doesn't delay first paint */}
+            <Script id="gtm" strategy="afterInteractive">
+              {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
+            </Script>
+            <noscript>
+              <iframe src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} title="Google Tag Manager" />
+            </noscript>
+          </>
+        )}
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
-              <PublicShell>
+              <PublicShell initialMaintenance={maintenance}>
                 {children}
               </PublicShell>
             </WishlistProvider>

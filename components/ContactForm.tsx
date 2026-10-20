@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowUpRight, CheckCircle, Sparkles } from "lucide-react";
+import { isValidEmail } from "@/lib/validation";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -27,6 +28,10 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidEmail(formData.email.trim())) {
+      setError("Please enter a valid email address (e.g. name@example.com).");
+      return;
+    }
     setLoading(true);
     setError("");
     try {

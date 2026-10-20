@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/admin/Sidebar";
+import AdminLoadingScreen from "@/components/admin/AdminLoadingScreen";
 import { AdminMobileProvider } from "@/context/AdminMobileContext";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,20 +26,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <AdminLoadingScreen message="Loading dashboard..." />;
   }
 
   if (!user || user.role !== "ADMIN") {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gray-50 flex-col gap-4">
-        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 text-sm font-medium animate-pulse">Redirecting to login...</p>
-      </div>
-    );
+    return <AdminLoadingScreen message="Redirecting to login..." />;
   }
 
   return (

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useCallback } from "react";
+import React, { createContext, useContext, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useUserScopedList } from "@/lib/useUserScopedList";
 
 export interface CartItem {
@@ -21,7 +23,11 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   count: number;
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  // Add the item and go straight to checkout (guests log in first)
+  buyNow: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  // true once the current user's cart (incl. items added before login) has loaded
+  ready: boolean;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
@@ -40,21 +46,72 @@ function mergeCarts(own: CartItem[], guest: CartItem[]): CartItem[] {
   return merged;
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  // Cart is stored per logged-in user (see useUserScopedList)
-  const [items, setItems] = useUserScopedList<CartItem>("kiddos_cart", mergeCarts);
+// Items a guest tried to add; applied to the cart after they log in
+const PENDING_KEY = "kiddos_pending_cart";
+const PENDING_TTL_MS = 30 * 60 * 1000;
 
-  const addItem = useCallback((newItem: Omit<CartItem, "quantity">) => {
+function readPending(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!parsed || Date.now() - parsed.at > PENDING_TTL_MS || !Array.isArray(parsed.items)) return [];
+    return parsed.items;
+  } catch {
+    return [];
+  }
+}
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  // Cart is stored per logged-in user (see useUserScopedList)
+  const [items, setItems, loaded] = useUserScopedList<CartItem>("kiddos_cart", mergeCarts);
+
+  const [syncedUserId, setSyncedUserId] = useState<string | null>(null);
+
+  // After login, add whatever the guest tried to add before being sent to login
+  useEffect(() => {
+    if (!user || !loaded) return;
+    const pending = readPending();
+    try { localStorage.removeItem(PENDING_KEY); } catch { /* ignore */ }
+    if (pending.length) setItems((prev) => mergeCarts(prev, pending));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from external storage
+    setSyncedUserId(user.id);
+  }, [user, loaded, setItems]);
+
+  const ready = !loading && loaded && (!user || syncedUserId === user.id);
+
+  // Returns false when the user is a guest and was sent to login instead
+  const add = useCallback((newItem: Omit<CartItem, "quantity">, quantity: number, afterLogin?: string) => {
+    // Guests must log in first: remember the item and send them to login
+    if (!user) {
+      if (loading) return false;
+      const pending = mergeCarts(readPending(), [{ ...newItem, quantity }]);
+      try { localStorage.setItem(PENDING_KEY, JSON.stringify({ at: Date.now(), items: pending })); } catch { /* ignore */ }
+      const back = afterLogin ?? window.location.pathname + window.location.search;
+      router.push(`/login?redirect=${encodeURIComponent(back)}`);
+      return false;
+    }
     setItems((prev) => {
       const existing = prev.find((i) => i.id === newItem.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === newItem.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === newItem.id ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
-      return [...prev, { ...newItem, quantity: 1 }];
+      return [...prev, { ...newItem, quantity }];
     });
-  }, []);
+    return true;
+  }, [user, loading, router, setItems]);
+
+  const addItem = useCallback((newItem: Omit<CartItem, "quantity">, quantity = 1) => {
+    add(newItem, quantity);
+  }, [add]);
+
+  const buyNow = useCallback((newItem: Omit<CartItem, "quantity">, quantity = 1) => {
+    if (add(newItem, quantity, "/checkout")) router.push("/checkout");
+  }, [add, router]);
 
   const removeItem = useCallback((id: string) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
@@ -75,7 +132,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const count = items.reduce((acc, i) => acc + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, count, addItem, removeItem, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ items, count, addItem, buyNow, ready, removeItem, updateQuantity, clearCart }}>
       {children}
     </CartContext.Provider>
   );

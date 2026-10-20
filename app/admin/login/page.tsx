@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Eye, EyeOff, ShieldAlert, ArrowLeft } from "lucide-react";
+import AdminLoadingScreen from "@/components/admin/AdminLoadingScreen";
 
 export default function AdminLoginPage() {
   const { user, loading, login } = useAuth();
@@ -63,14 +64,7 @@ export default function AdminLoginPage() {
   };
 
   if (loading || (user && user.role === "ADMIN")) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-emerald-950">
-        <div className="bg-white p-8 rounded-3xl flex flex-col items-center gap-5 shadow-2xl animate-in zoom-in-95 duration-200">
-          <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
-          <p className="text-emerald-900 font-bold text-lg animate-pulse">Redirecting to Dashboard...</p>
-        </div>
-      </div>
-    );
+    return <AdminLoadingScreen message={loading ? "Checking session..." : "Redirecting to Dashboard..."} />;
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { adminApi } from "@/lib/adminApi";
 import { Search, Eye, X } from "lucide-react";
 
@@ -40,6 +41,8 @@ export default function FranchiseInquiriesPage() {
   const [selected, setSelected] = useState<Inquiry | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -60,31 +63,35 @@ export default function FranchiseInquiriesPage() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
+  // Runs from the confirm dialog; a thrown error is shown inside it
   const handleDelete = async () => {
     if (!selected) return;
-    const ok = confirm(`Are you sure you want to delete the franchise inquiry from ${selected.name}?`);
-    if (!ok) return;
-
     setDeleting(true);
     try {
       await adminApi.delete(`/admin/franchise-inquiries/${selected.id}`);
+      setConfirmingDelete(false);
       setSelected(null);
       load();
-    } catch {
-      alert("Failed to delete inquiry");
     } finally {
       setDeleting(false);
     }
   };
 
   const handleStatusChange = async (inquiry: Inquiry, status: InquiryStatus) => {
+    const previous = inquiry.status;
     setUpdatingStatusId(inquiry.id);
+    setStatusError("");
+    // Show the new status immediately; roll back if the save fails
+    const apply = (s: InquiryStatus | undefined) => {
+      setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, status: s } : item));
+      setSelected((current) => current?.id === inquiry.id ? { ...current, status: s } : current);
+    };
+    apply(status);
     try {
       await adminApi.put(`/admin/franchise-inquiries/${inquiry.id}`, { status });
-      setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, status } : item));
-      setSelected((current) => current?.id === inquiry.id ? { ...current, status } : current);
-    } catch {
-      alert("Failed to update inquiry status");
+    } catch (e: unknown) {
+      apply(previous);
+      setStatusError(`Could not update ${inquiry.name}'s status: ${e instanceof Error ? e.message : "please try again"}`);
     } finally {
       setUpdatingStatusId(null);
     }
@@ -115,8 +122,8 @@ export default function FranchiseInquiriesPage() {
 
   const READY_LABEL: Record<string, string> = {
     immediately: "Immediately",
-    "1-3-months": "1â€“3 Months",
-    "3-6-months": "3â€“6 Months",
+    "1-3-months": "1–3 Months",
+    "3-6-months": "3–6 Months",
     "6-plus-months": "6+ Months",
   };
 
@@ -132,12 +139,18 @@ export default function FranchiseInquiriesPage() {
             <input
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search by name, email, cityâ€¦"
+              placeholder="Search by name, email, city..."
               className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
             />
           </div>
           <p className="text-sm text-gray-400">{total} inquiries</p>
         </div>
+        {statusError && (
+          <div role="alert" className="flex items-start justify-between gap-3 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <span>{statusError}</span>
+            <button onClick={() => setStatusError("")} aria-label="Dismiss" className="shrink-0 text-rose-500 hover:text-rose-700"><X size={16} /></button>
+          </div>
+        )}
 
         {/* Card grid */}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -280,7 +293,7 @@ export default function FranchiseInquiriesPage() {
 
               <div className="border-t border-gray-100 pt-4 mt-auto">
                 <button
-                  onClick={handleDelete}
+                  onClick={() => setConfirmingDelete(true)}
                   disabled={deleting}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50"
                 >
@@ -291,6 +304,14 @@ export default function FranchiseInquiriesPage() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={confirmingDelete && !!selected}
+        title="Delete franchise inquiry?"
+        message={selected && <p>The franchise inquiry from <b className="text-slate-900">{selected.name}</b> ({selected.email}) will be permanently deleted. This cannot be undone.</p>}
+        confirmLabel="Delete inquiry"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }

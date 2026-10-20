@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Check, Send, Upload, X } from "lucide-react";
+import { INDIA_STATES, INDIA_STATE_NAMES } from "@/lib/indiaLocations";
+import { isValidEmail } from "@/lib/validation";
 
 type FormState = {
   name: string;
@@ -47,8 +49,19 @@ const inputCls =
 const selectCls =
   "w-full px-4 py-3 rounded-lg bg-gray-100 dark:bg-zinc-800 text-sm text-gray-500 dark:text-zinc-400 border border-transparent focus:outline-none focus:border-gray-300 dark:focus:border-zinc-600 focus:bg-white dark:focus:bg-zinc-700 transition appearance-none cursor-pointer";
 
+function SelectChevron() {
+  return (
+    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </span>
+  );
+}
+
 export default function FranchiseForm() {
   const [form, setForm] = useState<FormState>(EMPTY);
+  const isIndia = form.country === "India";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -98,6 +111,14 @@ export default function FranchiseForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!/^[a-zA-Z][a-zA-Z\s.]*$/.test(form.name.trim()) || form.name.replace(/[^a-zA-Z]/g, "").length < 2) {
+      setError("Please enter a valid name (letters and spaces only).");
+      return;
+    }
+    if (!isValidEmail(form.email.trim())) {
+      setError("Please enter a valid email address (e.g. name@example.com).");
+      return;
+    }
     setIsSubmitting(true);
     setError("");
     try {
@@ -168,7 +189,7 @@ export default function FranchiseForm() {
 
             {/* Row 1: Name | Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input name="name" type="text" required value={form.name} onChange={handleChange} placeholder="Name" className={inputCls} />
+              <input name="name" type="text" required maxLength={100} value={form.name} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s.]/g, ""); setForm((prev) => ({ ...prev, name: v })); }} placeholder="Name" className={inputCls} />
               <input name="email" type="email" required value={form.email} onChange={handleChange} placeholder="Email Id" className={inputCls} />
             </div>
 
@@ -186,9 +207,30 @@ export default function FranchiseForm() {
 
             {/* Row 4: Country | State | City */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input name="country" type="text" value={form.country} onChange={handleChange} placeholder="Country" className={inputCls} />
-              <input name="state" type="text" required value={form.state} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s]/g, ""); setForm((prev) => ({ ...prev, state: v })); }} placeholder="State" className={inputCls} />
-              <input name="city" type="text" required value={form.city} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s]/g, ""); setForm((prev) => ({ ...prev, city: v })); }} placeholder="City" className={inputCls} />
+              <div className="relative">
+                <select name="country" value={isIndia ? "India" : "Other"} onChange={(e) => setForm((prev) => ({ ...prev, country: e.target.value, state: "", city: "" }))} className={selectCls}>
+                  <option value="India">India</option>
+                  <option value="Other">Other country</option>
+                </select>
+                <SelectChevron />
+              </div>
+              {isIndia ? (
+                <div className="relative">
+                  <select name="state" required value={form.state} onChange={(e) => setForm((prev) => ({ ...prev, state: e.target.value, city: "" }))} className={selectCls}>
+                    <option value="" disabled>Select State</option>
+                    {INDIA_STATE_NAMES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <SelectChevron />
+                </div>
+              ) : (
+                <input name="state" type="text" required value={form.state} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s]/g, ""); setForm((prev) => ({ ...prev, state: v })); }} placeholder="State / Province" className={inputCls} />
+              )}
+              <input name="city" type="text" required list={isIndia ? "franchise-city-options" : undefined} disabled={isIndia && !form.state} value={form.city} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s.]/g, ""); setForm((prev) => ({ ...prev, city: v })); }} placeholder={isIndia && !form.state ? "Select state first" : "City"} className={`${inputCls} disabled:cursor-not-allowed disabled:opacity-60`} />
+              {isIndia && (
+                <datalist id="franchise-city-options">
+                  {(INDIA_STATES[form.state] || []).map((c) => <option key={c} value={c} />)}
+                </datalist>
+              )}
             </div>
 
             {/* Row 5: Pincode | Profession | About business */}
