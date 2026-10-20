@@ -5,8 +5,7 @@ import PublicShell, { DEFAULT_MAINTENANCE_MESSAGE, type MaintenanceSettings } fr
 import { backendGet } from "@/lib/serverBackend";
 import Script from "next/script";
 
-// Google Tag Manager container, e.g. GTM-ABC1234. Unset (or malformed) = GTM is not loaded.
-const GTM_ID = /^GTM-[A-Z0-9]+$/.test(process.env.NEXT_PUBLIC_GTM_ID ?? "") ? process.env.NEXT_PUBLIC_GTM_ID : undefined;
+const GTM_ID = "GTM-N7BQMJ7K";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
