@@ -131,7 +131,7 @@ export default function AboutSection() {
                 <p className="text-white/70 text-xs sm:text-sm mt-1 font-medium">Categories</p>
               </div>
               <div className="border-x border-white/10">
-                <p className="text-[#d4af37] font-black text-2xl sm:text-3xl leading-none">250+</p>
+                <p className="text-[#d4af37] font-black text-2xl sm:text-3xl leading-none">200+</p>
                 <p className="text-white/70 text-xs sm:text-sm mt-1 font-medium">Products</p>
               </div>
               <div>

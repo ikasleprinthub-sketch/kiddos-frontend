@@ -206,7 +206,7 @@ export default function Footer() {
         <p className="text-white/70 text-[11px] md:text-xs text-center md:text-left">
           Copyright © {new Date().getFullYear()} Kiddos Foods | Crafted And Maintained By{" "}
           <a
-            href="https://ikasle.com"
+            href="https://ikasleinnovations.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#f97316] hover:underline"

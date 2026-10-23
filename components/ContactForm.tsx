@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { ArrowUpRight, CheckCircle, Sparkles } from "lucide-react";
-import { isValidEmail } from "@/lib/validation";
+import { isValidEmail, isValidName } from "@/lib/validation";
+
+const NAME_ERROR = "Please enter a valid name using alphabetic characters.";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -15,6 +17,8 @@ export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [nameTouched, setNameTouched] = useState(false);
+  const nameError = nameTouched && !isValidName(formData.name.trim()) ? NAME_ERROR : "";
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -28,6 +32,10 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidName(formData.name.trim())) {
+      setNameTouched(true);
+      return;
+    }
     if (!isValidEmail(formData.email.trim())) {
       setError("Please enter a valid email address (e.g. name@example.com).");
       return;
@@ -73,6 +81,7 @@ export default function ContactForm() {
         <button
           onClick={() => {
             setSubmitted(false);
+            setNameTouched(false);
             setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
           }}
           className="mt-2 px-6 py-2.5 text-sm font-semibold rounded-full bg-brand-green text-white dark:bg-brand-gold dark:text-brand-green hover:opacity-90 transition-opacity"
@@ -106,15 +115,28 @@ export default function ContactForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         {/* Grid for short inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            name="name"
-            type="text"
-            required
-            placeholder="Name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-4 py-3.5 rounded-xl border border-zinc-200/80 bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px]"
-          />
+          <div>
+            <input
+              name="name"
+              type="text"
+              required
+              maxLength={100}
+              placeholder="Name"
+              value={formData.name}
+              onChange={handleChange}
+              onBlur={() => setNameTouched(true)}
+              aria-invalid={!!nameError}
+              aria-describedby={nameError ? "contact-name-error" : undefined}
+              className={`w-full px-4 py-3.5 rounded-xl border bg-[#f9f1e7]/50 text-zinc-800 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-colors text-[13px] ${
+                nameError ? "border-red-400" : "border-zinc-200/80"
+              }`}
+            />
+            {nameError && (
+              <p id="contact-name-error" className="text-xs text-red-500 font-medium mt-1">
+                {nameError}
+              </p>
+            )}
+          </div>
 
           <input
             name="email"

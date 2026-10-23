@@ -67,6 +67,11 @@ export default function FranchiseForm() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [error, setError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const emailError =
+    emailTouched && form.email.trim() && !isValidEmail(form.email.trim())
+      ? "Please enter a valid email address (e.g. name@example.com)."
+      : "";
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -116,6 +121,7 @@ export default function FranchiseForm() {
       return;
     }
     if (!isValidEmail(form.email.trim())) {
+      setEmailTouched(true);
       setError("Please enter a valid email address (e.g. name@example.com).");
       return;
     }
@@ -178,7 +184,7 @@ export default function FranchiseForm() {
               will reach out to <strong>{form.mobile}</strong> shortly.
             </p>
             <button
-              onClick={() => { setForm(EMPTY); setIsSubmitted(false); }}
+              onClick={() => { setForm(EMPTY); setEmailTouched(false); setIsSubmitted(false); }}
               className="px-6 py-2.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-sm font-semibold text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition"
             >
               Submit Another Request
@@ -190,7 +196,10 @@ export default function FranchiseForm() {
             {/* Row 1: Name | Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <input name="name" type="text" required maxLength={100} value={form.name} onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z\s.]/g, ""); setForm((prev) => ({ ...prev, name: v })); }} placeholder="Name" className={inputCls} />
-              <input name="email" type="email" required value={form.email} onChange={handleChange} placeholder="Email Id" className={inputCls} />
+              <div>
+                <input name="email" type="email" required value={form.email} onChange={handleChange} onBlur={() => setEmailTouched(true)} aria-invalid={!!emailError} placeholder="Email Id" className={`${inputCls} ${emailError ? "border-red-400 dark:border-red-500" : ""}`} />
+                {emailError && <p className="text-xs text-red-500 font-medium mt-1">{emailError}</p>}
+              </div>
             </div>
 
             {/* Row 2: Mobile | Alternate */}

@@ -5,11 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { isValidMobile } from "@/lib/validation";
 
 export default function SignupPage() {
   const { signup } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,11 @@ export default function SignupPage() {
     setError(null);
 
     // Basic Validation
+    if (!isValidMobile(form.phone)) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
     if (form.password.length < 6) {
       setError("Password must be at least 6 characters long.");
       return;
@@ -35,7 +41,7 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    const result = await signup(form.name, form.email, form.password);
+    const result = await signup(form.name, form.email, form.phone, form.password);
 
     if (result.success) {
       // Redirect to OTP verification with pre-filled email
@@ -171,6 +177,35 @@ export default function SignupPage() {
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e4620]/40 focus:border-[#1e4620] transition"
+                />
+              </div>
+            </div>
+
+            {/* Mobile Number */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                Mobile number
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <rect x="7" y="2" width="10" height="20" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel-national"
+                  inputMode="numeric"
+                  required
+                  maxLength={10}
+                  pattern="[0-9]{10}"
+                  placeholder="10-digit mobile number"
+                  value={form.phone}
+                  onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e4620]/40 focus:border-[#1e4620] transition"
                 />
               </div>

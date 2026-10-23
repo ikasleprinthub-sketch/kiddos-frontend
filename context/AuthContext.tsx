@@ -16,7 +16,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   loginWithGoogle: (credential: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  signup: (name: string, email: string, phone: string, password: string) => Promise<{ success: boolean; message: string }>;
   verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (email: string, otp: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
@@ -185,12 +185,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signup = async (name: string, email: string, password: string) => {
+  const signup = async (name: string, email: string, phone: string, password: string) => {
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone, password }),
       });
 
       const data = await res.json();

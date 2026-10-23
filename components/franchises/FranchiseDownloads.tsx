@@ -3,7 +3,22 @@
 import { useState } from "react";
 import { Download, FileText, X } from "lucide-react";
 import { FaRegFilePdf } from "react-icons/fa";
+import { isValidEmail, isValidMobile, isValidName } from "@/lib/validation";
 
+type LeadForm = { name: string; email: string; mobile: string };
+
+function fieldErrors(f: LeadForm): Partial<Record<keyof LeadForm, string>> {
+  const errors: Partial<Record<keyof LeadForm, string>> = {};
+  if (!f.name.trim()) errors.name = "Full name is required.";
+  else if (!isValidName(f.name.trim())) errors.name = "Please enter a valid full name (letters and spaces only).";
+  if (!f.email.trim()) errors.email = "Email address is required.";
+  else if (!isValidEmail(f.email.trim())) errors.email = "Please enter a valid email address (e.g. name@example.com).";
+  if (!f.mobile) errors.mobile = "Mobile number is required.";
+  else if (!isValidMobile(f.mobile)) errors.mobile = "Please enter a valid 10-digit mobile number.";
+  return errors;
+}
+
+const errorInputCls = "border-red-400 dark:border-red-500 focus:ring-red-400";
 
 const resources = [
   {
@@ -35,7 +50,8 @@ const resources = [
 export default function FranchiseDownloads() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState<"FORM" | "OTP">("FORM");
-  const [formData, setFormData] = useState({ name: "", email: "", mobile: "" });
+  const [formData, setFormData] = useState<LeadForm>({ name: "", email: "", mobile: "" });
+  const [touched, setTouched] = useState<Partial<Record<keyof LeadForm, boolean>>>({});
   const [otp, setOtp] = useState("");
   const [selectedResource, setSelectedResource] = useState<"BROCHURE" | "APPLICATION_FORM">("BROCHURE");
   const [loading, setLoading] = useState(false);
@@ -45,6 +61,7 @@ export default function FranchiseDownloads() {
   const handleOpenModal = (resource: "BROCHURE" | "APPLICATION_FORM") => {
     setSelectedResource(resource);
     setFormData({ name: "", email: "", mobile: "" });
+    setTouched({});
     setOtp("");
     setError("");
     setMessage("");
@@ -54,10 +71,8 @@ export default function FranchiseDownloads() {
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.mobile.trim()) {
-      setError("Please fill in all fields.");
-      return;
-    }
+    setTouched({ name: true, email: true, mobile: true });
+    if (Object.keys(fieldErrors(formData)).length > 0) return;
     setError("");
     setLoading(true);
 
@@ -66,8 +81,8 @@ export default function FranchiseDownloads() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
           mobile: formData.mobile,
           resource: selectedResource,
         }),
@@ -101,7 +116,7 @@ export default function FranchiseDownloads() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: formData.email,
+          email: formData.email.trim(),
           otp,
         }),
       });
@@ -127,6 +142,10 @@ export default function FranchiseDownloads() {
       setLoading(false);
     }
   };
+
+  const errors = fieldErrors(formData);
+  const shownError = (field: keyof LeadForm) => (touched[field] ? errors[field] : undefined);
+  const markTouched = (field: keyof LeadForm) => () => setTouched((prev) => ({ ...prev, [field]: true }));
 
   return (
     <section id="downloads" className="relative bg-gradient-to-br from-[#1e4620] to-[#113113] dark:from-[#061410] dark:to-[#030907] py-24 pb-28 overflow-hidden">
@@ -220,7 +239,7 @@ export default function FranchiseDownloads() {
             )}
 
             {step === "FORM" ? (
-              <form onSubmit={handleRequestOtp} className="space-y-4">
+              <form onSubmit={handleRequestOtp} noValidate className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
                     Full Name
@@ -229,10 +248,14 @@ export default function FranchiseDownloads() {
                     type="text"
                     required
                     placeholder="Enter your name"
+                    maxLength={100}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e4620] dark:text-white"
+                    onBlur={markTouched("name")}
+                    aria-invalid={!!shownError("name")}
+                    className={`w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e4620] dark:text-white ${shownError("name") ? errorInputCls : ""}`}
                   />
+                  {shownError("name") && <p className="text-xs text-red-500 font-medium mt-1">{shownError("name")}</p>}
                 </div>
 
                 <div>
@@ -245,8 +268,11 @@ export default function FranchiseDownloads() {
                     placeholder="name@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e4620] dark:text-white"
+                    onBlur={markTouched("email")}
+                    aria-invalid={!!shownError("email")}
+                    className={`w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e4620] dark:text-white ${shownError("email") ? errorInputCls : ""}`}
                   />
+                  {shownError("email") && <p className="text-xs text-red-500 font-medium mt-1">{shownError("email")}</p>}
                 </div>
 
               <div>
@@ -266,8 +292,11 @@ export default function FranchiseDownloads() {
         mobile: e.target.value.replace(/\D/g, "").slice(0, 10),
       })
     }
-    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e4620] dark:text-white"
+    onBlur={markTouched("mobile")}
+    aria-invalid={!!shownError("mobile")}
+    className={`w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e4620] dark:text-white ${shownError("mobile") ? errorInputCls : ""}`}
   />
+  {shownError("mobile") && <p className="text-xs text-red-500 font-medium mt-1">{shownError("mobile")}</p>}
 </div>
 
                 <button

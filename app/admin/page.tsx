@@ -21,7 +21,7 @@ const STATUS_COLORS: Record<string, string> = {
   REFUNDED: "bg-slate-100 text-slate-700 ring-slate-600/10",
 };
 const STATUS_BARS: Record<string, string> = { PENDING: "bg-amber-400", CONFIRMED: "bg-sky-500", PROCESSING: "bg-violet-500", SHIPPED: "bg-indigo-500", DELIVERED: "bg-emerald-500", CANCELLED: "bg-rose-500", REFUNDED: "bg-slate-400" };
-const money = (value?: string | number) => `₹${Number(value ?? 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+const money = (value?: string | number) => `₹${Number(value ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const LoadingBlock = ({ className = "h-24" }: { className?: string }) => <div className={`${className} animate-pulse rounded-2xl bg-slate-100`} />;
 
 export default function AdminDashboard() {
