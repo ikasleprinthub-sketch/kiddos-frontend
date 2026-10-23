@@ -871,12 +871,15 @@ function ProductsPageContent() {
                           </Link>
 
                           {isRecipe ? (
-                            <div className="mt-2 flex items-center gap-2">
+                            <Link
+                              href={`/products/${product.slug || product.id}`}
+                              className="mt-2 inline-flex items-center gap-2 hover:underline"
+                            >
                               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                               <span className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
                                 View Recipe →
                               </span>
-                            </div>
+                            </Link>
                           ) : (
                             <div className="mt-2 flex flex-wrap items-center gap-x-2">
                               <span className="text-[15px] font-bold text-[#b49852]">
