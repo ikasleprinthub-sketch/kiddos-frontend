@@ -321,8 +321,11 @@ export default function ProductShowcase() {
                   </div>
 
                   {/* Title */}
-                  <Link href={`/products/${p.slug}`}>
-                    <h3 className="text-sm sm:text-base font-bold text-zinc-850 dark:text-zinc-100 hover:text-[#2a7a2a] transition-colors leading-tight line-clamp-1">
+                  <Link href={`/products/${p.slug}`} title={p.name}>
+                    <h3 
+                      className="text-sm sm:text-base font-bold text-zinc-850 dark:text-zinc-100 hover:text-[#2a7a2a] transition-colors leading-snug line-clamp-2 min-h-[2.5rem] break-words"
+                      title={p.name}
+                    >
                       {p.name}
                     </h3>
                   </Link>

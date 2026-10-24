@@ -864,8 +864,15 @@ function ProductsPageContent() {
                             </button>
                           </div>
 
-                          <Link href={`/products/${product.slug || product.id}`}>
-                            <h3 className="text-[15px] font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors line-clamp-1">
+                          <Link 
+                            href={`/products/${product.slug || product.id}`}
+                            title={product.name}
+                            className="block"
+                          >
+                            <h3 
+                              className="text-[14px] sm:text-[15px] font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-brand-green dark:group-hover:text-brand-gold transition-colors line-clamp-2 sm:line-clamp-3 leading-snug break-words min-h-[2.5rem] sm:min-h-[2.75rem]"
+                              title={product.name}
+                            >
                               {product.name}
                             </h3>
                           </Link>

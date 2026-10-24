@@ -655,16 +655,18 @@ export default function ProductDetailPage() {
                 const img = rp.images?.find((i) => i.isPrimary)?.url ?? rp.images?.[0]?.url;
                 return (
                   <div key={rp.id} className="flex-none w-52 snap-start bg-white dark:bg-zinc-900 rounded-2xl shadow-md border border-zinc-100 dark:border-zinc-800 overflow-hidden flex flex-col">
-                    <div className="w-full aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                    <Link href={`/products/${rp.slug}`} className="w-full aspect-[3/4] bg-zinc-50 dark:bg-zinc-800/60 overflow-hidden flex items-center justify-center p-2 group/img">
                       {img ? (
-                        <img src={img} alt={rp.name} className="w-full h-full object-cover" />
+                        <img src={img} alt={rp.name} className="w-full h-full object-contain group-hover/img:scale-105 transition-transform duration-200" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-4xl"><CategoryIcon slug={rpCatSlug} className="w-12 h-12 text-zinc-400" /></div>
                       )}
-                    </div>
+                    </Link>
                     <div className="p-3 flex flex-col flex-1 gap-1">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Kiddos Foods</p>
-                      <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2">{rp.name}</p>
+                      <Link href={`/products/${rp.slug}`} title={rp.name}>
+                        <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2 hover:text-brand-green dark:hover:text-brand-gold transition-colors">{rp.name}</p>
+                      </Link>
                       <div className="mt-auto pt-2">
                         <Link href={`/products/${rp.slug}`} className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-brand-green dark:bg-brand-gold text-white dark:text-brand-green text-xs font-bold hover:opacity-90 transition-opacity">
                           View Recipes
@@ -780,27 +782,29 @@ export default function ProductDetailPage() {
                   className="flex-none w-52 snap-start bg-white dark:bg-zinc-900 rounded-2xl shadow-md border border-zinc-100 dark:border-zinc-800 overflow-hidden flex flex-col"
                 >
                   {/* Cover image */}
-                  <div className="w-full aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                  <Link href={`/products/${book.slug}`} className="w-full aspect-[3/4] bg-zinc-50 dark:bg-zinc-800/60 overflow-hidden flex items-center justify-center p-2 group/img">
                     {img ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={img}
                         alt={book.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain group-hover/img:scale-105 transition-transform duration-200"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-4xl"><CategoryIcon slug="chutney-book" className="w-12 h-12 text-zinc-400" /></div>
                     )}
-                  </div>
+                  </Link>
 
                   {/* Info */}
                   <div className="p-3 flex flex-col flex-1 gap-1">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
                       Kiddos Foods
                     </p>
-                    <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2">
-                      {book.name}
-                    </p>
+                    <Link href={`/products/${book.slug}`} title={book.name}>
+                      <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-snug line-clamp-2 hover:text-brand-green dark:hover:text-brand-gold transition-colors">
+                        {book.name}
+                      </p>
+                    </Link>
                     <div className="mt-auto pt-2">
                       <Link
                         href={`/products/${book.slug}`}
