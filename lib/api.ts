@@ -48,6 +48,8 @@ export interface ApiProduct {
   isFeatured: boolean;
   isPopularBatter?: boolean;
   isSpiceOil?: boolean;
+  isOffer?: boolean;
+  isCombo?: boolean;
   isActive: boolean;
   weight: string | number | null;
   unit: string | null;

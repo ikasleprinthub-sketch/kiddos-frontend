@@ -2,7 +2,9 @@
 
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import type { Product } from "@/components/productsData";
+import type { ApiProduct } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Pagination from "@mui/material/Pagination";
 import { Heart, ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
@@ -10,12 +12,59 @@ import { Heart, ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
 export default function WishlistPage() {
   const { items, removeFromWishlist, clearWishlist } = useWishlist();
   const { addItem } = useCart();
+  const [currentProducts, setCurrentProducts] = useState<Map<string, ApiProduct>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refreshWishlistProducts() {
+      try {
+        const firstResponse = await fetch("/api/products?limit=200");
+        if (!firstResponse.ok) throw new Error("Unable to refresh wishlist products");
+
+        const firstPage = await firstResponse.json();
+        let products: ApiProduct[] = Array.isArray(firstPage) ? firstPage : (firstPage.products ?? []);
+        const totalPages: number = Array.isArray(firstPage) ? 1 : (firstPage.pages ?? 1);
+
+        for (let pageNumber = 2; pageNumber <= totalPages; pageNumber++) {
+          const response = await fetch(`/api/products?limit=200&page=${pageNumber}`);
+          if (!response.ok) throw new Error("Unable to refresh wishlist products");
+          const pageData = await response.json();
+          products = products.concat(pageData.products ?? []);
+        }
+
+        if (!cancelled) {
+          setCurrentProducts(new Map(products.map((product) => [String(product.id), product])));
+        }
+      } catch {
+        // Keep the saved wishlist snapshot when live product data is unavailable.
+      }
+    }
+
+    refreshWishlistProducts();
+    return () => { cancelled = true; };
+  }, []);
+
+  const currentItems = useMemo(() => items.map((item): Product => {
+    const current = currentProducts.get(String(item.id));
+    if (!current) return item;
+
+    const mrp = Number(current.price);
+    const salePrice = current.salePrice == null ? null : Number(current.salePrice);
+    const hasSale = salePrice != null && salePrice < mrp;
+
+    return {
+      ...item,
+      price: hasSale ? salePrice : mrp,
+      originalPrice: hasSale ? mrp : undefined,
+    };
+  }), [items, currentProducts]);
 
   const itemsPerPage = 25;
   const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(currentItems.length / itemsPerPage));
   const safePage = Math.min(page, totalPages); // removing items can shrink the last page
-  const pageItems = items.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
+  const pageItems = currentItems.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
 
   return (
     <div className="min-h-screen bg-[#faf8f5] dark:bg-[#061410] py-10 px-4 sm:px-6 lg:px-8">
@@ -97,9 +146,9 @@ export default function WishlistPage() {
                     </div>
                   )}
 
-                  {product.originalPrice && (
+                  {product.originalPrice && product.originalPrice > product.price && (
                     <span className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-red-500 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow">
-                      Sale
+                      {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
                     </span>
                   )}
 
@@ -130,7 +179,7 @@ export default function WishlistPage() {
                     <span className="text-lg sm:text-xl font-black text-brand-green dark:text-brand-gold">
                       ₹{product.price}
                     </span>
-                    {product.originalPrice && (
+                    {product.originalPrice && product.originalPrice > product.price && (
                       <span className="text-sm font-bold text-zinc-400 dark:text-zinc-500 line-through mb-0.5">
                         ₹{product.originalPrice}
                       </span>

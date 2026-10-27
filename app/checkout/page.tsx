@@ -98,6 +98,12 @@ function CheckoutInner() {
     orderNumber: string; total: string | number; razorpayPaymentId: string;
   } | null>(null);
 
+  useEffect(() => {
+    if (step === "payment") {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [step]);
+
   // Load Razorpay script
   useEffect(() => {
     const script = document.createElement("script");
@@ -594,6 +600,7 @@ function CheckoutInner() {
         </div>
 
         <button
+          type="button"
           onClick={createRazorpayOrder}
           disabled={loading || !user}
           className="w-full py-4 bg-brand-green hover:bg-brand-green-light text-white dark:bg-brand-gold dark:text-brand-green dark:hover:bg-brand-gold-light rounded-2xl text-sm font-bold uppercase tracking-wide shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"

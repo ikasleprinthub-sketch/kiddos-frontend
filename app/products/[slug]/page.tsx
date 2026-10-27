@@ -298,18 +298,11 @@ export default function ProductDetailPage() {
                   <CategoryIcon slug={catSlug} className="w-32 h-32 text-zinc-600/50" />
                 </span>
               )}
-
-              {/* Bestseller ribbon — diagonal corner with folded ends */}
+              {/* Bestseller badge */}
               {product.isFeatured && (
-                <div
-                  className="absolute top-[22px] left-[-34px] w-[130px] text-center bg-[#f97316] text-white text-[10px] font-black uppercase tracking-wider py-2 -rotate-45 z-20 pointer-events-none select-none"
-                  style={{
-                    clipPath: 'polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.30))',
-                  }}
-                >
+                <span className="absolute top-3 left-3 z-20 pointer-events-none select-none bg-[#f97316] text-white text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full shadow-sm w-fit">
                   Best Seller
-                </div>
+                </span>
               )}
 
               {/* Discount badge — bottom right */}
@@ -382,7 +375,7 @@ export default function ProductDetailPage() {
             )}
 
             {/* Variant Selector */}
-            {product.variants && product.variants.length > 0 && (
+            {!isRecipe && product.variants && product.variants.length > 0 && (
               <div className="py-2">
                 <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Select Size</p>
                 <div className="flex flex-wrap gap-2">

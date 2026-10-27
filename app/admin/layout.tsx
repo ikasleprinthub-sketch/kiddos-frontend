@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (isLoginPage) return;
     if (!loading && (!user || user.role !== "ADMIN")) {
-      window.location.href = "/admin/login?expired=true";
+      window.location.href = "/admin/login";
     }
   }, [user, loading, isLoginPage]);
 

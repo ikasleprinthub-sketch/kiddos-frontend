@@ -60,12 +60,14 @@ function getToken(): string | null {
   return localStorage.getItem("token");
 }
 
-async function fetchWithAuth<T>(path: string): Promise<T> {
+async function fetchWithAuth<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getToken();
   const res = await fetch(`/api${path}`, {
+    ...init,
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...init.headers,
     },
   });
   if (!res.ok) {
@@ -87,6 +89,8 @@ export default function MyOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<OrderDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelMessage, setCancelMessage] = useState<{ text: string; error?: boolean } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -117,7 +121,26 @@ export default function MyOrdersPage() {
     load();
   }, [load]);
 
+  const cancelOrder = async () => {
+    if (!detail || cancelling) return;
+    const confirmed = window.confirm("Cancel this order? The full amount will be refunded to your original payment method.");
+    if (!confirmed) return;
+    setCancelling(true);
+    setCancelMessage(null);
+    try {
+      const data = await fetchWithAuth<{ order: OrderDetail; message: string }>(`/orders/${detail.id}/cancel`, { method: "POST" });
+      setDetail(data.order);
+      setOrders((current) => current.map((order) => order.id === data.order.id ? data.order : order));
+      setCancelMessage({ text: "Order cancelled. Your refund has been initiated to the original payment method." });
+    } catch (e) {
+      setCancelMessage({ text: e instanceof Error ? e.message : "Cancellation failed. Please try again.", error: true });
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   const openDetail = async (order: Order) => {
+    setCancelMessage(null);
     setDetailLoading(true);
     setDetail(order as OrderDetail);
     try {
@@ -252,7 +275,7 @@ export default function MyOrdersPage() {
                         ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800"
                         : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800"
                     }`}>
-                      {order.paymentStatus === "PAID" ? "Paid" : order.paymentStatus}
+                      {order.paymentStatus === "PAID" ? "Paid" : order.paymentStatus === "REFUNDED" ? "Refunded" : order.paymentStatus}
                     </span>
                     <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">₹{order.total}</span>
                   </div>
@@ -335,7 +358,7 @@ export default function MyOrdersPage() {
                     ? "bg-green-50 text-green-700 border-green-200"
                     : "bg-amber-50 text-amber-700 border-amber-200"
                 }`}>
-                  {detail.paymentStatus === "PAID" ? "Payment Received" : `Payment ${detail.paymentStatus}`}
+                  {detail.paymentStatus === "PAID" ? "Payment Received" : detail.paymentStatus === "REFUNDED" ? "Payment Refunded" : `Payment ${detail.paymentStatus}`}
                 </span>
               </div>
 
@@ -415,6 +438,21 @@ export default function MyOrdersPage() {
                   <p className="text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl p-3.5">
                     {(detail as OrderDetail).notes}
                   </p>
+                </div>
+              )}
+
+              {cancelMessage && (
+                <div className={`rounded-xl border px-4 py-3 text-sm ${cancelMessage.error ? "border-red-200 bg-red-50 text-red-700" : "border-green-200 bg-green-50 text-green-700"}`}>
+                  {cancelMessage.text}
+                </div>
+              )}
+
+              {detail.paymentMethod === "RAZORPAY" && detail.paymentStatus === "PAID" && ["PENDING", "CONFIRMED"].includes(detail.status) && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                  <p className="text-xs leading-relaxed text-red-700">Cancelling will initiate a full refund to the original payment method. Bank processing may take several business days.</p>
+                  <button type="button" onClick={cancelOrder} disabled={cancelling} className="mt-3 w-full rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60">
+                    {cancelling ? "Cancelling & initiating refund?" : "Cancel order & get refund"}
+                  </button>
                 </div>
               )}
 

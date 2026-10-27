@@ -22,12 +22,6 @@ export default function AdminLoginPage() {
     }
   }, [user, loading]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("expired=true")) {
-      setError("Your session has expired. Please sign in again.");
-      window.history.replaceState({}, document.title, "/admin/login");
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

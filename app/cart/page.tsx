@@ -148,13 +148,13 @@ export default function CartPage() {
     const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const isFreeDelivery = subtotal >= shipping.freeAbove || activeCoupon === "FREESHIP" || subtotal === 0;
     const deliveryFee = isFreeDelivery ? 0 : shipping.fee;
-    const tax = Math.round(subtotal * 0.05);
+
     let discount = 0;
     if (activeCoupon === "KIDDOS20" && subtotal > 0) {
       discount = Math.round(subtotal * 0.2);
     }
-    const total = subtotal + tax + deliveryFee - discount;
-    return { subtotal, deliveryFee, tax, discount, total, isFreeDelivery };
+    const total = subtotal + deliveryFee - discount;
+    return { subtotal, deliveryFee, discount, total, isFreeDelivery };
   }, [items, activeCoupon, shipping]);
 
   // Navigate to checkout with active coupon
@@ -301,9 +301,6 @@ export default function CartPage() {
                     <span>Discount ({activeCoupon})</span><span>−₹{calculations.discount}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
-                  <span>GST (5%)</span><span>₹{calculations.tax}</span>
-                </div>
                 <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
                   <span>Delivery</span><span>{calculations.deliveryFee === 0 ? "Free" : `₹${calculations.deliveryFee}`}</span>
                 </div>
@@ -665,11 +662,6 @@ export default function CartPage() {
                       <span className="font-semibold">-₹{calculations.discount}</span>
                     </div>
                   )}
-
-                  <div className="flex justify-between text-zinc-650 dark:text-zinc-300">
-                    <span>GST (5%)</span>
-                    <span className="font-semibold">₹{calculations.tax}</span>
-                  </div>
 
                   <div className="flex justify-between text-zinc-650 dark:text-zinc-300 items-center">
                     <div className="flex items-center gap-1">

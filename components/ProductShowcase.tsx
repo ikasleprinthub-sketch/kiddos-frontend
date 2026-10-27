@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { PRODUCTS as FALLBACK_PRODUCTS, type Product as LocalProduct } from "@/components/productsData";
 
-type TabType = "best-seller" | "popular-batters" | "spices-oils";
+type TabType = "best-seller" | "popular-batters" | "spices-oils" | "offers" | "combo";
 
 const TAB_META = {
   "best-seller": {
@@ -28,6 +28,18 @@ const TAB_META = {
     headingPrefix: "Spices &",
     headingHighlight: "Oils",
     subtitle: "Aromatic home-style spice mixes and wood-pressed pure oils",
+  },
+  offers: {
+    label: "Offers",
+    headingPrefix: "Special",
+    headingHighlight: "Offers",
+    subtitle: "Great products at special prices, selected for you",
+  },
+  combo: {
+    label: "Combo",
+    headingPrefix: "Value",
+    headingHighlight: "Combos",
+    subtitle: "Thoughtfully paired products with more value in every pack",
   },
 };
 
@@ -56,8 +68,12 @@ export default function ProductShowcase() {
       url = "/api/products?featured=true&limit=8";
     } else if (activeTab === "popular-batters") {
       url = "/api/products?popularBatter=true&limit=8";
-    } else {
+    } else if (activeTab === "spices-oils") {
       url = "/api/products?spiceOil=true&limit=8";
+    } else if (activeTab === "offers") {
+      url = "/api/products?offer=true&limit=8";
+    } else {
+      url = "/api/products?combo=true&limit=8";
     }
 
     fetch(url)
@@ -88,8 +104,11 @@ export default function ProductShowcase() {
       list = FALLBACK_PRODUCTS.filter((p) => p.isBestSeller).slice(0, 8);
     } else if (tab === "popular-batters") {
       list = FALLBACK_PRODUCTS.filter((p) => p.category === "batter").slice(0, 8);
-    } else {
+    } else if (tab === "spices-oils") {
       list = FALLBACK_PRODUCTS.filter((p) => p.category === "spice-blends" || p.category === "oils").slice(0, 8);
+    } else {
+      // Offers and Combo are admin-curated; never substitute unrelated local products.
+      list = [];
     }
 
     // Convert local schema to ApiProduct schema

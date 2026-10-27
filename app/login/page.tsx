@@ -47,7 +47,7 @@ function LoginForm() {
     if (result.success) {
       if (result.user?.role === "ADMIN") {
         await logout();
-        setError("Admin accounts must sign in through the Admin Panel, not here.");
+        setError("Invalid user");
         setLoading(false);
         return;
       }
@@ -91,7 +91,7 @@ function LoginForm() {
     if (result.success) {
       if (result.user?.role === "ADMIN") {
         await logout(); // Properly clear both token and global context state
-        setError("Admin accounts must sign in through the Admin Panel, not here.");
+        setError("Invalid user");
         setLoading(false);
         return;
       }
@@ -199,14 +199,6 @@ function LoginForm() {
                   className="text-brand-green font-semibold hover:underline mt-1"
                 >
                   Verify your account now &rarr;
-                </Link>
-              )}
-              {error.toLowerCase().includes("admin") && (
-                <Link
-                  href="/admin/login"
-                  className="text-[#1e4620] font-semibold hover:underline mt-1"
-                >
-                  Go to Admin Panel &rarr;
                 </Link>
               )}
             </div>

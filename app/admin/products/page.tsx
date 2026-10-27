@@ -46,6 +46,8 @@ interface Product {
   isFeatured: boolean;
   isPopularBatter: boolean;
   isSpiceOil: boolean;
+  isOffer: boolean;
+  isCombo: boolean;
   weight: string | number | null;
   unit: string | null;
   tags: string[];
@@ -83,6 +85,8 @@ interface FormState {
   isFeatured: boolean;
   isPopularBatter: boolean;
   isSpiceOil: boolean;
+  isOffer: boolean;
+  isCombo: boolean;
   weight: string;
   unit: string;
   tags: string;
@@ -99,6 +103,7 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   name: "", description: "", price: "", salePrice: "", stock: 0, sku: "",
   categoryId: "", isActive: true, isFeatured: false, isPopularBatter: false, isSpiceOil: false,
+  isOffer: false, isCombo: false,
   weight: "", unit: "", tags: "", images: [],
   ingredients: "", healthBenefits: "", usageInstructions: "", nutrientFacts: "",
   shelfLife: "", storageInstructions: "",
@@ -239,6 +244,8 @@ export default function ProductsPage() {
         isFeatured: fullProduct.isFeatured,
         isPopularBatter: fullProduct.isPopularBatter || false,
         isSpiceOil: fullProduct.isSpiceOil || false,
+        isOffer: fullProduct.isOffer || false,
+        isCombo: fullProduct.isCombo || false,
         weight: fullProduct.weight !== null && fullProduct.weight !== undefined ? String(fullProduct.weight) : "",
         unit: fullProduct.unit || "",
         tags: Array.isArray(fullProduct.tags) ? fullProduct.tags.join(", ") : "",
@@ -766,6 +773,16 @@ export default function ProductsPage() {
                   <input type="checkbox" checked={form.isSpiceOil} onChange={(e) => setForm((f) => ({ ...f, isSpiceOil: e.target.checked }))}
                     className="w-4 h-4 accent-emerald-600" />
                   <span className="text-sm text-gray-700">Spice & Oil</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isOffer} onChange={(e) => setForm((f) => ({ ...f, isOffer: e.target.checked }))}
+                    className="w-4 h-4 accent-emerald-600" />
+                  <span className="text-sm text-gray-700">Offers</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.isCombo} onChange={(e) => setForm((f) => ({ ...f, isCombo: e.target.checked }))}
+                    className="w-4 h-4 accent-emerald-600" />
+                  <span className="text-sm text-gray-700">Combo</span>
                 </label>
               </div>
             </div>

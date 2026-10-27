@@ -26,13 +26,13 @@ export default function FranchiseExcellence() {
 
         {/* Images */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative rounded-3xl overflow-hidden group shadow-lg">
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden group shadow-lg bg-zinc-100 dark:bg-zinc-800">
             <Image
               src="/images/franchisis/experience1.webp"
               alt="Kiddos Foods Store Experience"
               width={640}
               height={480}
-              className="w-full h-auto object-cover group-hover:scale-[1.03] transition-transform duration-500"
+              className="w-full h-full object-contain"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5">
