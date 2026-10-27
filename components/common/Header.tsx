@@ -18,6 +18,7 @@ import {
   Heart,
   Compass,
   LayoutGrid,
+  Sparkles,
 } from "lucide-react";
 import type { ApiCategory } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
